@@ -17,12 +17,14 @@
 | TB2a Golden 种子与公开查询 | 1da1261 | 冻结标注直接落库系统案件；getPublic/getSource |
 | TB3 Session Authority | c4b1440 | sessions.create/getPublic、messages/events.listPublic、Owner 隔离、幂等 |
 | TB4 Faithful 成功回合 | 9610862 | ask/observe 全链路、生成+校验+重写门控、证据解锁；真实模型 entailed 回合通过 |
+| TB5+TB6+TB7 | df6ae4a | 重写矩阵/Distorted 门控（Scripted 11 项确定性测试）+ game.start 串行五条开场；真实五条开场 218s 通过 |
+| TB9 指控与 Reveal | 825a345 | 服务器判定与两项评分、truth chain/altered links、Reveal 模型候选严格校验、原子 revealed；真实完整 golden 闭环 293s 通过（开场→审讯→指控→Reveal） |
 
 另外：PF1 补齐 auth.config.ts + JWKS（JWT 校验链路首次真正打通）、AI_* 配置落地（DeepSeek v4）+ smoke、AI 配置 handoff。
 
 ## 测试状态
 
-- `bun test`：69 pass / 0 fail / 1 skip（模型测试显式 opt-in）
+- `bun test`：89 pass / 0 fail / 4 skip（模型测试显式 opt-in，各自单独通过）
 - `RUN_MODEL_INTEGRATION=1`：TB1 编译、TB4 回合各自通过（消耗真实 DeepSeek 调用）
 - `bun run typecheck`：通过
 
@@ -34,12 +36,10 @@
 
 ## 剩余依赖前沿（按序）
 
-1. **TB5**：把 worker 的尝试循环抽成 `server/turn-engine/` 纯函数（接 ModelGateway Seam），用 Scripted Adapter 覆盖：首试通过/一次重写通过/两次重写通过/三次全拒；协议错误不进入语义重写。
-2. **TB6**：Distorted 门控测试（status=distorted、类型⊆允许集、新事实拒绝、公开结果不泄露 Fidelity）。
-3. **TB7**：game.start——briefing→opening_statements，按 CasePublic.roles 固定顺序串行五条开场（一次一个活动 Ticket），全过→investigation（allowed=ask/update_board/accuse），任一失败→failed+terminal_error，历史保留。
-4. TB2b：用户案件完整编译器（模型出角色/Catalog 候选、服务器定 4+1 与答案、Public Projection）。
-5. TB8（Board/证据投影）、TB9（accuse/Reveal + rubric 消费）、TB10（全链证明）。
-6. REL0/AUTH1/G1/P1：需外部资源或用户输入，保持 BLOCKED（不降级）。
+1. **TB8**：Evidence 与 Board——`evidence.getAll`（Catalog 投影/解锁限制）、`evidence.updateBoard`（全量 CAS、`BOARD_REVISION_CONFLICT`）。
+2. **TB2b**：用户案件完整编译器（模型出角色/Catalog 候选、服务器定 4+1 与答案、rubric 落库、Public Projection；Golden 种子路径已示范全部形状）。
+3. **TB10**：P0 全链证明（幂等/并发/锁/泄漏扫描/恢复/审计/指标聚合）+ 发布 Gate 完整套件与真实供应商 smoke（模型 smoke 已多次实际通过）。
+4. REL0/AUTH1/G1/P1：需外部资源或用户输入，保持 BLOCKED（不降级）。
 
 ## 继续工作的最小阅读顺序
 
