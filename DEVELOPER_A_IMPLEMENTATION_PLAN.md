@@ -36,7 +36,7 @@
 | R0 资源完成 | COMPLETE | 文档、官方 Skill/CLI 与素材已审计；不等于工程或 Git 基线完成。 |
 | VCS0 版本基线 | COMPLETE | Secret 扫描通过、纳入范围确认，基线提交 `cea25d5` 已建立；推送按用户既有环节授权执行。见 [VCS0 handoff](./docs/handoffs/2026-09-04-vcs0-version-baseline.md)。 |
 | PF0 工具链骨架 | COMPLETE | Bun 1.4.1、Next.js 16.3.4、React 19.2.8、Convex 1.45.0、TypeScript 5.9.3 已固定；typecheck/test/build 验证通过。未实现公开 schema、产品页面或 XState。见 [PF0 handoff](./docs/handoffs/2026-09-04-pf0-toolchain-skeleton.md)。 |
-| D0 契约修复与 B 评审 | IN PROGRESS | A 侧已完成：第 3 节决定已写入 [CONTRACTS.md](./docs/developer-a/CONTRACTS.md)、[ENGINEERING_SPEC.md](./docs/developer-a/ENGINEERING_SPEC.md) 与 [ADR 0004](./docs/adr/0004-case-catalog-durable-compilation-and-anonymous-access.md)，三张矩阵建立。剩余：B 对 Public 类型、错误、认证与 P0 Cut 的可追溯签署。见 [D0 A 侧 handoff](./docs/handoffs/2026-09-04-d0-contract-repair-a-side.md)。 |
+| D0 契约修复与 B 评审 | COMPLETE | A 侧修复包 + B 侧签署均已完成：用户于 2026-09-04 会话中明确决定「D0 同意签署意见」，Public 类型、错误、认证与 P0 Cut 视为通过评审。见 [D0 A 侧 handoff](./docs/handoffs/2026-09-04-d0-contract-repair-a-side.md) 与 [D0 签署记录](./docs/handoffs/2026-09-04-d0-signoff.md)。 |
 | G0 Golden Case 输入 | BLOCKED | 用户须提供真实知乎 URL 和完整正文；不得用搜索摘要、旧缓存、示例或合成内容替代。 |
 | GC0 Golden Case 标注 | BLOCKED | G0 与 D0 均完成后，A/B 共同冻结第一案件的可验证标注。 |
 | G1 第二案件输入 | BLOCKED | 第一案件闭环后，由用户提供第二篇真实 URL 和完整正文。 |
@@ -107,8 +107,8 @@ AUTH0 + REL0 → AUTH1 知乎 OAuth（独立后续阶段）
 |---|---:|---|
 | VCS0 版本基线 | COMPLETE | 已完成：Secret 扫描通过，基线提交 `cea25d5` 建立，并按用户环节授权推送。见 [VCS0 handoff](./docs/handoffs/2026-09-04-vcs0-version-baseline.md)。 |
 | PF0 工具链骨架 | COMPLETE | 已完成：Bun 1.4.1 固定，Next.js 16 / React 19 / TypeScript / Convex 骨架与测试、typecheck、build 命令就绪；无公开 schema、页面或 XState。见 [PF0 handoff](./docs/handoffs/2026-09-04-pf0-toolchain-skeleton.md)。 |
-| D0 契约修复与 B 评审 | IN PROGRESS | A 侧已完成（契约/规格/ADR 0004、三张矩阵、fixture 计划）；待 B 签署 Public 类型、错误、认证与 P0 Cut。见 [D0 A 侧 handoff](./docs/handoffs/2026-09-04-d0-contract-repair-a-side.md)。 |
-| PF1 Schema、Auth 与模型 Seam | BLOCKED | 建立 <code>shared/public/private</code> 物理入口、严格 runtime schema、Convex Anonymous Auth、八项显式 <code>AI_*</code> 配置、生产 OpenAI-compatible Adapter 与仅测试可用的 Scripted Adapter。 |
+| D0 契约修复与 B 评审 | COMPLETE | 已完成：契约/规格/ADR 0004、三张矩阵、fixture 计划均已落地，B 侧已签署（2026-09-04 用户明确决定）。见 [D0 签署记录](./docs/handoffs/2026-09-04-d0-signoff.md)。 |
+| PF1 Schema、Auth 与模型 Seam | READY | 建立 <code>shared/public/private</code> 物理入口、严格 runtime schema、Convex Anonymous Auth、八项显式 <code>AI_*</code> 配置、生产 OpenAI-compatible Adapter 与仅测试可用的 Scripted Adapter。 |
 | GC0 Golden Case 标注 | BLOCKED | 用户给出真实 URL 和完整正文后，A/B 共同确认 source、paragraphs、claims、relations、roles、policies、Evidence Catalog、truth、评分 rubric、代表性候选、validation 与 reveal fixture。 |
 | TB1 Source 与 Durable 建案 Walking Path | BLOCKED | 完成规范化、段落/引用、精确 Span、邀请码和额度、异步编译 Ticket、幂等及原子持久化；由 Scripted Adapter 驱动 Golden Case，绝不在生产失败时回退 fixture。 |
 | TB2 生产 Evidence Graph / Case Compiler | BLOCKED | 真实 OpenAI-compatible Adapter 生成候选；服务器分配 ID 并验证 Span、Relation、4+1 Role、Policy、Evidence Catalog、评分 rubric 和 Public Projection。 |

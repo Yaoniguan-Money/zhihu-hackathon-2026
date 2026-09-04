@@ -75,3 +75,4 @@ docs/handoffs/<ticket-or-stage-id>.md
 | VCS0 版本基线 | complete | [2026-09-04-vcs0-version-baseline](./2026-09-04-vcs0-version-baseline.md) |
 | PF0 工具链骨架 | complete | [2026-09-04-pf0-toolchain-skeleton](./2026-09-04-pf0-toolchain-skeleton.md) |
 | D0 契约修复包（A 侧） | complete | [2026-09-04-d0-contract-repair-a-side](./2026-09-04-d0-contract-repair-a-side.md) |
+| D0 签署记录 | complete | [2026-09-04-d0-signoff](./2026-09-04-d0-signoff.md) |
