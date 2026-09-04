@@ -12,7 +12,10 @@ import { internal } from "./_generated/api";
 import {
   caseCatalogItemPublicSchema,
   caseCompilationStatusPublicSchema,
+  casePublicSchema,
+  sourceDocumentPublicSchema,
   type CaseCompileReceipt,
+  type CasePublic,
 } from "@contracts/public/index.js";
 import {
   assertEvidenceGraphInvariants,
@@ -157,8 +160,7 @@ export const observeCompilation = query({
 
 export const listPublic = query({
   args: {},
-  handler: async (ctx) => {
-    const docs = await ctx.db
+  handler: async (ctx) => {    const docs = await ctx.db
       .query("cases")
       .withIndex("by_case_key")
       .filter((q) => q.eq(q.field("visibility"), "system"))
@@ -183,6 +185,64 @@ export const listPublic = query({
         theme: doc.theme,
         source_url: doc.source_url,
       });
+    });
+  },
+});
+
+export const getPublic = query({
+  args: { case_id: v.string() },
+  handler: async (ctx, args): Promise<CasePublic | null> => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throwPublicError("AUTH_REQUIRED", "需要先建立会话身份");
+    }
+    const caseDoc = await ctx.db
+      .query("cases")
+      .withIndex("by_case_key", (q) => q.eq("case_key", args.case_id))
+      .unique();
+    // 不存在、越权与未 ready 都返回同一安全 null（CONTRACTS 4.3/4.4）。
+    if (!caseDoc) return null;
+    if (
+      caseDoc.visibility === "user" &&
+      caseDoc.owner_identity !== identity.tokenIdentifier
+    ) {
+      return null;
+    }
+    if (caseDoc.status !== "ready" || !caseDoc.public_json) return null;
+    return casePublicSchema.parse(JSON.parse(caseDoc.public_json));
+  },
+});
+
+export const getSource = query({
+  args: { case_id: v.string() },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throwPublicError("AUTH_REQUIRED", "需要先建立会话身份");
+    }
+    const caseDoc = await ctx.db
+      .query("cases")
+      .withIndex("by_case_key", (q) => q.eq("case_key", args.case_id))
+      .unique();
+    if (!caseDoc) return null;
+    if (
+      caseDoc.visibility === "user" &&
+      caseDoc.owner_identity !== identity.tokenIdentifier
+    ) {
+      return null;
+    }
+    if (caseDoc.status !== "ready") return null;
+    const source = await ctx.db
+      .query("source_documents")
+      .withIndex("by_case_key", (q) => q.eq("case_key", args.case_id))
+      .unique();
+    if (!source) return null;
+    return sourceDocumentPublicSchema.parse({
+      source_id: `src-${caseDoc.case_key}`,
+      case_id: caseDoc.case_key,
+      source_url: source.source_url,
+      canonical_text: source.canonical_text,
+      content_sha256: source.content_sha256,
     });
   },
 });

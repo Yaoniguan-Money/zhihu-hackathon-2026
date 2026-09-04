@@ -21,6 +21,7 @@ export default defineSchema({
     summary: v.optional(v.string()),
     theme: v.optional(v.string()),
     source_url: v.optional(v.string()),
+    public_json: v.optional(v.string()), // CasePublic（zod 校验后序列化），ready 时存在
     created_at_ms: v.number(),
     updated_at_ms: v.number(),
   })
@@ -84,6 +85,11 @@ export default defineSchema({
   case_private: defineTable({
     case_key: v.string(),
     graph_json: v.string(), // EvidenceGraphPrivate，zod 校验后序列化
+    policies_json: v.optional(v.string()), // RolePrivatePolicy[]（4+1）
+    golden_answer_json: v.optional(v.string()), // GoldenAnswerPrivate
+    catalog_json: v.optional(v.string()), // EvidenceCatalogItemPrivate[]
+    rules_json: v.optional(v.string()), // EvidenceUnlockRulePrivate[]
+    rubric_json: v.optional(v.string()), // evidence_score 加权 criteria
     compiler_version: v.string(), // 模型输入/输出 schema 版本（CONTRACTS 9.3）
     created_at_ms: v.number(),
   }).index("by_case_key", ["case_key"]),
