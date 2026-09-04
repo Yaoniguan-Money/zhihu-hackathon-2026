@@ -78,3 +78,4 @@ docs/handoffs/<ticket-or-stage-id>.md
 | D0 签署记录 | complete | [2026-09-04-d0-signoff](./2026-09-04-d0-signoff.md) |
 | G0 Golden Case 源输入 | complete | [2026-09-04-g0-golden-case-source](./2026-09-04-g0-golden-case-source.md) |
 | PF1 契约入口与模型 Seam | blocked | [2026-09-04-pf1-schema-auth-model-seam](./2026-09-04-pf1-schema-auth-model-seam.md) |
+| 工作区 ASCII 路径迁移与 Convex 本地后端验证 | complete | [2026-09-05-workspace-ascii-path](./2026-09-05-workspace-ascii-path.md) |
