@@ -110,8 +110,8 @@ AUTH0 + REL0 → AUTH1 知乎 OAuth（独立后续阶段）
 | D0 契约修复与 B 评审 | COMPLETE | 已完成：契约/规格/ADR 0004、三张矩阵、fixture 计划均已落地，B 侧已签署（2026-09-04 用户明确决定）。见 [D0 签署记录](./docs/handoffs/2026-09-04-d0-signoff.md)。 |
 | PF1 Schema、Auth 与模型 Seam | COMPLETE | contracts 三入口 + 严格 runtime schema、八项显式 <code>AI_*</code> 配置、生产 OpenAI-compatible Adapter 与测试 Scripted Adapter 已完成并测试通过；2026-09-05 在 ASCII 路径本地后端完成 schema push 与 <code>auth:signIn</code> 匿名会话复验，同日以 DeepSeek 完成真实供应商 smoke 后关闭。见 [PF1 handoff](./docs/handoffs/2026-09-04-pf1-schema-auth-model-seam.md) 与 [AI 配置 handoff](./docs/handoffs/2026-09-05-ai-config-deepseek-smoke.md)。 |
 | GC0 Golden Case 标注 | IN PROGRESS | 标注草案已产出并全部程序化验证（23 claims / 22 relations / 4+1 policies / golden answer / 8 catalog / rubric 100 / 代表性 fixtures）。用户于 2026-09-05 夜间明确指示：手动验收环节一律跳过、留待批量验收——草案即日起作为 TB1+ 工作基线；九项清单最终确认与冻结签署延后批量验收，未完成前 GC0 不标记 COMPLETE。见 [GC0 草案 handoff](./docs/handoffs/2026-09-05-gc0-annotation-draft.md)。 |
-| TB1 Source 与 Durable 建案 Walking Path | BLOCKED | 完成规范化、段落/引用、精确 Span、邀请码和额度、异步编译 Ticket、幂等及原子持久化；由 Scripted Adapter 驱动 Golden Case，绝不在生产失败时回退 fixture。 |
-| TB2 生产 Evidence Graph / Case Compiler | BLOCKED | 真实 OpenAI-compatible Adapter 生成候选；服务器分配 ID 并验证 Span、Relation、4+1 Role、Policy、Evidence Catalog、评分 rubric 和 Public Projection。 |
+| TB1 Source 与 Durable 建案 Walking Path | COMPLETE | 已完成：A1 纯函数、幂等/邀请码/三重额度、durable 编译 Ticket、原子持久化与 13.3 错误映射；本地后端集成测试 10 项 + 真实模型编译端到端（DeepSeek）通过。见 [TB1 handoff](./docs/handoffs/2026-09-05-tb1-source-durable-creation.md)。 |
+| TB2 生产 Evidence Graph / Case Compiler | IN PROGRESS | Golden 系统案件种子（冻结 JSON 直接落库）、编译器完整校验（Span、Relation、4+1 Role、Policy、Evidence Catalog、评分 rubric、Public Projection）、<code>cases.getPublic</code>/<code>cases.getSource</code>。 |
 | TB3 Session Authority 与公开查询 | BLOCKED | 实现 <code>sessions.create/getPublic</code>、<code>messages.listPublic</code>、<code>events.listPublic</code>；证明 Owner 隔离、初始 <code>briefing</code>、Board revision 0、连续公开事件及刷新恢复。 |
 | TB4 Faithful 成功回合 | BLOCKED | <code>roleTurns.ask/observe</code> 经幂等、阶段、排他锁、可见 Claim、Generator、Validator 后，只发布完整 entailed Message。 |
 | TB5 Faithful 重写与失败 | BLOCKED | 覆盖字面初次通过、第一次重写通过、第二次重写通过、三次均拒绝；协议/请求失败不得进入语义重写。 |
