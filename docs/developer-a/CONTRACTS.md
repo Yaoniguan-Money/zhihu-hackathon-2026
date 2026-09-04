@@ -1,6 +1,6 @@
 # Evidence / AI Engine 契约
 
-状态：**规范性，接口冻结候选，待开发人员 B 共同评审**。
+状态：**规范性，接口冻结候选；D0 契约修复包已由 A 按用户锁定决定写入，待开发人员 B 共同评审签署**。B 签署前，D0 修复包新增的契约文本（案件目录、Durable 编译、匿名身份、邀请码与额度、Phase/Action 矩阵、Evidence Catalog、版本化模型 schema、评分规则、扩充的错误矩阵）是待评审提案，不得进入生产行为。
 
 本文是 A/B 跨端数据形状、运行时校验、调用顺序和错误语义的唯一事实来源。示例 TypeScript 同时代表必须实现的运行时 schema；类型检查不能替代运行时验证。
 
@@ -101,6 +101,23 @@ export interface SourceDocumentPublic {
 }
 ```
 
+### 3.3 段落、引用与私有段落索引
+
+- 段落定义为“由一个或多个空白行分隔的最大非空行块”，边界在 Canonical Source 上按 UTF-16 code unit 计算。
+- 仅当一个段落块内每个非空行去除水平空白后均以 `>` 开头时，该段识别为 Quote 段。
+- 服务端保存私有段落索引；Browser 不获得段落索引之外的任何结构化视图：
+
+```ts
+export interface CanonicalParagraphPrivate {
+  paragraph_index: number;
+  start: number; // UTF-16 code unit，含起点
+  end: number; // UTF-16 code unit，半开区间
+  is_quote: boolean;
+}
+```
+
+- Source Span 始终使用未改写 Canonical Source 上的 UTF-16 半开偏移，且必须完整落在单个段落内（见 3.2）。
+
 ## 4. Evidence Graph 与案件
 
 ### 4.1 Private 图谱
@@ -179,11 +196,21 @@ export interface EvidenceUnlockRulePrivate {
   allowed_role_ids: RoleId[];
 }
 
+export interface EvidenceCatalogItemPrivate {
+  evidence_id: EvidenceId;
+  type: EvidenceType;
+  title: string;
+  body: string;
+  public_claim_refs: ClaimId[];
+  conflicts_with: EvidenceId[];
+}
+
 export interface CasePrivate {
   case_id: CaseId;
   graph: EvidenceGraphPrivate;
   role_policies: RolePrivatePolicy[];
   golden_answer: GoldenAnswerPrivate;
+  evidence_catalog: EvidenceCatalogItemPrivate[];
   evidence_unlock_rules: EvidenceUnlockRulePrivate[];
 }
 ```
@@ -196,6 +223,57 @@ export interface CasePrivate {
 - Distorted Policy 的允许集合非空，且 `answer_distortion_types` 是其非空子集。
 - Truth、visible Claim、unlock rule、Role、Relation 的全部引用属于当前案件。
 - 任一不变量失败即案件编译失败，不保存 ready Case，不返回部分 Public Case。
+- Unlock Rule 的 `evidence_id` 必须存在于本案件 Evidence Catalog；Catalog 条目的 `public_claim_refs` 与 `conflicts_with` 必须引用本案件已存在的 Claim 与 Catalog 条目。
+- Recording Evidence（P1）动态创建时，其公开 Claim 引用由服务器从已批准数据推导，不得直接暴露 Message 私有 `support_claim_ids`。
+
+### 4.3 匿名身份与资源所有权
+
+- P0 采用 Convex Auth 的 Anonymous 身份。Case 与 Session 的权限一律从服务端认证上下文获得，业务对象不携带访问令牌。
+- 系统案件对所有身份可读；用户创建的案件默认仅创建者可见，不进入系统目录；Session 仅 Owner 可读写。
+- 越权访问与资源不存在必须返回相同的安全结果（`CASE_NOT_FOUND` / `SESSION_NOT_FOUND`；observe 类接口返回 `null`），不提供资源存在性侧信道。
+- Convex Auth 处于 beta：以固定依赖版本与兼容 smoke 管控；无法满足兼容时相关阶段保持 BLOCKED，禁止自制鉴权兜底。
+
+### 4.4 案件目录与编译生命周期
+
+```ts
+export interface CaseCatalogItemPublic {
+  case_id: CaseId;
+  title: string;
+  summary: string;
+  theme: string;
+  source_url: string;
+}
+
+export type CaseCompilationStatus =
+  | "accepted"
+  | "working"
+  | "succeeded"
+  | "failed";
+
+export interface CaseCompileReceipt {
+  case_id: CaseId;
+  status: "accepted";
+}
+
+export interface CaseCompilationStatusPublic {
+  case_id: CaseId;
+  status: CaseCompilationStatus;
+  error?: PublicError; // 当且仅当 status = "failed"
+}
+```
+
+- `cases.listPublic` 只返回已批准且 `ready` 的系统案件；用户案件不出现在目录中。进入系统目录只能由内部操作完成，并经过 A/B Golden 审批。
+- `cases.createFromSource` 校验通过后立即返回 `CaseCompileReceipt`；编译异步执行，进度只能经 `cases.observeCompilation` 观察，公开状态仅限 `accepted / working / succeeded / failed`。
+- 编译任何一步失败都不留下可玩 Case：`cases.getPublic` 保持 `null`，`observeCompilation` 报告 `failed` 与安全 Public Error。
+- `observeCompilation` 对不存在与不可访问的 Case 都返回 `null`。
+
+### 4.5 邀请码与建案额度
+
+- 匿名建案必须提供有效邀请码。邀请码只保存哈希，可设置过期、撤销与总使用次数；明文不进入业务对象、日志、fixture、计划或 handoff。
+- 额度按身份均衡执行：滚动 24 小时最多 3 次建案；同一身份同时最多 1 次进行中的编译；全站 UTC 日最多 50 次。Canonical Source 上限 30,000 UTF-16 code units。
+- 幂等命中发生在额度扣减之前；同键同哈希重放不重复扣减、不重复建案。
+- 超长正文直接拒绝并返回 `SOURCE_TOO_LONG`，绝不截断后继续。
+- 游玩系统案件不消耗建案额度。
 
 ## 5. Message 与已批准发言
 
@@ -381,6 +459,24 @@ export interface SessionView {
 - `reveal_available` 当且仅当阶段为 `revealed`；`terminal_error` 当且仅当阶段为 `failed`。
 - `failed` 不伪装成上一个正常阶段，也不自动重启。
 
+### 7.1 阶段与玩家写操作矩阵
+
+| phase | 允许的玩家写操作 |
+|---|---|
+| `briefing` | `start` |
+| `opening_statements` | 无 |
+| `investigation` | `ask`、`update_board`、`accuse` 按资源前置条件动态开放；`save_recording` / `present_recording` 属 P1，P0 恒不开放 |
+| `judging` | 无 |
+| `revealed` | 无 |
+| `failed` | 无 |
+
+- `allowed_actions` 由服务器按上表与资源前置条件计算（例如至少一条已解锁 Evidence 才开放 `update_board` / `accuse`）；XState 只镜像，不推断权限。
+
+### 7.2 公开查询与开场编排
+
+- `messages.listPublic` 的 v1 返回当前 Session 的全部公开消息，按 `created_at` + `message_id` 稳定排序；不提供 `after` 参数。增量恢复仅使用 `events.listPublic(after_sequence)`。
+- `game.start` 按 `CasePublic.roles` 的固定顺序串行执行五条开场：一次只存在一个活动 Ticket，前一条成功后才创建下一条，禁止预建队列。五条全部批准后进入 `investigation`；任一失败 Session 进入 `failed`，已发布消息与事件保留为真实历史。
+
 ```ts
 export type GameEventPayload =
   | { type: "session_created" }
@@ -470,9 +566,8 @@ export interface RoleTurnReceipt {
 
 export type RoleTurnKind =
   | "ask"
-  | "present_recording"
-  | "opening_statement"
-  | "role_confrontation";
+  | "present_recording" // P1
+  | "opening_statement";
 
 interface PublicRoleTurnBase {
   request_id: RequestId;
@@ -529,17 +624,10 @@ export type TurnIntentPrivate =
       kind: "opening_statement";
       role_id: RoleId;
       trigger_event_id: EventId;
-    }
-  | {
-      kind: "role_confrontation";
-      role_id: RoleId;
-      target_role_id: RoleId;
-      rebuttal_to_message_id: MessageId;
-      trigger_event_id: EventId;
     };
 ```
 
-Browser 没有通用 execute Interface。`opening_statement` 与 `role_confrontation` 只能由服务端事件创建。
+Browser 没有通用 execute Interface。`opening_statement`（P0）与 `recording_presented`（P1）只能由服务端事件创建。首版“角色互咬”归入 P1：仅由 `presentRecording` 触发，回应必须引用该 Recording 的来源 Message 或允许的 Claim；不存在独立的 server-only `role_confrontation` 回合。
 
 同一 Session 的全部角色生成共享一个排他锁：没有活动 Ticket 时原子创建 Ticket、相关玩家消息/事件和锁；已有 `accepted` 或 `working` Ticket 时立即返回 `ROLE_TURN_BUSY`。不排队、不延迟执行。Ticket 终止后释放锁；lease 异常显式失败且不自动再次调用模型。
 
@@ -611,6 +699,12 @@ Distorted Role：全部材料仍来自可见 Claim；Validator 必须返回 `dis
 7. AI SDK/provider 自动重试为 0。
 8. Failed Ticket 不发布 Role Message、不解锁 Evidence、不触发 TTS。
 
+### 9.3 版本化模型候选 schema
+
+- Claim Extractor、Case Compiler、Validator、Reveal 的模型输入/输出 schema 均带显式版本号；Prompt、schema 与 fixture 按版本共同冻结。
+- 模型只能产生临时候选键与内容；可信 ID、角色分配、Evidence 解锁、评分、重写次数与发布状态均由服务器决定。
+- 模型候选不得包含 `evidence_unlock_ids`（见第 6 节），也不得包含任何服务端专属判定字段。
+
 ## 10. Final Accusation 与 Reveal
 
 ```ts
@@ -639,18 +733,26 @@ Final Accusation 必须引用当前案件有效 Role，包含至少一个且无�
 
 RevealResult 必须完整持久化后才公开。`truth_chain.order` 从 1 开始、连续且唯一；每个 Claim 属于当前案件。`getReveal` 在非 revealed 阶段返回 `null`，不得返回部分内容或失败原因。
 
+### 10.1 正确性与评分
+
+- `evidence_score` 使用 Golden Case 冻结的加权 Evidence criteria：权重均为整数且总和恰为 100；选中的 Evidence 仅在类型允许、命中允许 Claim，且要求时来自指定 Role Quote 时获得该项权重。
+- `questioning_score` 固定为：成功审讯覆盖每个不同 Role 计 8 分、最多 40；同一 Role 首问后每次成功追问计 10 分、最多 30；成功审讯产生新 Evidence 每次计 10 分、最多 30。开场与录音投递不计入该分数。
+- 正确性、两项分数、truth chain 与 altered links 全部由服务器确定；Reveal 模型只产生带 Claim 引用的解释与 Reality Mapping 候选，候选校验失败时整个 Reveal 失败，不公开部分结果。
+
 ## 11. 逻辑 Interface 目录
 
 所有参数和返回值都必须通过运行时 schema。
 
 | Interface | 种类 | 输入 | 成功输出 / 语义 |
 |---|---|---|---|
-| `cases.createFromSource` | action | `source_url, source_text, theme?, client_action_id` | `{ case_id, status: "ready" }`；完整编译成功后才返回 |
+| `cases.createFromSource` | action | `source_url, source_text, theme?, invite_code, client_action_id` | `CaseCompileReceipt`；编译异步执行（见 4.4/4.5） |
+| `cases.observeCompilation` | query | `case_id` | `CaseCompilationStatusPublic | null` |
+| `cases.listPublic` | query | 无参数 | `CaseCatalogItemPublic[]`，仅 approved + ready 系统案件 |
 | `cases.getPublic` | query | `case_id` | `CasePublic | null` |
 | `cases.getSource` | query | `case_id` | `SourceDocumentPublic | null` |
 | `sessions.create` | mutation | `case_id, client_action_id` | `SessionView`，初始 phase=`briefing` |
 | `sessions.getPublic` | query | `session_id` | `SessionView | null` |
-| `messages.listPublic` | query | `session_id, after?` | `MessagePublic[]`，稳定时间/ID 顺序 |
+| `messages.listPublic` | query | `session_id` | `MessagePublic[]`，v1 全量返回，`created_at + message_id` 稳定排序 |
 | `events.listPublic` | query | `session_id, after_sequence` | `GameEventPublic[]`，sequence 递增 |
 | `game.start` | mutation | `session_id, client_action_id` | `{ session_id, phase: "opening_statements" }`，调度五个服务端回合 |
 | `roleTurns.ask` | action | `AskRoleArgs` | `RoleTurnReceipt` |
@@ -675,6 +777,7 @@ RevealResult 必须完整持久化后才公开。`truth_chain.order` 从 1 开�
 处理顺序：输入 schema → 操作规定的内容规范化 → RFC 8785 canonical JSON → SHA-256。`client_action_id` 不进入载荷哈希。
 
 - 同键同哈希：在阶段校验前返回首次持久化的同一 receipt / request / result，不重复模型调用、事件或数据写入。
+- 建案额度扣减发生在幂等命中之后：同键同哈希重放不重复扣减额度，也不重复建案。
 - 同键不同哈希：返回 `IDEMPOTENCY_CONFLICT`。
 - 失败 Ticket 的同 ID 重放仍返回同一失败；人工再次发起必须使用新 ID。
 - 缺失、空白或非 UUID action ID 直接返回 `INVALID_ARGUMENT`；服务端不得补一个默认 ID。
@@ -686,6 +789,10 @@ RevealResult 必须完整持久化后才公开。`truth_chain.order` 从 1 开�
 ```ts
 export type PublicErrorCode =
   | "INVALID_ARGUMENT"
+  | "AUTH_REQUIRED"
+  | "CASE_CREATION_NOT_ALLOWED"
+  | "RATE_LIMITED"
+  | "SOURCE_TOO_LONG"
   | "SOURCE_INVALID"
   | "CASE_NOT_FOUND"
   | "CASE_NOT_READY"
@@ -724,8 +831,12 @@ Public message 只描述玩家可采取的明确动作，不包含 provider 响�
 ```ts
 export type PrivateFailureCode =
   | "INPUT_SCHEMA_INVALID"
+  | "AUTH_CONTEXT_MISSING"
+  | "INVITE_CODE_REJECTED"
+  | "CREATION_QUOTA_EXCEEDED"
   | "SOURCE_URL_INVALID"
   | "SOURCE_TEXT_EMPTY"
+  | "SOURCE_TOO_LONG"
   | "SOURCE_PARSE_FAILED"
   | "SOURCE_SPAN_INVALID"
   | "MODEL_CONFIG_MISSING"
@@ -744,7 +855,35 @@ export type PrivateFailureCode =
   | "INTERNAL_INVARIANT_VIOLATION";
 ```
 
-隐私映射：`VALIDATION_EXHAUSTED`、`DISTORTION_POLICY_VIOLATION`、`NEW_FACT_INTRODUCED` 与 Validator 失败一律公开为 `ROLE_TURN_FAILED`；否则错误码本身会泄露 Fidelity。具体原因通过 `incident_id` 对应私有审计。
+隐私映射：`VALIDATION_EXHAUSTED`、`DISTORTION_POLICY_VIOLATION`、`NEW_FACT_INTRODUCED` 与 Validator 失败一律公开为 `ROLE_TURN_FAILED`；否则错误码本身会泄露 Fidelity。具体原因通过 `incident_id` 对应私有审计。`AUTH_CONTEXT_MISSING`、`INVITE_CODE_REJECTED`、`CREATION_QUOTA_EXCEEDED` 的私有细节一律公开为 `AUTH_REQUIRED` / `CASE_CREATION_NOT_ALLOWED` / `RATE_LIMITED`，不区分具体拒绝原因。
+
+### 13.3 私有失败 × 操作上下文 → 公开错误矩阵
+
+“—”表示该私有失败不会出现在该上下文；出现即属 `INTERNAL_INVARIANT_VIOLATION`。
+
+| Private Failure | 建案 / 编译 | 角色回合 | Reveal | Voice |
+|---|---|---|---|---|
+| `INPUT_SCHEMA_INVALID` | `INVALID_ARGUMENT` | `INVALID_ARGUMENT` | `INVALID_ARGUMENT` | `INVALID_ARGUMENT` |
+| `SOURCE_URL_INVALID` / `SOURCE_TEXT_EMPTY` / `SOURCE_PARSE_FAILED` | `SOURCE_INVALID` | — | — | — |
+| `SOURCE_TOO_LONG` | `SOURCE_TOO_LONG` | — | — | — |
+| `AUTH_CONTEXT_MISSING` | `AUTH_REQUIRED` | `AUTH_REQUIRED` | `AUTH_REQUIRED` | `AUTH_REQUIRED` |
+| `INVITE_CODE_REJECTED` | `CASE_CREATION_NOT_ALLOWED` | — | — | — |
+| `CREATION_QUOTA_EXCEEDED` | `RATE_LIMITED` | — | — | — |
+| `SOURCE_SPAN_INVALID`（编译期图谱/段落不变量） | `CASE_COMPILE_FAILED` | — | — | — |
+| `NEW_FACT_INTRODUCED`（编译期） | `CASE_COMPILE_FAILED` | `ROLE_TURN_FAILED` | — | — |
+| `MODEL_CONFIG_MISSING` | `SERVICE_NOT_CONFIGURED` | `SERVICE_NOT_CONFIGURED` | `SERVICE_NOT_CONFIGURED` | `SERVICE_NOT_CONFIGURED` |
+| `MODEL_REQUEST_FAILED` / `MODEL_PROTOCOL_INVALID` | `CASE_COMPILE_FAILED` | `ROLE_TURN_FAILED` | `REVEAL_FAILED` | — |
+| `VALIDATOR_REQUEST_FAILED` / `VALIDATOR_PROTOCOL_INVALID` | — | `ROLE_TURN_FAILED` | `REVEAL_FAILED`（候选校验） | — |
+| `VALIDATION_EXHAUSTED` | — | `ROLE_TURN_FAILED` | — | — |
+| `DISTORTION_POLICY_VIOLATION` | — | `ROLE_TURN_FAILED` | — | — |
+| `NEW_FACT_INTRODUCED`（回合期） | — | `ROLE_TURN_FAILED` | — | — |
+| `PRIVATE_PROJECTION_VIOLATION` | `INTERNAL_INCIDENT` | `INTERNAL_INCIDENT` | `INTERNAL_INCIDENT` | `INTERNAL_INCIDENT` |
+| `TURN_LEASE_EXPIRED` | — | `ROLE_TURN_FAILED` | — | — |
+| `REVEAL_JUDGE_FAILED` | — | — | `REVEAL_FAILED` | — |
+| `ASR_PROVIDER_FAILED` / `TTS_PROVIDER_FAILED` | — | — | — | `VOICE_ASR_FAILED` / `VOICE_TTS_FAILED` |
+| `INTERNAL_INVARIANT_VIOLATION` | `INTERNAL_INCIDENT` | `INTERNAL_INCIDENT` | `INTERNAL_INCIDENT` | `INTERNAL_INCIDENT` |
+
+资源查找类失败不进入本矩阵：Case / Session / Role 的越权与不存在一律返回同一安全结果（4.3），Ticket observe 返回 `null`（8.1）。
 
 错误对象不得包含 `retryable` 或任何会触发自动行为的标志。恢复动作固定：Board 冲突要求刷新后由用户重提；Busy 展示当前 Ticket；ASR 失败保留键盘输入且不自动提交；TTS 失败保留 Approved Role Message；其他模型/协议/验证失败显式终止。
 

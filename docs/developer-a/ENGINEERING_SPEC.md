@@ -47,7 +47,7 @@ Source Snapshot
 | A5 | Distortion Engine | Distortion Type、单一篡改角色、获准操纵策略 |
 | A6 | Validator | entailed / distorted / invalid 判定、忠实候选最多两次重写 |
 | A7 | Reveal Engine | Final Accusation 判定、truth chain、altered links、Reality Mapping |
-| A8 | Convex Authority | schema、actions、queries、事件、幂等、并发锁与恢复快照 |
+| A8 | Convex Authority | schema、actions、queries、事件、幂等、并发锁、匿名身份、邀请码与建案额度、恢复快照 |
 | A9 | Local Voice | SenseVoice/FunASR ASR 与 Kokoro 中文 TTS Adapter |
 
 B 拥有页面、XState、输入控件、打字机、播放器、Evidence Board 交互和动效。A 可以建立共享最小工程骨架与同源语音 Route Handler，但不得实现 B 的页面或状态机。Public contracts、Golden Case、Distortion Type 和发布验收必须由 A/B 共同评审。
@@ -116,20 +116,23 @@ Role Turn Engine 的 Depth 来自把可见范围、生成、验证、重写、�
 
 ```text
 cases.createFromSource
-  → 输入 schema 与幂等检查
-  → Source Ingestion
+  → 输入 schema 与幂等检查（幂等命中先于额度扣减）
+  → 匿名身份、邀请码与额度检查
+    （滚动 24h ≤3、并发 ≤1、全站 UTC 日 ≤50、正文 ≤30,000 UTF-16 code units）
+  → 持久化编译 Ticket，立即返回 CaseCompileReceipt
+  → worker：Source Ingestion
   → Evidence Graph structured generation
   → 图谱不变量检查
   → Case Compilation
   → Public / Private 物理分离检查
-  → 原子保存 ready 案件
+  → 原子保存 ready 案件，Ticket 记为 succeeded
 ```
 
-任何步骤失败都返回 typed failure，不产生可玩的 Case Public。幂等重放返回首次保存的同一结果，不重复调用模型。
+`cases.observeCompilation` 只公开 `accepted / working / succeeded / failed` 与安全 Public Error；对不存在或不可访问的 Case 返回 `null`。编译任何步骤失败都返回 typed failure，不产生可玩的 Case Public。幂等重放返回首次保存的同一结果，不重复调用模型、不重复扣减额度。超长正文直接拒绝，绝不截断。用户案件默认仅创建者可见；进入系统目录只能由内部操作完成并经 A/B Golden 审批。
 
 ### 5.2 开场与审讯
 
-1. `game.start` 原子改变 Session 阶段并调度五个服务端 `opening_statement` Turn Intent。
+1. `game.start` 原子改变 Session 阶段并按 `CasePublic.roles` 固定顺序串行调度五条 `opening_statement`：一次只存在一个活动 Ticket，前一条成功后才创建下一条，禁止预建队列。
 2. 每条开场陈述经过与普通角色回合相同的生成、Validator 和批准流程。
 3. 五条全部批准后 Session 才进入调查阶段；任一失败则 Session 进入显式 `failed`。
 4. `roleTurns.ask` 先执行幂等、阶段、Role、`mode`、`source` 和并发检查，再原子保存玩家消息、`accepted` Ticket、公开事件与 Session 排他锁。
@@ -158,7 +161,7 @@ cases.createFromSource
 3. Reveal Engine 读取 Case Private 与玩家 Evidence，保存 Final Accusation、评分和 RevealResult。
 4. 只有完整结果成功持久化后 Session 才进入 `revealed`；失败进入显式 `failed`，不得展示部分答案。
 
-`player_correct` 的判定固定为：嫌疑 Role 相同，且提交的 Distortion Type 集合与标准答案集合完全相同。Evidence 与提问质量单独计分，不使用未记录的隐藏阈值改变正确性。
+`player_correct` 的判定固定为：嫌疑 Role 相同，且提交的 Distortion Type 集合与标准答案集合完全相同。Evidence 与提问质量单独计分，不使用未记录的隐藏阈值改变正确性。Evidence 权重 criteria 与 Questioning 计分公式以 [CONTRACTS.md](./CONTRACTS.md) 10.1 为唯一事实来源；Reveal 模型只产生解释与 Reality Mapping 候选，判定与评分全部由服务器完成。
 
 ### 5.6 本地语音
 
@@ -217,6 +220,7 @@ Scripted Adapter 只存在于测试组合根，由测试显式注入；生产配
 - 同一幂等键和同一规范化载荷返回第一次保存的同一 receipt / request / result，不重复调用模型或写事件。
 - 同一幂等键但载荷不同返回 `IDEMPOTENCY_CONFLICT`。
 - 幂等命中先于当前阶段的再次判断，使网络重放可以获得原结果。
+- 建案额度扣减发生在幂等命中之后；同键同哈希重放不重复扣减额度，也不重复建案。
 - 终止失败用同一 action ID 重放时仍返回原失败；用户主动重试必须创建新 action ID。
 - 一个 Session 的开场、问答、录音投递和角色互咬共用一个角色回合排他锁。存在 `accepted` 或 `working` Ticket 时立即返回 `ROLE_TURN_BUSY`，不排队。
 - Worker / lease 异常必须将 Ticket 明确标为失败并释放锁，不能自动再次调用模型。
