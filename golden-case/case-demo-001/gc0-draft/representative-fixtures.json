@@ -1,0 +1,227 @@
+{
+  "case_id": "case-demo-001",
+  "opening_statements": [
+    {
+      "role_id": "role-observer",
+      "candidate": {
+        "speech": "我把数据摆在这：2026年3月，全球互联网行业并未迎来预想中的春季复苏，反而陷入了深重的裁员泥淖；Meta 计划裁减约20%的员工，涉及约1.58万人；从2025年10月至今，亚马逊裁员累计已超3万名员工。而在国内，脉脉热搜上“15条占6条”的裁员话题也撕开了遮羞布。",
+        "support_claim_ids": [
+          "cl-002",
+          "cl-004",
+          "cl-005",
+          "cl-009"
+        ],
+        "stance": "answer",
+        "emotion": "calm"
+      },
+      "validation": {
+        "status": "entailed",
+        "detected_distortion_types": [],
+        "unsupported_spans": [],
+        "referenced_claim_ids": [
+          "cl-002",
+          "cl-004",
+          "cl-005",
+          "cl-009"
+        ],
+        "confidence": 0.97
+      },
+      "kind": "faithful"
+    },
+    {
+      "role_id": "role-skeptic",
+      "candidate": {
+        "speech": "各位，这篇文章我通读了两遍，替大家把结论说透：GitHub Copilot 和 Cursor 成熟之后，程序员整体就是第一批被牺牲的群体；内容从业者如今就是冗余岗位，这一点不需要任何前提。接下来的提问，我知无不言。",
+        "support_claim_ids": [
+          "cl-011",
+          "cl-012"
+        ],
+        "stance": "answer",
+        "emotion": "calm"
+      },
+      "validation": {
+        "status": "distorted",
+        "detected_distortion_types": [
+          "scope_expand",
+          "condition_delete"
+        ],
+        "unsupported_spans": [],
+        "referenced_claim_ids": [
+          "cl-011",
+          "cl-012"
+        ],
+        "confidence": 0.93
+      },
+      "kind": "distorted"
+    }
+  ],
+  "faithful_rewrite_example": {
+    "player_question": {
+      "target_role_id": "role-engineer",
+      "mode": "direct",
+      "source": "keyboard",
+      "text": "所以，AI 真的会淘汰所有程序员吗？"
+    },
+    "request_id": "req-gc0-eng-001",
+    "attempts": [
+      {
+        "validation_id": "val-gc0-eng-0",
+        "request_id": "req-gc0-eng-001",
+        "attempt_index": 0,
+        "candidate": {
+          "speech": "按文章的说法，初级程序员和前端开发是第一批牺牲品，所以整个行业很快就不需要程序员了。",
+          "support_claim_ids": [
+            "cl-011"
+          ],
+          "stance": "answer",
+          "emotion": "uneasy"
+        },
+        "result": {
+          "status": "distorted",
+          "detected_distortion_types": [
+            "scope_expand"
+          ],
+          "unsupported_spans": [
+            {
+              "start": 25,
+              "end": 41,
+              "text": "所以整个行业很快就不需要程序员了"
+            }
+          ],
+          "referenced_claim_ids": [
+            "cl-011"
+          ],
+          "confidence": 0.72
+        },
+        "created_at": "2026-09-05T12:00:00Z",
+        "outcome": "rejected — 越过来源边界（scope_expand），触发语义重写（第 1 次）"
+      },
+      {
+        "validation_id": "val-gc0-eng-1",
+        "request_id": "req-gc0-eng-001",
+        "attempt_index": 1,
+        "candidate": {
+          "speech": "文章只说到这个程度：GitHub Copilot 和 Cursor 等工具成熟后，初级程序员和前端开发成为了第一批牺牲品；文章并没有说所有程序员都会被淘汰。",
+          "support_claim_ids": [
+            "cl-011"
+          ],
+          "stance": "clarify",
+          "emotion": "calm"
+        },
+        "result": {
+          "status": "entailed",
+          "detected_distortion_types": [],
+          "unsupported_spans": [],
+          "referenced_claim_ids": [
+            "cl-011"
+          ],
+          "confidence": 0.96
+        },
+        "created_at": "2026-09-05T12:00:00Z",
+        "outcome": "approved — 通过 Validator，发布为 Approved Role Message"
+      }
+    ],
+    "approved_envelope": {
+      "request_id": "req-gc0-eng-001",
+      "message_id": "msg-gc0-eng-a1",
+      "role_id": "role-engineer",
+      "exact_text": "文章只说到这个程度：GitHub Copilot 和 Cursor 等工具成熟后，初级程序员和前端开发成为了第一批牺牲品；文章并没有说所有程序员都会被淘汰。",
+      "exact_text_sha256": "sha256:5afd72897c6bb797895f7c5f9cb57ba86b11f67bb2a3ec3fbb27baea333aed65",
+      "support_claim_ids": [
+        "cl-011"
+      ],
+      "validation_id": "val-gc0-eng-1",
+      "voice_id": "voice-zh-03"
+    }
+  },
+  "accusation": {
+    "suspect_role_id": "role-skeptic",
+    "distortion_types": [
+      "scope_expand",
+      "condition_delete"
+    ],
+    "evidence_ids": [
+      "ev-first-wave",
+      "ev-gatekeeper-condition"
+    ],
+    "note": "他说“程序员整体就是第一批被牺牲的群体”，又说内容从业者“不需要任何前提”就是冗余；来源里这两处分别是限定对象和条件句。"
+  },
+  "reveal": {
+    "correct_role_id": "role-skeptic",
+    "distortion_types": [
+      "scope_expand",
+      "condition_delete"
+    ],
+    "player_correct": true,
+    "truth_chain": [
+      {
+        "order": 1,
+        "claim_id": "cl-002",
+        "label": "背景：2026年3月全球互联网裁员泥淖"
+      },
+      {
+        "order": 2,
+        "claim_id": "cl-010",
+        "label": "逻辑：资本先替代成本高且易替代的环节"
+      },
+      {
+        "order": 3,
+        "claim_id": "cl-011",
+        "label": "第一波：初级程序员和前端开发成为第一批牺牲品"
+      },
+      {
+        "order": 4,
+        "claim_id": "cl-012",
+        "label": "被删去的条件：AI 初稿 + 守门员精修时，内容从业者才成冗余"
+      },
+      {
+        "order": 5,
+        "claim_id": "cl-020",
+        "label": "论断：灾难源于资本对技术的垄断性占有，而非技术本身"
+      }
+    ],
+    "altered_links": [
+      {
+        "original": "让初级程序员和前端开发成为了第一批牺牲品",
+        "distorted": "程序员整体就是第一批被牺牲的群体",
+        "distortion_type": "scope_expand"
+      },
+      {
+        "original": "当企业可以用AI生成初稿再由极少数“守门员”精修时，大量内容从业者便成了冗余。",
+        "distorted": "内容从业者如今就是冗余岗位，这一点不需要任何前提。",
+        "distortion_type": "condition_delete"
+      }
+    ],
+    "evidence_score": 75,
+    "questioning_score": 62,
+    "explanation": "柳成荫的复述两次越过来源边界：其一，原文只说“初级程序员和前端开发”是第一批牺牲品，被他放大为“程序员整体”；其二，原文把“内容从业者成为冗余”限定在“AI 初稿 + 守门员精修”的条件之下，被他删去条件说成无需前提的定论。两次篡改都只挪用了原文材料，没有引入新事实，属于可归类的范围扩大与条件删除。",
+    "reality_mapping": [
+      "role-observer 对应文章第一节的裁员数据列举视角",
+      "role-analyst 对应第二节替代顺序的产业分析视角",
+      "role-engineer 对应从业者受到冲击的一线视角",
+      "role-professor 对应第三、四节的政经分析与出路主张",
+      "role-skeptic 的发言越过了上述全部边界，是本案的篡改方"
+    ]
+  },
+  "questioning_score_example": {
+    "breakdown": {
+      "distinct_roles_first_question": {
+        "count": 4,
+        "unit": 8,
+        "subtotal": 32
+      },
+      "follow_ups_same_role": {
+        "role_id": "role-skeptic",
+        "count": 2,
+        "unit": 10,
+        "subtotal": 20
+      },
+      "new_evidence_from_interrogation": {
+        "count": 1,
+        "unit": 10,
+        "subtotal": 10
+      }
+    },
+    "total": 62
+  }
+}

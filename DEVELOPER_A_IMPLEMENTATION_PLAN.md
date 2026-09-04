@@ -21,7 +21,7 @@
 
 ## 2. 审计现场：当前事实与 Gate
 
-截至本计划建立时，现场事实如下；这些事实不是实现完成声明。当前进展以各阶段状态行与对应 handoff 为准：VCS0 与 PF0 已完成（Bun 1.4.1、Next.js 16.3.4、React 19.2.8、Convex 1.45.0、TypeScript 5.9.3 骨架与首个基线提交已建立），A1–A9 的业务代码与业务测试仍为 0%。
+截至本计划建立时，现场事实如下；这些事实不是实现完成声明。当前进展以各阶段状态行与对应 handoff 为准：VCS0、PF0、D0、G0 与 PF1 已完成（Bun 1.4.1、Next.js 16.3.4、React 19.2.8、Convex 1.45.0、TypeScript 5.9.3 骨架与首个基线提交已建立；PF1 于 2026-09-05 完成本地后端运行时复验），A1–A9 的业务代码与业务测试仍为 0%。
 
 - A1–A9 的业务代码、业务测试均为 0%；PF0 仅建立工具链骨架，不含业务实现。
 - 根目录已存在 <code>package.json</code>、<code>bun.lock</code>、Next.js/Convex 配置与工具链冒烟测试（PF0 产物）。
@@ -38,7 +38,7 @@
 | PF0 工具链骨架 | COMPLETE | Bun 1.4.1、Next.js 16.3.4、React 19.2.8、Convex 1.45.0、TypeScript 5.9.3 已固定；typecheck/test/build 验证通过。未实现公开 schema、产品页面或 XState。见 [PF0 handoff](./docs/handoffs/2026-09-04-pf0-toolchain-skeleton.md)。 |
 | D0 契约修复与 B 评审 | COMPLETE | A 侧修复包 + B 侧签署均已完成：用户于 2026-09-04 会话中明确决定「D0 同意签署意见」，Public 类型、错误、认证与 P0 Cut 视为通过评审。见 [D0 A 侧 handoff](./docs/handoffs/2026-09-04-d0-contract-repair-a-side.md) 与 [D0 签署记录](./docs/handoffs/2026-09-04-d0-signoff.md)。 |
 | G0 Golden Case 输入 | COMPLETE | 用户已提供真实知乎 URL（红歌会网专栏文章），完整正文经渲染抓取获得并冻结于 `golden-case/case-demo-001/`（含哈希与来源元数据）。见 [G0 handoff](./docs/handoffs/2026-09-04-g0-golden-case-source.md)。 |
-| GC0 Golden Case 标注 | READY | G0 与 D0 均已解除。A/B 共同确认 source、paragraphs、claims、relations、roles、policies、Evidence Catalog、truth、评分 rubric、代表性候选、validation 与 reveal fixture。 |
+| GC0 Golden Case 标注 | IN PROGRESS | 标注草案已产出（23 claims / 22 relations / 4+1 policies / golden answer / 8 catalog / rubric 100 / 代表性 fixtures），全部经脚本程序化验证；待 A/B 与用户按确认清单逐项确认后冻结。见 [GC0 草案 handoff](./docs/handoffs/2026-09-05-gc0-annotation-draft.md)。 |
 | G1 第二案件输入 | BLOCKED | 第一案件闭环后，由用户提供第二篇真实 URL 和完整正文。 |
 | REL0 公网 P0 | BLOCKED | 依赖 TB10、P0 发布验收和已签署 Golden 系统案件。 |
 | AUTH1 知乎 OAuth | BLOCKED | 是 P0 后的独立外部 Gate；不以 OAuth 阻塞游客 P0。 |
@@ -108,8 +108,8 @@ AUTH0 + REL0 → AUTH1 知乎 OAuth（独立后续阶段）
 | VCS0 版本基线 | COMPLETE | 已完成：Secret 扫描通过，基线提交 `cea25d5` 建立，并按用户环节授权推送。见 [VCS0 handoff](./docs/handoffs/2026-09-04-vcs0-version-baseline.md)。 |
 | PF0 工具链骨架 | COMPLETE | 已完成：Bun 1.4.1 固定，Next.js 16 / React 19 / TypeScript / Convex 骨架与测试、typecheck、build 命令就绪；无公开 schema、页面或 XState。见 [PF0 handoff](./docs/handoffs/2026-09-04-pf0-toolchain-skeleton.md)。 |
 | D0 契约修复与 B 评审 | COMPLETE | 已完成：契约/规格/ADR 0004、三张矩阵、fixture 计划均已落地，B 侧已签署（2026-09-04 用户明确决定）。见 [D0 签署记录](./docs/handoffs/2026-09-04-d0-signoff.md)。 |
-| PF1 Schema、Auth 与模型 Seam | IN PROGRESS | contracts 三入口 + 严格 runtime schema、八项显式 <code>AI_*</code> 配置、生产 OpenAI-compatible Adapter 与测试 Scripted Adapter 已完成并测试通过；Convex Anonymous Auth 代码就绪，push/运行时 smoke 待用户 <code>convex dev</code> 交互登录。见 [PF1 handoff](./docs/handoffs/2026-09-04-pf1-schema-auth-model-seam.md)。 |
-| GC0 Golden Case 标注 | READY | G0 与 D0 已解除：用户给出真实 URL，完整正文已冻结；A/B 共同确认 source、paragraphs、claims、relations、roles、policies、Evidence Catalog、truth、评分 rubric、代表性候选、validation 与 reveal fixture。 |
+| PF1 Schema、Auth 与模型 Seam | COMPLETE | contracts 三入口 + 严格 runtime schema、八项显式 <code>AI_*</code> 配置、生产 OpenAI-compatible Adapter 与测试 Scripted Adapter 已完成并测试通过；2026-09-05 在 ASCII 路径本地后端完成 schema push 与 <code>auth:signIn</code> 匿名会话复验后关闭。见 [PF1 handoff](./docs/handoffs/2026-09-04-pf1-schema-auth-model-seam.md)。 |
+| GC0 Golden Case 标注 | IN PROGRESS | 标注草案位于 <code>golden-case/case-demo-001/gc0-draft/</code>（含构建+验证脚本与九项确认清单）；确认冻结前不得标记 COMPLETE，TB1 仍不得开工。见 [GC0 草案 handoff](./docs/handoffs/2026-09-05-gc0-annotation-draft.md)。 |
 | TB1 Source 与 Durable 建案 Walking Path | BLOCKED | 完成规范化、段落/引用、精确 Span、邀请码和额度、异步编译 Ticket、幂等及原子持久化；由 Scripted Adapter 驱动 Golden Case，绝不在生产失败时回退 fixture。 |
 | TB2 生产 Evidence Graph / Case Compiler | BLOCKED | 真实 OpenAI-compatible Adapter 生成候选；服务器分配 ID 并验证 Span、Relation、4+1 Role、Policy、Evidence Catalog、评分 rubric 和 Public Projection。 |
 | TB3 Session Authority 与公开查询 | BLOCKED | 实现 <code>sessions.create/getPublic</code>、<code>messages.listPublic</code>、<code>events.listPublic</code>；证明 Owner 隔离、初始 <code>briefing</code>、Board revision 0、连续公开事件及刷新恢复。 |

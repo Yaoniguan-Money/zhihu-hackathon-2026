@@ -1,0 +1,51 @@
+{
+  "case_id": "case-demo-001",
+  "scoring_rule": "对最终指控所附的已解锁 Evidence 逐条判定：一条 Evidence 满足某 criterion 的类型与 Claim 条件时，该 criterion 授予其权重；每个 criterion 至多授予一次；未满足的 criterion 不得计分。总分封顶 100。",
+  "criteria": [
+    {
+      "criterion_id": "crit-quote-first-wave",
+      "weight": 40,
+      "allowed_types": [
+        "quote"
+      ],
+      "claim_match_mode": "any_of",
+      "claim_ids": [
+        "cl-011",
+        "cl-012"
+      ],
+      "description": "引用类证据且其公开 Claim 引用命中第一波冲击对象（cl-011/cl-012 任一）。"
+    },
+    {
+      "criterion_id": "crit-claim-first-wave",
+      "weight": 35,
+      "allowed_types": [
+        "claim"
+      ],
+      "claim_match_mode": "any_of",
+      "claim_ids": [
+        "cl-011",
+        "cl-012"
+      ],
+      "description": "判断类证据且其公开 Claim 引用命中第一波冲击对象（cl-011/cl-012 任一）。"
+    },
+    {
+      "criterion_id": "crit-layoff-scale",
+      "weight": 25,
+      "allowed_types": [
+        "quote",
+        "timeline",
+        "claim"
+      ],
+      "claim_match_mode": "any_of",
+      "claim_ids": [
+        "cl-004",
+        "cl-005",
+        "cl-006",
+        "cl-007",
+        "cl-008",
+        "cl-009"
+      ],
+      "description": "命中裁员潮规模背景数据（cl-004 至 cl-009 任一）的证据。"
+    }
+  ]
+}

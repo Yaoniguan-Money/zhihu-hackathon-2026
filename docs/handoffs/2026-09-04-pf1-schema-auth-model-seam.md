@@ -1,7 +1,7 @@
 # PF1（第一批）：契约入口与模型 Seam
 
-状态：`blocked`（仅剩 Convex Auth 运行时验证，待用户交互登录）  
-完成时间：`2026-09-04`  
+状态：`complete`（2026-09-04 完成实现；2026-09-05 完成运行时复验后关闭）  
+完成时间：`2026-09-05`  
 负责人：`开发人员 A / ZCode`
 
 ## 实际完成
@@ -20,9 +20,20 @@
 
 ## 明确未完成（阻塞点）
 
-- **Convex Auth 的 push 与运行时 smoke**：`convex dev` 需要交互登录（本机 CLI 无 local 免登录模式，未配置 `CONVEX_DEPLOYMENT`）。按用户既有决定，由用户在终端交互登录一次后运行 `bunx convex dev`，验证 Anonymous 会话可签发、`authTables` 推送无兼容错误；此后 PF1 才能标记 COMPLETE。不得以自制鉴权兜底。
-- **八项 `AI_*` 的真实值**：待用户提供后才能做真实供应商 smoke（TB2/发布 Gate 要求）。
+~~Convex Auth 的 push 与运行时 smoke~~ **已于 2026-09-05 解除**：见下方「2026-09-05 复验记录」。当时评估的 `convex dev` 交互登录方案最终未使用——真正的根因是非 ASCII 项目路径导致 adminKey 含汉字、CLI 崩溃；迁移 ASCII 路径后以自托管直连方式完成验证（根因与启动命令见 [2026-09-05-workspace-ascii-path](./2026-09-05-workspace-ascii-path.md)）。
+
+- **八项 `AI_*` 的真实值**：待用户提供后才能做真实供应商 smoke（TB2/发布 Gate 要求）。此项为外部输入，不影响 PF1 关闭。
 - 未创建任何业务表、业务 action、页面或 XState（TB1+ 范围）。
+
+## 2026-09-05 复验记录（解除阻塞、标记 COMPLETE）
+
+在迁移后的 ASCII 工作区 `D:\Users\yaoni\Desktop\zhihu-hackathon` 重启本地后端并复验：
+
+- `convex-local-backend.exe`（precompiled-2026-08-25-7cce8fb）以 `--instance-name anonymous-zhihu-hackathon` 启动，监听 3210/3211；`curl /version` 与 `/.well-known/openid-configuration` 均响应。
+- `CONVEX_SELF_HOSTED_URL=http://127.0.0.1:3210 CONVEX_SELF_HOSTED_ADMIN_KEY=<本地 adminKey> bunx convex dev --once` — 推送成功，输出 `Convex functions ready!`，authTables 无兼容错误。
+- `bunx convex run auth:signIn '{"provider":"anonymous"}'` — 成功返回 `{tokens:{token,refreshToken}}`（RS256 JWT，issuer `http://127.0.0.1:3211`）。
+- `bun run typecheck` 通过；`bun test` 26 pass / 0 fail。
+- 本地部署的 adminKey/instanceSecret/JWT_PRIVATE_KEY 仅存于 gitignored 的 `.convex/` 与本地部署环境，未进入任何文档或仓库文件。
 
 ## 修改文件
 
@@ -49,11 +60,10 @@
 ## 已知风险、阻塞与下一步
 
 - ai SDK 为 v7（`generateObject` 仍在导出且带 schema 校验）；若未来升级引入 API 变化，以本批测试为回归线。
-- Convex Auth 0.0.95 处于 beta：固定版本 + 登录后的 push smoke 管控；不通过则 PF1 相关子项保持 BLOCKED。
-- 下一位 Agent 起点（按依赖前沿）：
-  1. 用户完成 `bunx convex dev` 交互登录并验证 Anonymous 会话 → PF1 COMPLETE；
-  2. GC0 标注草案（claims/relations/roles/policies/Evidence Catalog/truth/rubric/fixture，依据 `golden-case/case-demo-001/source.md`）；
-  3. 用户提供八项 `AI_*` 配置值（进入 TB1/TB2 真实模型验证前必须）。
+- Convex Auth 0.0.95 处于 beta：固定版本 + push smoke 已通过（见上方复验记录）；后续升级仍须重跑该 smoke。
+- 下一位 Agent 起点（按依赖前沿，PF1 已关闭）：
+  1. GC0 标注草案（claims/relations/roles/policies/Evidence Catalog/truth/rubric/fixture，依据 `golden-case/case-demo-001/source.md`，经用户确认后冻结）；
+  2. 用户提供八项 `AI_*` 配置值（进入 TB1/TB2 真实模型验证前必须）。
 
 ## 最小接手阅读顺序
 

@@ -1,0 +1,725 @@
+{
+  "case_id": "case-demo-001",
+  "graph": {
+    "case_id": "case-demo-001",
+    "source_id": "src-case-demo-001",
+    "claims": [
+      {
+        "claim_id": "cl-001",
+        "proposition": "文章开篇引用马克思《资本论》的论断：劳动资料一作为机器出现，就立刻成了工人本身的竞争者。",
+        "modality": "文章引用的经典论断",
+        "source_span": {
+          "start": 27,
+          "end": 68,
+          "text": "马克思在《资本论》中指出：“劳动资料一作为机器出现，就立刻成了工人本身的竞争者。”",
+          "paragraph_index": 2
+        },
+        "source_ref": "src-case-demo-001",
+        "confidence": 0.99
+      },
+      {
+        "claim_id": "cl-002",
+        "proposition": "2026年3月，全球互联网行业并未迎来预想中的春季复苏，反而陷入了深重的裁员泥淖。",
+        "time": "2026年3月",
+        "modality": "报道性陈述",
+        "source_span": {
+          "start": 226,
+          "end": 267,
+          "text": "2026年3月，全球互联网行业并未迎来预想中的春季复苏，反而陷入了深重的裁员泥淖。",
+          "paragraph_index": 5
+        },
+        "source_ref": "src-case-demo-001",
+        "confidence": 0.98
+      },
+      {
+        "claim_id": "cl-003",
+        "proposition": "文章称这不再是简单的“降本增效”，而是一场由AI驱动的岗位清洗。",
+        "modality": "作者论断",
+        "source_span": {
+          "start": 267,
+          "end": 296,
+          "text": "这不再是简单的“降本增效”，而是一场由AI驱动的岗位清洗。",
+          "paragraph_index": 5
+        },
+        "source_ref": "src-case-demo-001",
+        "confidence": 0.95
+      },
+      {
+        "claim_id": "cl-004",
+        "proposition": "Meta（Facebook母公司）计划裁减约20%的员工，涉及约1.58万人。",
+        "subject": "Meta",
+        "predicate": "计划裁减",
+        "object": "约20%的员工（约1.58万人）",
+        "modality": "报道性陈述（计划）",
+        "source_span": {
+          "start": 298,
+          "end": 337,
+          "text": "Meta（Facebook母公司）计划裁减约20%的员工，涉及约1.58万人；",
+          "paragraph_index": 6
+        },
+        "source_ref": "src-case-demo-001",
+        "confidence": 0.98
+      },
+      {
+        "claim_id": "cl-005",
+        "proposition": "亚马逊在机器人部门进行了新一轮裁员；从2025年10月至今，亚马逊裁员累计已超3万名员工。",
+        "subject": "亚马逊",
+        "time": "2025年10月至今",
+        "modality": "报道性陈述（累计）",
+        "source_span": {
+          "start": 339,
+          "end": 384,
+          "text": "亚马逊在机器人部门进行了新一轮裁员，从2025年10月至今，亚马逊裁员累计已超3万名员工；",
+          "paragraph_index": 7
+        },
+        "source_ref": "src-case-demo-001",
+        "confidence": 0.98
+      },
+      {
+        "claim_id": "cl-006",
+        "proposition": "提供支付和金融服务的Block公司宣布将裁掉近一半（超4000名）员工。",
+        "subject": "Block",
+        "modality": "报道性陈述（宣布）",
+        "source_span": {
+          "start": 386,
+          "end": 424,
+          "text": "提供支付和金融服务的Block公司更是宣布将裁掉近一半（超4000名）员工；",
+          "paragraph_index": 8
+        },
+        "source_ref": "src-case-demo-001",
+        "confidence": 0.97
+      },
+      {
+        "claim_id": "cl-007",
+        "proposition": "甲骨文公司计划在多个部门裁员，涉及数千人。",
+        "subject": "甲骨文",
+        "modality": "报道性陈述（计划）",
+        "source_span": {
+          "start": 426,
+          "end": 447,
+          "text": "甲骨文公司计划在多个部门裁员，涉及数千人；",
+          "paragraph_index": 9
+        },
+        "source_ref": "src-case-demo-001",
+        "confidence": 0.97
+      },
+      {
+        "claim_id": "cl-008",
+        "proposition": "eBay宣布裁员800人，Pinterest裁员675人，Atlassian裁员1600人。",
+        "modality": "报道性陈述",
+        "source_span": {
+          "start": 449,
+          "end": 496,
+          "text": "eBay宣布裁员800人，Pinterest裁员675人，Atlassian裁员1600人……",
+          "paragraph_index": 10
+        },
+        "source_ref": "src-case-demo-001",
+        "confidence": 0.97
+      },
+      {
+        "claim_id": "cl-009",
+        "proposition": "文章称国内各巨头将裁员修饰为“业务调整”或“组织优化”，而脉脉热搜上“15条占6条”的裁员话题撕开了遮羞布。",
+        "modality": "作者观察",
+        "source_span": {
+          "start": 498,
+          "end": 566,
+          "text": "在国内，尽管各巨头由于“众所周知”的原因将其修饰为“业务调整”或“组织优化”，但脉脉热搜上“15条占6条”的裁员话题撕开了最后的遮羞布。",
+          "paragraph_index": 11
+        },
+        "source_ref": "src-case-demo-001",
+        "confidence": 0.95
+      },
+      {
+        "claim_id": "cl-010",
+        "proposition": "文章认为资本会最先替代那些劳动力成本高且技术最容易实现替代的环节。",
+        "modality": "作者论断",
+        "source_span": {
+          "start": 705,
+          "end": 734,
+          "text": "资本会最先替代那些劳动力成本高且技术最容易实现替代的环节。",
+          "paragraph_index": 15
+        },
+        "source_ref": "src-case-demo-001",
+        "confidence": 0.95
+      },
+      {
+        "claim_id": "cl-011",
+        "proposition": "文章称GitHub Copilot和Cursor等工具的成熟，让初级程序员和前端开发成为了第一批牺牲品。",
+        "subject": "GitHub Copilot和Cursor等工具的成熟",
+        "predicate": "使…成为第一批牺牲品",
+        "object": "初级程序员和前端开发",
+        "modality": "作者论断",
+        "source_span": {
+          "start": 751,
+          "end": 800,
+          "text": "GitHub Copilot和Cursor等工具的成熟，让初级程序员和前端开发成为了第一批牺牲品。",
+          "paragraph_index": 16
+        },
+        "source_ref": "src-case-demo-001",
+        "confidence": 0.96
+      },
+      {
+        "claim_id": "cl-012",
+        "proposition": "文章认为当企业可以用AI生成初稿再由极少数“守门员”精修时，大量内容从业者便成了冗余。",
+        "condition": "企业可以用AI生成初稿再由极少数“守门员”精修",
+        "modality": "作者论断（条件句）",
+        "source_span": {
+          "start": 817,
+          "end": 856,
+          "text": "当企业可以用AI生成初稿再由极少数“守门员”精修时，大量内容从业者便成了冗余。",
+          "paragraph_index": 16
+        },
+        "source_ref": "src-case-demo-001",
+        "confidence": 0.96
+      },
+      {
+        "claim_id": "cl-013",
+        "proposition": "文章称随着AI幻觉的克服，会计审计、法律助理、医疗初筛等基于规则和结构化决策的岗位，在资本“降本增效”的压力下正成规模地消亡。",
+        "modality": "作者论断",
+        "source_span": {
+          "start": 906,
+          "end": 955,
+          "text": "但随着AI幻觉的克服，这些基于规则和结构化决策的岗位，在资本“降本增效”的压力下，正成规模地消亡。",
+          "paragraph_index": 17
+        },
+        "source_ref": "src-case-demo-001",
+        "confidence": 0.94
+      },
+      {
+        "claim_id": "cl-014",
+        "proposition": "文章称随着智能驾驶与人形机器人成本破冰，仓储物流、零售餐饮、流水线工人等蓝领与灰领阶层将面临系统性的替代。",
+        "condition": "智能驾驶与人形机器人成本破冰",
+        "modality": "作者论断（前瞻）",
+        "source_span": {
+          "start": 969,
+          "end": 1022,
+          "text": "随着智能驾驶与人形机器人成本破冰，蓝领与灰领阶层——仓储物流、零售餐饮、流水线工人——将面临系统性的替代。",
+          "paragraph_index": 18
+        },
+        "source_ref": "src-case-demo-001",
+        "confidence": 0.94
+      },
+      {
+        "claim_id": "cl-015",
+        "proposition": "文章认为当AI能处理非结构化决策时，资本将发现它比高管更“忠诚”、更“高效”。",
+        "condition": "AI能处理非结构化决策",
+        "modality": "作者论断（前瞻）",
+        "source_span": {
+          "start": 1097,
+          "end": 1132,
+          "text": "当AI能处理非结构化决策时，资本将发现它比高管更“忠诚”、更“高效”。",
+          "paragraph_index": 19
+        },
+        "source_ref": "src-case-demo-001",
+        "confidence": 0.93
+      },
+      {
+        "claim_id": "cl-016",
+        "proposition": "文章认为AI替代的全域化正导致“产业后备军”的指数级膨胀；这不再是周期性的“结构性失业”，而是永久性的系统性失业。",
+        "modality": "作者论断",
+        "source_span": {
+          "start": 1154,
+          "end": 1208,
+          "text": "AI替代的全域化，正导致“产业后备军”的指数级膨胀。这不再是周期性的“结构性失业”，而是永久性的系统性失业。",
+          "paragraph_index": 21
+        },
+        "source_ref": "src-case-demo-001",
+        "confidence": 0.95
+      },
+      {
+        "claim_id": "cl-017",
+        "proposition": "文章认为随着大规模失业发生，劳动者的支付能力断崖式下跌，正迎来一场史无前例的生产相对过剩危机。",
+        "modality": "作者论断",
+        "source_span": {
+          "start": 1244,
+          "end": 1294,
+          "text": "但现实中，随着大规模失业发生，劳动者的支付能力断崖式下跌，我们正迎来一场史无前例的生产相对过剩危机。",
+          "paragraph_index": 22
+        },
+        "source_ref": "src-case-demo-001",
+        "confidence": 0.94
+      },
+      {
+        "claim_id": "cl-018",
+        "proposition": "文章称巨大的财富被固化在算法垄断者手中，而绝大多数人则被推向“无用”的深渊。",
+        "modality": "作者论断",
+        "source_span": {
+          "start": 1296,
+          "end": 1331,
+          "text": "巨大的财富被固化在算法垄断者手中，而绝大多数人则被推向“无用”的深渊。",
+          "paragraph_index": 23
+        },
+        "source_ref": "src-case-demo-001",
+        "confidence": 0.93
+      },
+      {
+        "claim_id": "cl-019",
+        "proposition": "文章回顾19世纪的英国工人砸毁机器，是因为他们直觉地感到机器夺走了生计。",
+        "time": "19世纪",
+        "modality": "文章引用的史实",
+        "source_span": {
+          "start": 1430,
+          "end": 1462,
+          "text": "19世纪的英国工人砸毁机器，是因为他们直觉地感到机器夺走了生计。",
+          "paragraph_index": 25
+        },
+        "source_ref": "src-case-demo-001",
+        "confidence": 0.95
+      },
+      {
+        "claim_id": "cl-020",
+        "proposition": "文章认为制造灾难的不是技术，而是资本对技术的垄断性占有。",
+        "modality": "作者核心论断",
+        "source_span": {
+          "start": 1519,
+          "end": 1543,
+          "text": "制造灾难的不是技术，而是资本对技术的垄断性占有。",
+          "paragraph_index": 27
+        },
+        "source_ref": "src-case-demo-001",
+        "confidence": 0.97
+      },
+      {
+        "claim_id": "cl-021",
+        "proposition": "文章强调不是“AI吃人”，而是“私有AI吃人”，是“私有制吃人”。",
+        "modality": "作者核心论断",
+        "source_span": {
+          "start": 1545,
+          "end": 1574,
+          "text": "不是“AI吃人”，而是“私有AI吃人”，是“私有制吃人”！",
+          "paragraph_index": 28
+        },
+        "source_ref": "src-case-demo-001",
+        "confidence": 0.97
+      },
+      {
+        "claim_id": "cl-022",
+        "proposition": "文章认为当算力、数据和算法成为极少数寡头的私产，传统的劳资博弈便彻底失衡。",
+        "condition": "算力、数据和算法成为极少数寡头的私产",
+        "modality": "作者论断（条件句）",
+        "source_span": {
+          "start": 1576,
+          "end": 1609,
+          "text": "当算力、数据和算法成为极少数寡头的私产，传统的劳资博弈便彻底失衡。",
+          "paragraph_index": 29
+        },
+        "source_ref": "src-case-demo-001",
+        "confidence": 0.95
+      },
+      {
+        "claim_id": "cl-023",
+        "proposition": "文章主张只有将这超级生产力从生产资料私有制的枷锁中解放出来，AI才能从“吃人的怪兽”变回“缩短劳动时间、实现人的自由全面发展”的工具。",
+        "condition": "将超级生产力从生产资料私有制的枷锁中解放出来",
+        "modality": "作者主张（条件句）",
+        "source_span": {
+          "start": 1641,
+          "end": 1704,
+          "text": "只有将这超级生产力从生产资料私有制的枷锁中解放出来，AI才能从“吃人的怪兽”变回“缩短劳动时间、实现人的自由全面发展”的工具。",
+          "paragraph_index": 31
+        },
+        "source_ref": "src-case-demo-001",
+        "confidence": 0.96
+      }
+    ],
+    "relations": [
+      {
+        "relation_id": "rel-001",
+        "type": "supports",
+        "from_claim_id": "cl-004",
+        "to_claim_id": "cl-002"
+      },
+      {
+        "relation_id": "rel-002",
+        "type": "supports",
+        "from_claim_id": "cl-005",
+        "to_claim_id": "cl-002"
+      },
+      {
+        "relation_id": "rel-003",
+        "type": "supports",
+        "from_claim_id": "cl-006",
+        "to_claim_id": "cl-002"
+      },
+      {
+        "relation_id": "rel-004",
+        "type": "supports",
+        "from_claim_id": "cl-007",
+        "to_claim_id": "cl-002"
+      },
+      {
+        "relation_id": "rel-005",
+        "type": "supports",
+        "from_claim_id": "cl-008",
+        "to_claim_id": "cl-002"
+      },
+      {
+        "relation_id": "rel-006",
+        "type": "supports",
+        "from_claim_id": "cl-009",
+        "to_claim_id": "cl-002"
+      },
+      {
+        "relation_id": "rel-007",
+        "type": "qualifies",
+        "from_claim_id": "cl-003",
+        "to_claim_id": "cl-002"
+      },
+      {
+        "relation_id": "rel-008",
+        "type": "supports",
+        "from_claim_id": "cl-011",
+        "to_claim_id": "cl-010"
+      },
+      {
+        "relation_id": "rel-009",
+        "type": "qualifies",
+        "from_claim_id": "cl-012",
+        "to_claim_id": "cl-011"
+      },
+      {
+        "relation_id": "rel-010",
+        "type": "supports",
+        "from_claim_id": "cl-013",
+        "to_claim_id": "cl-010"
+      },
+      {
+        "relation_id": "rel-011",
+        "type": "supports",
+        "from_claim_id": "cl-014",
+        "to_claim_id": "cl-010"
+      },
+      {
+        "relation_id": "rel-012",
+        "type": "supports",
+        "from_claim_id": "cl-015",
+        "to_claim_id": "cl-010"
+      },
+      {
+        "relation_id": "rel-013",
+        "type": "temporal_before",
+        "from_claim_id": "cl-011",
+        "to_claim_id": "cl-013"
+      },
+      {
+        "relation_id": "rel-014",
+        "type": "temporal_before",
+        "from_claim_id": "cl-013",
+        "to_claim_id": "cl-014"
+      },
+      {
+        "relation_id": "rel-015",
+        "type": "causal",
+        "from_claim_id": "cl-003",
+        "to_claim_id": "cl-016"
+      },
+      {
+        "relation_id": "rel-016",
+        "type": "causal",
+        "from_claim_id": "cl-016",
+        "to_claim_id": "cl-017"
+      },
+      {
+        "relation_id": "rel-017",
+        "type": "correlated",
+        "from_claim_id": "cl-017",
+        "to_claim_id": "cl-018"
+      },
+      {
+        "relation_id": "rel-018",
+        "type": "correlated",
+        "from_claim_id": "cl-019",
+        "to_claim_id": "cl-020"
+      },
+      {
+        "relation_id": "rel-019",
+        "type": "supports",
+        "from_claim_id": "cl-020",
+        "to_claim_id": "cl-021"
+      },
+      {
+        "relation_id": "rel-020",
+        "type": "qualifies",
+        "from_claim_id": "cl-022",
+        "to_claim_id": "cl-020"
+      },
+      {
+        "relation_id": "rel-021",
+        "type": "qualifies",
+        "from_claim_id": "cl-023",
+        "to_claim_id": "cl-021"
+      },
+      {
+        "relation_id": "rel-022",
+        "type": "supports",
+        "from_claim_id": "cl-001",
+        "to_claim_id": "cl-020"
+      }
+    ]
+  },
+  "role_policies": [
+    {
+      "role_id": "role-observer",
+      "fidelity": "faithful",
+      "visible_claim_ids": [
+        "cl-002",
+        "cl-003",
+        "cl-004",
+        "cl-005",
+        "cl-006",
+        "cl-007",
+        "cl-008",
+        "cl-009"
+      ],
+      "goal": "用文中可核实的数据说明这轮裁员潮的规模、时间线与国内外表述差异。",
+      "allowed_distortion_types": []
+    },
+    {
+      "role_id": "role-analyst",
+      "fidelity": "faithful",
+      "visible_claim_ids": [
+        "cl-010",
+        "cl-011",
+        "cl-012",
+        "cl-013",
+        "cl-014",
+        "cl-015"
+      ],
+      "goal": "按来源解释替代顺序的判断：成本高且易替代的环节先被替代，并保留原文的条件限定。",
+      "allowed_distortion_types": []
+    },
+    {
+      "role_id": "role-engineer",
+      "fidelity": "faithful",
+      "visible_claim_ids": [
+        "cl-011",
+        "cl-012",
+        "cl-016",
+        "cl-017"
+      ],
+      "goal": "以从业者视角转述岗位冲击与失业性质变化的原文判断，不越过原文边界。",
+      "allowed_distortion_types": []
+    },
+    {
+      "role_id": "role-professor",
+      "fidelity": "faithful",
+      "visible_claim_ids": [
+        "cl-001",
+        "cl-016",
+        "cl-017",
+        "cl-018",
+        "cl-019",
+        "cl-020",
+        "cl-021",
+        "cl-022",
+        "cl-023"
+      ],
+      "goal": "完整转述文章的政经分析与结论，包括其引用、条件限定与出处。",
+      "allowed_distortion_types": []
+    },
+    {
+      "role_id": "role-skeptic",
+      "fidelity": "distorted",
+      "visible_claim_ids": [
+        "cl-002",
+        "cl-010",
+        "cl-011",
+        "cl-012",
+        "cl-020",
+        "cl-021"
+      ],
+      "goal": "在复述中放大主语范围、删除条件限定，把文中有边界的判断说成无边界定论。",
+      "allowed_distortion_types": [
+        "scope_expand",
+        "condition_delete"
+      ]
+    }
+  ],
+  "golden_answer": {
+    "distortion_owner_role_id": "role-skeptic",
+    "answer_distortion_types": [
+      "scope_expand",
+      "condition_delete"
+    ],
+    "truth_claim_ids": [
+      "cl-002",
+      "cl-010",
+      "cl-012",
+      "cl-016",
+      "cl-020"
+    ]
+  },
+  "evidence_catalog": [
+    {
+      "evidence_id": "ev-meta-quote",
+      "type": "quote",
+      "title": "Meta 裁员数据",
+      "body": "Meta（Facebook母公司）计划裁减约20%的员工，涉及约1.58万人。",
+      "public_claim_refs": [
+        "cl-004"
+      ],
+      "conflicts_with": []
+    },
+    {
+      "evidence_id": "ev-amazon-timeline",
+      "type": "timeline",
+      "title": "亚马逊 2025年10月以来累计裁员超3万",
+      "body": "亚马逊在机器人部门进行了新一轮裁员；从2025年10月至今累计裁员已超3万名员工。",
+      "public_claim_refs": [
+        "cl-005"
+      ],
+      "conflicts_with": []
+    },
+    {
+      "evidence_id": "ev-more-layoffs",
+      "type": "quote",
+      "title": "Block、甲骨文、eBay、Pinterest、Atlassian 裁员数字",
+      "body": "Block 将裁掉近一半（超4000名）员工；甲骨文多个部门涉及数千人；eBay 800人、Pinterest 675人、Atlassian 1600人。",
+      "public_claim_refs": [
+        "cl-006",
+        "cl-007",
+        "cl-008"
+      ],
+      "conflicts_with": []
+    },
+    {
+      "evidence_id": "ev-domestic-wording",
+      "type": "claim",
+      "title": "国内表述差异与脉脉热搜",
+      "body": "文章称国内巨头把裁员修饰为“业务调整”或“组织优化”；脉脉热搜上“15条占6条”是裁员话题。",
+      "public_claim_refs": [
+        "cl-009"
+      ],
+      "conflicts_with": []
+    },
+    {
+      "evidence_id": "ev-first-wave",
+      "type": "claim",
+      "title": "第一波冲击对象：初级程序员与前端开发",
+      "body": "文章称 GitHub Copilot 和 Cursor 等工具的成熟，让初级程序员和前端开发成为了第一批牺牲品。",
+      "public_claim_refs": [
+        "cl-011",
+        "cl-012"
+      ],
+      "conflicts_with": []
+    },
+    {
+      "evidence_id": "ev-gatekeeper-condition",
+      "type": "quote",
+      "title": "“AI 初稿 + 守门员精修”的条件句",
+      "body": "当企业可以用AI生成初稿再由极少数“守门员”精修时，大量内容从业者便成了冗余。",
+      "public_claim_refs": [
+        "cl-012"
+      ],
+      "conflicts_with": []
+    },
+    {
+      "evidence_id": "ev-permanent-unemployment",
+      "type": "claim",
+      "title": "“永久性系统性失业”的判断",
+      "body": "文章称 AI 替代的全域化导致“产业后备军”指数级膨胀，这是永久性的系统性失业而非周期性结构失业。",
+      "public_claim_refs": [
+        "cl-016",
+        "cl-017"
+      ],
+      "conflicts_with": []
+    },
+    {
+      "evidence_id": "ev-private-eating",
+      "type": "claim",
+      "title": "“私有AI吃人”核心论断",
+      "body": "制造灾难的不是技术，而是资本对技术的垄断性占有；不是“AI吃人”，而是“私有制吃人”。",
+      "public_claim_refs": [
+        "cl-020",
+        "cl-021"
+      ],
+      "conflicts_with": []
+    }
+  ],
+  "evidence_unlock_rules": [
+    {
+      "rule_id": "ul-001",
+      "evidence_id": "ev-meta-quote",
+      "required_claim_ids": [
+        "cl-004"
+      ],
+      "allowed_role_ids": [
+        "role-observer"
+      ]
+    },
+    {
+      "rule_id": "ul-002",
+      "evidence_id": "ev-amazon-timeline",
+      "required_claim_ids": [
+        "cl-005"
+      ],
+      "allowed_role_ids": [
+        "role-observer"
+      ]
+    },
+    {
+      "rule_id": "ul-003",
+      "evidence_id": "ev-more-layoffs",
+      "required_claim_ids": [
+        "cl-006"
+      ],
+      "allowed_role_ids": [
+        "role-observer"
+      ]
+    },
+    {
+      "rule_id": "ul-004",
+      "evidence_id": "ev-domestic-wording",
+      "required_claim_ids": [
+        "cl-009"
+      ],
+      "allowed_role_ids": [
+        "role-observer"
+      ]
+    },
+    {
+      "rule_id": "ul-005",
+      "evidence_id": "ev-first-wave",
+      "required_claim_ids": [
+        "cl-011"
+      ],
+      "allowed_role_ids": [
+        "role-analyst",
+        "role-engineer",
+        "role-skeptic"
+      ]
+    },
+    {
+      "rule_id": "ul-006",
+      "evidence_id": "ev-gatekeeper-condition",
+      "required_claim_ids": [
+        "cl-012"
+      ],
+      "allowed_role_ids": [
+        "role-analyst",
+        "role-engineer",
+        "role-skeptic"
+      ]
+    },
+    {
+      "rule_id": "ul-007",
+      "evidence_id": "ev-permanent-unemployment",
+      "required_claim_ids": [
+        "cl-016"
+      ],
+      "allowed_role_ids": [
+        "role-engineer",
+        "role-professor"
+      ]
+    },
+    {
+      "rule_id": "ul-008",
+      "evidence_id": "ev-private-eating",
+      "required_claim_ids": [
+        "cl-020"
+      ],
+      "allowed_role_ids": [
+        "role-professor"
+      ]
+    }
+  ]
+}

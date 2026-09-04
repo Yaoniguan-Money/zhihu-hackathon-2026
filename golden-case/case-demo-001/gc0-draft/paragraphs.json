@@ -1,0 +1,204 @@
+{
+  "case_id": "case-demo-001",
+  "source_id": "src-case-demo-001",
+  "paragraphs": [
+    {
+      "paragraph_index": 0,
+      "start": 0,
+      "end": 18,
+      "is_quote": false
+    },
+    {
+      "paragraph_index": 1,
+      "start": 20,
+      "end": 25,
+      "is_quote": false
+    },
+    {
+      "paragraph_index": 2,
+      "start": 27,
+      "end": 118,
+      "is_quote": false
+    },
+    {
+      "paragraph_index": 3,
+      "start": 120,
+      "end": 203,
+      "is_quote": false
+    },
+    {
+      "paragraph_index": 4,
+      "start": 205,
+      "end": 224,
+      "is_quote": false
+    },
+    {
+      "paragraph_index": 5,
+      "start": 226,
+      "end": 296,
+      "is_quote": false
+    },
+    {
+      "paragraph_index": 6,
+      "start": 298,
+      "end": 337,
+      "is_quote": false
+    },
+    {
+      "paragraph_index": 7,
+      "start": 339,
+      "end": 384,
+      "is_quote": false
+    },
+    {
+      "paragraph_index": 8,
+      "start": 386,
+      "end": 424,
+      "is_quote": false
+    },
+    {
+      "paragraph_index": 9,
+      "start": 426,
+      "end": 447,
+      "is_quote": false
+    },
+    {
+      "paragraph_index": 10,
+      "start": 449,
+      "end": 496,
+      "is_quote": false
+    },
+    {
+      "paragraph_index": 11,
+      "start": 498,
+      "end": 566,
+      "is_quote": false
+    },
+    {
+      "paragraph_index": 12,
+      "start": 568,
+      "end": 602,
+      "is_quote": false
+    },
+    {
+      "paragraph_index": 13,
+      "start": 604,
+      "end": 627,
+      "is_quote": false
+    },
+    {
+      "paragraph_index": 14,
+      "start": 629,
+      "end": 647,
+      "is_quote": false
+    },
+    {
+      "paragraph_index": 15,
+      "start": 649,
+      "end": 734,
+      "is_quote": false
+    },
+    {
+      "paragraph_index": 16,
+      "start": 736,
+      "end": 856,
+      "is_quote": false
+    },
+    {
+      "paragraph_index": 17,
+      "start": 858,
+      "end": 955,
+      "is_quote": false
+    },
+    {
+      "paragraph_index": 18,
+      "start": 957,
+      "end": 1047,
+      "is_quote": false
+    },
+    {
+      "paragraph_index": 19,
+      "start": 1049,
+      "end": 1132,
+      "is_quote": false
+    },
+    {
+      "paragraph_index": 20,
+      "start": 1134,
+      "end": 1152,
+      "is_quote": false
+    },
+    {
+      "paragraph_index": 21,
+      "start": 1154,
+      "end": 1208,
+      "is_quote": false
+    },
+    {
+      "paragraph_index": 22,
+      "start": 1210,
+      "end": 1294,
+      "is_quote": false
+    },
+    {
+      "paragraph_index": 23,
+      "start": 1296,
+      "end": 1410,
+      "is_quote": false
+    },
+    {
+      "paragraph_index": 24,
+      "start": 1412,
+      "end": 1428,
+      "is_quote": false
+    },
+    {
+      "paragraph_index": 25,
+      "start": 1430,
+      "end": 1504,
+      "is_quote": false
+    },
+    {
+      "paragraph_index": 26,
+      "start": 1506,
+      "end": 1517,
+      "is_quote": false
+    },
+    {
+      "paragraph_index": 27,
+      "start": 1519,
+      "end": 1543,
+      "is_quote": false
+    },
+    {
+      "paragraph_index": 28,
+      "start": 1545,
+      "end": 1574,
+      "is_quote": false
+    },
+    {
+      "paragraph_index": 29,
+      "start": 1576,
+      "end": 1609,
+      "is_quote": false
+    },
+    {
+      "paragraph_index": 30,
+      "start": 1611,
+      "end": 1639,
+      "is_quote": false
+    },
+    {
+      "paragraph_index": 31,
+      "start": 1641,
+      "end": 1704,
+      "is_quote": false
+    },
+    {
+      "paragraph_index": 32,
+      "start": 1706,
+      "end": 1732,
+      "is_quote": false
+    }
+  ]
+}

@@ -1,0 +1,44 @@
+{
+  "case_id": "case-demo-001",
+  "title": "互联网裁员潮拉开了“AI吃人”的帷幕",
+  "summary": "五名与科技行业相关的角色围绕一篇评论文章各陈其词：裁员潮的数据、替代顺序的逻辑、失业性质的判断与出路的争论。其中一位的复述越过了原文边界。请收集证据、拼出事实链，指认这位角色与篡改方式。",
+  "source_url": "https://zhuanlan.zhihu.com/p/2020194970120790951",
+  "theme": "AI 与就业",
+  "roles": [
+    {
+      "role_id": "role-observer",
+      "display_name": "沈青梧 · 财经调查记者",
+      "public_bio": "跑了十年科技行业条线，相信数据比表态更诚实。",
+      "persona_key": "calm_reporter",
+      "voice_id": "voice-zh-01"
+    },
+    {
+      "role_id": "role-analyst",
+      "display_name": "纪云汀 · 行业分析师",
+      "public_bio": "长期追踪 AI 工具对劳动力市场的结构性影响。",
+      "persona_key": "sharp_analyst",
+      "voice_id": "voice-zh-02"
+    },
+    {
+      "role_id": "role-engineer",
+      "display_name": "阿岚 · 前端工程师",
+      "public_bio": "裁员季的亲历者，正在重新审视自己的职业。",
+      "persona_key": "uneasy_engineer",
+      "voice_id": "voice-zh-03"
+    },
+    {
+      "role_id": "role-professor",
+      "display_name": "何叙 · 政治经济学教授",
+      "public_bio": "习惯把《资本论》和本周新闻放在同一张课桌上讲。",
+      "persona_key": "stern_professor",
+      "voice_id": "voice-zh-04"
+    },
+    {
+      "role_id": "role-skeptic",
+      "display_name": "柳成荫 · 自由撰稿人",
+      "public_bio": "给多家专栏供稿，擅长把复杂争论讲成一句锐利的话。",
+      "persona_key": "smooth_essayist",
+      "voice_id": "voice-zh-05"
+    }
+  ]
+}
