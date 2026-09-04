@@ -154,6 +154,7 @@ export default defineSchema({
     ),
     message_json: v.optional(v.string()), // succeeded：RoleMessagePublic
     unlocked_ids_json: v.optional(v.string()), // succeeded：新解锁 EvidenceId[]
+    validation_json: v.optional(v.string()), // succeeded：Validator 结果摘要（Reveal 构建用）
     error_json: v.optional(v.string()), // failed：PublicError
     created_at_ms: v.number(),
     updated_at_ms: v.number(),
@@ -165,6 +166,14 @@ export default defineSchema({
   session_evidence_unlocked: defineTable({
     session_id: v.string(),
     evidence_id: v.string(),
+    via_kind: v.optional(v.string()), // 产生解锁的回合 kind（questioning 评分用）
     unlocked_at_ms: v.number(),
   }).index("by_session", ["session_id", "evidence_id"]),
+
+  // TB9：Reveal（CONTRACTS 10）。
+  reveals: defineTable({
+    session_id: v.string(),
+    reveal_json: v.string(), // RevealResult，zod 校验后序列化
+    created_at_ms: v.number(),
+  }).index("by_session", ["session_id"]),
 });

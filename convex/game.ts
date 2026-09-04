@@ -1,6 +1,6 @@
 import { v } from "convex/values";
 import { z } from "zod";
-import { mutation } from "./_generated/server";
+import { action, mutation, query } from "./_generated/server";
 import {
   internalAction,
   internalMutation,
@@ -9,7 +9,9 @@ import {
 import { internal } from "./_generated/api";
 import {
   gameEventPayloadSchema,
+  revealResultSchema,
   roleMessagePublicSchema,
+  type RevealResult,
 } from "@contracts/public/index.js";
 import {
   rolePrivatePolicySchema,
@@ -341,6 +343,12 @@ export const openingWorker = internalAction({
         emotion: outcome.candidate.emotion,
         support_claim_ids: outcome.candidate.support_claim_ids,
         unlocked_ids: unlocked,
+        validation_json: JSON.stringify({
+          status: outcome.validation.status,
+          detected_distortion_types: outcome.validation.detected_distortion_types,
+          unsupported_spans: outcome.validation.unsupported_spans,
+          referenced_claim_ids: outcome.validation.referenced_claim_ids,
+        }),
       });
 
       if (args.role_index + 1 < 5) {
@@ -417,6 +425,52 @@ export const enterInvestigation = internalMutation({
     await ctx.db.patch(session._id, {
       phase: "investigation",
       updated_at_ms: Date.now(),
+    });
+  },
+});
+
+// ---------------------------------------------------------------------------
+// TB9 公开入口：game.accuse / game.getReveal（实现见 reveal.ts）
+
+export const accuse = action({
+  args: {
+    session_id: v.string(),
+    suspect_role_id: v.string(),
+    distortion_types: v.array(v.string()),
+    evidence_ids: v.array(v.string()),
+    note: v.optional(v.string()),
+    client_action_id: v.string(),
+  },
+  handler: async (ctx, args): Promise<{ session_id: string; phase: string }> => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throwPublicError("AUTH_REQUIRED", "需要先建立会话身份");
+    }
+    if (!uuidSchema.safeParse(args.client_action_id).success) {
+      throwPublicError("INVALID_ARGUMENT", "client_action_id 必须是 UUID");
+    }
+    return ctx.runAction(internal.reveal.accuseCore, {
+      identity_token: identity.tokenIdentifier,
+      session_id: args.session_id,
+      suspect_role_id: args.suspect_role_id,
+      distortion_types: args.distortion_types,
+      evidence_ids: args.evidence_ids,
+      note: args.note,
+      client_action_id: args.client_action_id,
+    });
+  },
+});
+
+export const getReveal = query({
+  args: { session_id: v.string() },
+  handler: async (ctx, args): Promise<RevealResult | null> => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throwPublicError("AUTH_REQUIRED", "需要先建立会话身份");
+    }
+    return ctx.runQuery(internal.reveal.getRevealInternal, {
+      session_id: args.session_id,
+      identity_token: identity.tokenIdentifier,
     });
   },
 });

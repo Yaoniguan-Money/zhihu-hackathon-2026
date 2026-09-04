@@ -71,7 +71,13 @@ export function validatorSystemPrompt(input: {
     "你是事实校验器（Validator）。给定：可见事实、候选发言、候选声称的支持事实。",
     "任务：判断候选发言与可见事实之间的语义关系，输出严格符合 schema 的 JSON。",
     input.faithful
-      ? "status=entailed 仅当候选的每个实质性断言都被所引可见事实直接支持且不改变原意。"
+      ? [
+          "status=entailed 仅当候选的每个实质性断言都被所引可见事实直接支持且不改变原意。",
+          "判定校准：同义改写、概括、语气变化、把书面语转成口语都视为 entailed；",
+          "原文中的条件句、前瞻性判断（如“将面临”“可能会”）只要候选保留同样的条件与情态，就视为 entailed；",
+          "只有当候选真正改变了语义范围、程度、条件、因果、主语或概念时，才判为 distorted 并给出类型；",
+          "不要因为措辞差异或信息省略就拒绝一个实质忠实的候选。",
+        ].join("\n")
       : `status=distorted 仅当候选确实改变了事实关系且其改写方式全部属于允许的篡改类型：${input.allowedDistortionTypes.join(", ")}。`,
     "若候选引入了可见事实之外的新实体、数字、时间、事件或来源，用 unsupported_spans 标出候选文本中的对应片段（start/end 为候选 speech 的 UTF-16 偏移，text 为该片段原文）。",
     "detected_distortion_types 只能从以下取值：scope_expand, degree_strengthen, condition_delete, causal_swap, time_montage, source_splice, context_omit, subject_swap, concept_shift, cherry_pick。",

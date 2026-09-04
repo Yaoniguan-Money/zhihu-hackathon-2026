@@ -415,6 +415,12 @@ export const roleTurnWorker = internalAction({
         emotion: approved.candidate.emotion,
         support_claim_ids: approved.candidate.support_claim_ids,
         unlocked_ids: unlocked,
+        validation_json: JSON.stringify({
+          status: approved.validation.status,
+          detected_distortion_types: approved.validation.detected_distortion_types,
+          unsupported_spans: approved.validation.unsupported_spans,
+          referenced_claim_ids: approved.validation.referenced_claim_ids,
+        }),
       });
     } catch (error) {
       const failure = toPrivateFailure(error);
@@ -608,6 +614,7 @@ export const finalizeTurnSuccess = internalMutation({
     ),
     support_claim_ids: v.array(v.string()),
     unlocked_ids: v.array(v.string()),
+    validation_json: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const ticket = await ctx.db
@@ -648,6 +655,7 @@ export const finalizeTurnSuccess = internalMutation({
       await ctx.db.insert("session_evidence_unlocked", {
         session_id: ticket.session_id,
         evidence_id: evidenceId,
+        via_kind: ticket.kind,
         unlocked_at_ms: nowMs,
       });
       newlyUnlocked.push(evidenceId);
@@ -668,6 +676,9 @@ export const finalizeTurnSuccess = internalMutation({
       status: "succeeded",
       message_json: JSON.stringify(roleMessage),
       unlocked_ids_json: JSON.stringify(newlyUnlocked),
+      ...(args.validation_json !== undefined && {
+        validation_json: args.validation_json,
+      }),
       updated_at_ms: nowMs,
     });
   },

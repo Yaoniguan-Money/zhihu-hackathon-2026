@@ -118,7 +118,7 @@ AUTH0 + REL0 → AUTH1 知乎 OAuth（独立后续阶段）
 | TB6 Distorted 回合 | COMPLETE | 单次候选、无重写兜底；entailed/未授权类型/越界 Claim 全部立即终止（VALIDATION_EXHAUSTED/DISTORTION_POLICY_VIOLATION），公开仅 ROLE_TURN_FAILED。真实 distorted 开场经门控通过。见同上 handoff。 |
 | TB7 Session Start 与五条开场 | COMPLETE | game.start 幂等、链式串行五条开场（禁止预建队列）、全部批准→investigation、失败→failed 且历史保留；真实模型五条开场 218s 通过。见同上 handoff。 |
 | TB8 Evidence 与 Board | BLOCKED | 实现 <code>evidence.getAll/updateBoard</code>、服务器解锁、Catalog 投影、全量 Board CAS；覆盖未解锁/跨 Session Evidence、重复 placement、自连、未放置 link 与 revision conflict。 |
-| TB9 Final Accusation 与 Reveal | BLOCKED | 实现 <code>game.accuse/getReveal</code>、确定性正确性与两项分数、严格 Reveal 候选校验与原子发布；提前读取返回 <code>null</code>。 |
+| TB9 Final Accusation 与 Reveal | COMPLETE | accuse（幂等、阶段/证据门控、服务器判定与两项评分、judging 瞬态）+ Reveal 模型解释候选严格校验 + 原子持久化 revealed；getReveal 提前读取 null；真实模型完整 golden 闭环 293s 通过。见 [TB9 handoff](./docs/handoffs/2026-09-05-tb9-accuse-reveal.md)。 |
 | TB10 P0 全链证明 | BLOCKED | 覆盖所有 P0 写接口的幂等、并发、lease、公开/私有泄漏扫描、恢复、审计事件和聚合指标；完成一次真实模型供应商 smoke。 |
 | REL0 公网 P0 | BLOCKED | Web/API 默认部署 Vercel、权威数据部署 Convex Cloud；先部署兼容 schema/functions，再部署客户端；发布已签署 Golden 系统案件，验证匿名多用户隔离、邀请码额度、生产 build、日志、指标与回滚点。 |
 | P1-1 Recording / 对质 | BLOCKED | 实现 <code>saveRecording/presentRecording</code>；只能保存 Approved Role Message，投递回应引用具体 Message/Claim，并与 <code>ask</code> 共用锁。 |

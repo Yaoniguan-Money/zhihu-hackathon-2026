@@ -88,3 +88,4 @@ docs/handoffs/<ticket-or-stage-id>.md
 | TB4 Faithful 成功回合 | complete | [2026-09-05-tb4-faithful-role-turn](./2026-09-05-tb4-faithful-role-turn.md) |
 | 2026-09-05 夜间开发中继 | complete | [2026-09-05-night-relay](./2026-09-05-night-relay.md) |
 | TB5+TB6+TB7 重写/Distorted/五条开场 | complete | [2026-09-05-tb5-tb6-tb7-rewrite-distorted-openings](./2026-09-05-tb5-tb6-tb7-rewrite-distorted-openings.md) |
+| TB9 Final Accusation 与 Reveal | complete | [2026-09-05-tb9-accuse-reveal](./2026-09-05-tb9-accuse-reveal.md) |
