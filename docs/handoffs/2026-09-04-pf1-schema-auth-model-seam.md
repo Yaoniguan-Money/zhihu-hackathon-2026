@@ -22,7 +22,7 @@
 
 ~~Convex Auth 的 push 与运行时 smoke~~ **已于 2026-09-05 解除**：见下方「2026-09-05 复验记录」。当时评估的 `convex dev` 交互登录方案最终未使用——真正的根因是非 ASCII 项目路径导致 adminKey 含汉字、CLI 崩溃；迁移 ASCII 路径后以自托管直连方式完成验证（根因与启动命令见 [2026-09-05-workspace-ascii-path](./2026-09-05-workspace-ascii-path.md)）。
 
-- **八项 `AI_*` 的真实值**：待用户提供后才能做真实供应商 smoke（TB2/发布 Gate 要求）。此项为外部输入，不影响 PF1 关闭。
+- ~~八项 `AI_*` 的真实值~~ **已于 2026-09-05 提供并完成真实供应商 smoke**：见 [2026-09-05-ai-config-deepseek-smoke](./2026-09-05-ai-config-deepseek-smoke.md)。
 - 未创建任何业务表、业务 action、页面或 XState（TB1+ 范围）。
 
 ## 2026-09-05 复验记录（解除阻塞、标记 COMPLETE）

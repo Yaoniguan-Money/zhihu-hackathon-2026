@@ -16,7 +16,7 @@
 ## 明确未完成
 
 - 九项确认清单（见 gc0-draft/README.md）未经 A/B 与用户确认，**GC0 未冻结、不得标记 COMPLETE**。
-- 八项 `AI_*` 配置仍未提供（PF1 真实供应商 smoke 与 TB1/TB2 前置）。
+- ~~八项 `AI_*` 配置仍未提供~~ **[2026-09-05 修正]** 已配置并完成真实供应商 smoke：见 [2026-09-05-ai-config-deepseek-smoke](./2026-09-05-ai-config-deepseek-smoke.md)。
 - G1 第二案件仍 BLOCKED（等用户输入）。
 
 ## 修改文件
@@ -41,7 +41,7 @@
 
 - 阻塞：GC0 冻结需用户/A/B 按九项清单逐项确认；确认后按 gc0-draft/README.md 冻结流程执行（移出目录、重跑脚本、更新计划与 handoff）。
 - 本地后端为常驻开发依赖；重启命令见 [2026-09-05-workspace-ascii-path](./2026-09-05-workspace-ascii-path.md)。CLI 一律 `bunx convex` + `CONVEX_SELF_HOSTED_URL/ADMIN_KEY` 直连。
-- 下一步顺序：① 用户确认 GC0 标注 → 冻结；② 用户提供八项 `AI_*` 配置 → PF1 真实供应商 smoke；③ 两者齐备后 TB1（Source 与 Durable 建案）可开工——TB1 只依赖 PF1+GC0。
+- 下一步顺序：① 用户确认 GC0 标注 → 冻结；② TB1（Source 与 Durable 建案）开工——PF1 与 AI_* 配置均已就绪。
 
 ## 最小接手阅读顺序
 

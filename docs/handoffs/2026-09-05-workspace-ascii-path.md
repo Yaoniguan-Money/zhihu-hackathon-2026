@@ -22,7 +22,7 @@
 
 - 旧目录 `D:\Users\yaoni\Desktop\知乎黑客松` 仍存在（被应用句柄锁定无法删除）：**确认所有 Agent 会话与编辑器都切换到新路径后**，由用户手动删除，避免双工作区分叉。
 - PF1 的 handoff 状态仍由其 owner 维护；本环节只解除其阻塞并留下证据，未改其状态。
-- 未提供真实供应商 `AI_*` 配置值（PF1 后续真实 smoke 与 TB2+ 需要）。
+- 未提供真实供应商 `AI_*` 配置值（PF1 后续真实 smoke 与 TB2+ 需要）。**[2026-09-05 修正]** 已由用户提供并完成 smoke：见 [2026-09-05-ai-config-deepseek-smoke](./2026-09-05-ai-config-deepseek-smoke.md)。
 
 ## 修改文件
 
