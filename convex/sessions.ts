@@ -163,11 +163,42 @@ export const getPublic = query({
       session.submitted_accusation_json
         ? JSON.parse(session.submitted_accusation_json)
         : undefined;
+    // 资源前置条件（CONTRACTS 7.1）：至少一条已解锁 Evidence 才开放
+    // update_board / accuse；活动 Ticket 存在时公开其 request_id。
+    const unlockedCount = await ctx.db
+      .query("session_evidence_unlocked")
+      .withIndex("by_session", (q) => q.eq("session_id", args.session_id))
+      .collect();
+    const activeTicket =
+      (
+        await ctx.db
+          .query("role_turn_tickets")
+          .withIndex("by_session_status", (q) =>
+            q.eq("session_id", args.session_id).eq("status", "accepted"),
+          )
+          .order("asc")
+          .first()
+      ) ??
+      (
+        await ctx.db
+          .query("role_turn_tickets")
+          .withIndex("by_session_status", (q) =>
+            q.eq("session_id", args.session_id).eq("status", "working"),
+          )
+          .order("asc")
+          .first()
+      );
     return sessionViewSchema.parse({
       session_id: session.session_key,
       case_id: session.case_id,
       phase: session.phase,
-      allowed_actions: allowedActionsFor(session.phase),
+      allowed_actions: allowedActionsFor(
+        session.phase,
+        unlockedCount.length > 0,
+      ),
+      ...(activeTicket && {
+        active_role_turn_request_id: activeTicket.request_id,
+      }),
       board,
       ...(submitted !== undefined && { submitted_accusation: submitted }),
       reveal_available: session.reveal_available,
@@ -179,13 +210,15 @@ export const getPublic = query({
   },
 });
 
-/** 阶段 → 玩家可执行动作（CONTRACTS 7.1；save/present_recording 属 P1）。 */
-function allowedActionsFor(phase: string): string[] {
+/** 阶段 + 资源前置条件 → 玩家可执行动作（CONTRACTS 7.1；save/present_recording 属 P1）。 */
+function allowedActionsFor(phase: string, hasUnlockedEvidence: boolean): string[] {
   switch (phase) {
     case "briefing":
       return ["start"];
     case "investigation":
-      return ["ask", "update_board", "accuse"];
+      return hasUnlockedEvidence
+        ? ["ask", "update_board", "accuse"]
+        : ["ask"];
     case "opening_statements":
     case "judging":
     case "revealed":

@@ -181,6 +181,34 @@ export const forcePhase = internalMutation({
   },
 });
 
+/** 测试工具：直接写入 Session 已解锁 Evidence（生产路径只能由服务器 Unlock Rule 计算）。 */
+export const seedUnlockedEvidence = internalMutation({
+  args: { session_id: v.string(), evidence_ids: v.array(v.string()) },
+  handler: async (ctx, args) => {
+    const nowMs = Date.now();
+    let inserted = 0;
+    for (const evidenceId of args.evidence_ids) {
+      const existing = await ctx.db
+        .query("session_evidence_unlocked")
+        .withIndex("by_session", (q) =>
+          q
+            .eq("session_id", args.session_id)
+            .eq("evidence_id", evidenceId),
+        )
+        .unique();
+      if (existing) continue;
+      await ctx.db.insert("session_evidence_unlocked", {
+        session_id: args.session_id,
+        evidence_id: evidenceId,
+        via_kind: "ask",
+        unlocked_at_ms: nowMs,
+      });
+      inserted += 1;
+    }
+    return { inserted };
+  },
+});
+
 /** 测试工具：插入一个 accepted 的活动 Ticket 以制造排他锁占用。 */
 export const seedActiveTicket = internalMutation({
   args: { session_id: v.string() },

@@ -145,7 +145,10 @@ describe("TB7 真实模型五条开场（显式 opt-in）", () => {
         expect(JSON.stringify(message)).not.toContain("fidelity");
       }
 
-      const view = await callConvex<{ allowed_actions: string[] }>(
+      const view = await callConvex<{
+        allowed_actions: string[];
+        active_role_turn_request_id?: string;
+      }>(
         "query",
         "sessions:getPublic",
         { session_id: sessionId },
@@ -153,11 +156,23 @@ describe("TB7 真实模型五条开场（显式 opt-in）", () => {
       );
       expect(view.ok).toBe(true);
       if (view.ok && view.value) {
-        expect(view.value.allowed_actions).toEqual([
-          "ask",
-          "update_board",
-          "accuse",
-        ]);
+        // allowed_actions 按资源前置条件动态计算（CONTRACTS 7.1）：
+        // investigation 恒开放 ask；update_board/accuse 需至少一条已解锁 Evidence。
+        const evidence = await callConvex<unknown[]>(
+          "query",
+          "evidence:getAll",
+          { session_id: sessionId },
+          { bearer: token },
+        );
+        expect(evidence.ok).toBe(true);
+        const unlockedCount = evidence.ok ? evidence.value.length : 0;
+        expect(view.value.allowed_actions).toEqual(
+          unlockedCount > 0
+            ? ["ask", "update_board", "accuse"]
+            : ["ask"],
+        );
+        // 五条开场全部终止后不存在活动 Ticket（CONTRACTS 7）
+        expect(view.value.active_role_turn_request_id).toBeUndefined();
       }
     },
     { timeout: 480_000 },

@@ -3,14 +3,21 @@
  * 处理顺序：操作规定的内容规范化 → RFC 8785 canonical JSON → SHA-256。
  * `client_action_id` 不进入载荷哈希。
  *
- * 建案载荷仅由字符串字段组成（source_url / source_text / theme / invite_code），
- * 本模块实现该 JSON 子集的 JCS 规则：按键的 UTF-16 码元排序、
- * JSON.stringify 转义（ES2019+ 对孤立代理项做 \uXXXX 转义）、无数字序列化分歧。
+ * 本模块实现 RFC 8785 的 JSON 值子集：按键的 UTF-16 码元排序、
+ * 字符串按 JSON.stringify 转义（ES2019+ 对孤立代理项做 \uXXXX 转义）、
+ * 数字按 ES6 Number::toString 序列化（JSON.stringify 与 RFC 8785 一致；
+ * -0 规范化为 "0"，NaN/Infinity 不是合法 JSON，直接失败）。
  */
 
 export function canonicalJson(value: unknown): string {
   if (value === null) return "null";
   if (typeof value === "boolean") return value ? "true" : "false";
+  if (typeof value === "number") {
+    if (!Number.isFinite(value)) {
+      throw new Error("canonicalJson 不支持非有限数字");
+    }
+    return JSON.stringify(value);
+  }
   if (typeof value === "string") return JSON.stringify(value);
   if (Array.isArray(value)) {
     return `[${value.map(canonicalJson).join(",")}]`;

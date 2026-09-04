@@ -117,7 +117,7 @@ AUTH0 + REL0 → AUTH1 知乎 OAuth（独立后续阶段）
 | TB5 Faithful 重写与失败 | COMPLETE | 尝试循环抽取为 ModelGateway Seam 纯模块（server/turn-engine/run-turn.ts），Scripted Adapter 确定性覆盖：首试/一次/两次重写通过、三次全拒、协议失败不进入语义重写。见 [TB5-7 handoff](./docs/handoffs/2026-09-05-tb5-tb6-tb7-rewrite-distorted-openings.md)。 |
 | TB6 Distorted 回合 | COMPLETE | 单次候选、无重写兜底；entailed/未授权类型/越界 Claim 全部立即终止（VALIDATION_EXHAUSTED/DISTORTION_POLICY_VIOLATION），公开仅 ROLE_TURN_FAILED。真实 distorted 开场经门控通过。见同上 handoff。 |
 | TB7 Session Start 与五条开场 | COMPLETE | game.start 幂等、链式串行五条开场（禁止预建队列）、全部批准→investigation、失败→failed 且历史保留；真实模型五条开场 218s 通过。见同上 handoff。 |
-| TB8 Evidence 与 Board | BLOCKED | 实现 <code>evidence.getAll/updateBoard</code>、服务器解锁、Catalog 投影、全量 Board CAS；覆盖未解锁/跨 Session Evidence、重复 placement、自连、未放置 link 与 revision conflict。 |
+| TB8 Evidence 与 Board | COMPLETE | 已完成：evidence.getAll（Catalog 公开投影/解锁限制/安全空数组）、evidence.updateBoard（幂等、阶段门控、全量 CAS、BOARD_REVISION_CONFLICT、解锁/放置/自连/重复约束、board_updated 事件）；getPublic 动态 allowed_actions 与 active_role_turn_request_id 补齐。见 [TB8 handoff](./docs/handoffs/2026-09-05-tb8-evidence-board.md)。 |
 | TB9 Final Accusation 与 Reveal | COMPLETE | accuse（幂等、阶段/证据门控、服务器判定与两项评分、judging 瞬态）+ Reveal 模型解释候选严格校验 + 原子持久化 revealed；getReveal 提前读取 null；真实模型完整 golden 闭环 293s 通过。见 [TB9 handoff](./docs/handoffs/2026-09-05-tb9-accuse-reveal.md)。 |
 | TB10 P0 全链证明 | BLOCKED | 覆盖所有 P0 写接口的幂等、并发、lease、公开/私有泄漏扫描、恢复、审计事件和聚合指标；完成一次真实模型供应商 smoke。 |
 | REL0 公网 P0 | BLOCKED | Web/API 默认部署 Vercel、权威数据部署 Convex Cloud；先部署兼容 schema/functions，再部署客户端；发布已签署 Golden 系统案件，验证匿名多用户隔离、邀请码额度、生产 build、日志、指标与回滚点。 |
