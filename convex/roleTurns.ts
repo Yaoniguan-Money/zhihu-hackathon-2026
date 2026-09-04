@@ -18,9 +18,7 @@ import {
 } from "@contracts/public/index.js";
 import {
   evidenceUnlockRulePrivateSchema,
-  roleCandidatePayloadPrivateSchema,
   rolePrivatePolicySchema,
-  validationResultPrivateSchema,
   type ClaimPrivate,
   type PrivateFailure,
 } from "@contracts/private/index.js";
@@ -32,16 +30,7 @@ import {
   OpenAICompatibleModelGateway,
 } from "@server/model-gateway/openai-compatible-gateway.js";
 import { ModelConfigMissingError as ConfigMissingError } from "@server/model-gateway/config.js";
-import {
-  ROLE_CANDIDATE_SCHEMA_VERSION,
-  ROLE_VALIDATION_SCHEMA_VERSION,
-  roleCandidateModelSchema,
-  roleGeneratorSystemPrompt,
-  roleGeneratorUserPrompt,
-  roleValidationModelSchema,
-  validatorSystemPrompt,
-  validatorUserPrompt,
-} from "@server/model/schemas/role-turn.js";
+import { runGenerationAttempts } from "@server/turn-engine/run-turn.js";
 import { throwPublicError } from "./publicErrors.js";
 
 /**
@@ -53,7 +42,6 @@ import { throwPublicError } from "./publicErrors.js";
 
 const OPERATION_ASK = "roleTurns.ask";
 const uuidSchema = z.uuid();
-const MAX_ATTEMPTS = 3; // 初始候选 + 最多两次语义重写
 
 function newOpaqueId(prefix: string): string {
   try {
@@ -386,98 +374,29 @@ export const roleTurnWorker = internalAction({
     const context = loaded as TurnContext & { kind: string };
     try {
       const gateway = OpenAICompatibleModelGateway.fromEnv();
-      const faithful = context.policy.fidelity === "faithful";
-      const attempts: { candidate: unknown; validation: unknown }[] = [];
-      let approved: {
-        candidate: z.infer<typeof roleCandidatePayloadPrivateSchema>;
-        validation: z.infer<typeof validationResultPrivateSchema>;
-      } | null = null;
+      const outcome = await runGenerationAttempts(gateway, {
+        policy: context.policy,
+        displayName: context.displayName,
+        visibleClaims: context.visibleClaims.map((claim) => ({
+          claim_id: claim.claim_id,
+          proposition: claim.proposition,
+        })),
+        history: context.history,
+        question: context.question,
+        mode: context.mode,
+        incidentRef: args.request_id,
+      });
 
-      for (let attemptIndex = 0; attemptIndex < MAX_ATTEMPTS; attemptIndex += 1) {
-        const previousFeedback =
-          attempts.length > 0
-            ? attempts[attempts.length - 1]!
-            : null;
-        const candidate = roleCandidateModelSchema.parse(
-          await gateway.generateStructured({
-            task: "role",
-            schemaName: ROLE_CANDIDATE_SCHEMA_VERSION,
-            system: roleGeneratorSystemPrompt({
-              displayName: context.displayName,
-              goal: context.policy.goal,
-              faithful,
-            }),
-            prompt: roleGeneratorUserPrompt({
-              visibleClaims: context.visibleClaims.map((claim) => ({
-                claim_id: claim.claim_id,
-                proposition: claim.proposition,
-              })),
-              history: context.history,
-              question: context.question,
-              questionMode: context.mode,
-            }) + (previousFeedback
-              ? `\n\n上一次候选未通过校验，请修正后重新输出：${JSON.stringify(previousFeedback.validation)}`
-              : ""),
-            schema: roleCandidateModelSchema,
-          }),
-        );
-
-        // 服务器前置检查：支持 Claim 必须存在且属于可见集合。
-        const visibleIds = new Set(context.visibleClaims.map((c) => c.claim_id));
-        const supportVisible = candidate.support_claim_ids.every((id) =>
-          visibleIds.has(id),
-        );
-        const validation = roleValidationModelSchema.parse(
-          await gateway.generateStructured({
-            task: "validator",
-            schemaName: ROLE_VALIDATION_SCHEMA_VERSION,
-            system: validatorSystemPrompt({
-              faithful,
-              allowedDistortionTypes: context.policy.allowed_distortion_types,
-            }),
-            prompt: validatorUserPrompt({
-              visibleClaims: context.visibleClaims.map((claim) => ({
-                claim_id: claim.claim_id,
-                proposition: claim.proposition,
-              })),
-              speech: candidate.speech,
-              supportClaimIds: candidate.support_claim_ids,
-            }),
-            schema: roleValidationModelSchema,
-          }),
-        );
-
-        const passed = faithful
-          ? supportVisible &&
-            validation.status === "entailed" &&
-            validation.unsupported_spans.length === 0
-          : supportVisible &&
-            validation.status === "distorted" &&
-            validation.detected_distortion_types.every((type) =>
-              context.policy.allowed_distortion_types.includes(type),
-            );
-        attempts.push({ candidate, validation });
-        if (passed) {
-          approved = { candidate, validation };
-          break;
-        }
-        // 非 semantic 失败（校验器/协议错误）不进入重写：异常路径由 catch 处理。
-      }
-
-      if (!approved) {
-        // 语义校验耗尽（私有原因不外泄 Fidelity 细节）。
+      if (!outcome.ok) {
+        // 协议/校验器失败与语义耗尽都是终止结果；私有原因进 incident，公开只映射。
         await ctx.runMutation(internal.roleTurns.finalizeTurnFailure, {
           request_id: args.request_id,
-          failure_json: JSON.stringify({
-            code: "VALIDATION_EXHAUSTED",
-            incident_id: `turn:${args.request_id}`,
-            detail: `语义校验未通过，共 ${attempts.length} 次候选`,
-          } satisfies PrivateFailure),
+          failure_json: JSON.stringify(outcome.failure),
         });
         return;
       }
 
-      // 服务器计算 Evidence 解锁（CONTRACTS 6）：规则引用的 Claim 全部被支持。
+      const approved = outcome;
       const supportIds = new Set(approved.candidate.support_claim_ids);
       const unlocked = await ctx.runQuery(
         internal.roleTurns.computeUnlocksInternal,

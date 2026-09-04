@@ -114,9 +114,9 @@ AUTH0 + REL0 → AUTH1 知乎 OAuth（独立后续阶段）
 | TB2 生产 Evidence Graph / Case Compiler | IN PROGRESS | Golden 系统案件种子（冻结 JSON 直接落库）、编译器完整校验（Span、Relation、4+1 Role、Policy、Evidence Catalog、评分 rubric、Public Projection）、<code>cases.getPublic</code>/<code>cases.getSource</code>。 |
 | TB3 Session Authority 与公开查询 | COMPLETE | 已完成：sessions.create（幂等→Case 可读性→原子建 Session+事件）、getPublic、messages.listPublic、events.listPublic；Owner 隔离、briefing 初始视图、Board revision 0、增量恢复均经本地后端集成测试证明。见 [TB3 handoff](./docs/handoffs/2026-09-05-tb3-session-authority.md)。 |
 | TB4 Faithful 成功回合 | COMPLETE | 已完成：ask/observe 全链路（幂等、阶段、锁、可见 Claim、生成、校验、原子发布、证据解锁）；本地后端集成 4 项 + 真实模型 entailed 回合与解锁通过。见 [TB4 handoff](./docs/handoffs/2026-09-05-tb4-faithful-role-turn.md)。 |
-| TB5 Faithful 重写与失败 | BLOCKED | 覆盖字面初次通过、第一次重写通过、第二次重写通过、三次均拒绝；协议/请求失败不得进入语义重写。 |
-| TB6 Distorted 回合 | BLOCKED | 只使用可见来源材料和 Policy allowlist 中的 Distortion Type；新事实、未授权类型或验证失败立即终止，公开结果不泄露 Fidelity。 |
-| TB7 Session Start 与五条开场 | BLOCKED | <code>game.start</code> 幂等，按固定 Role 顺序串行运行五个完整 Validator 回合；全部成功才进入调查，失败终止且不回滚已发布历史。 |
+| TB5 Faithful 重写与失败 | COMPLETE | 尝试循环抽取为 ModelGateway Seam 纯模块（server/turn-engine/run-turn.ts），Scripted Adapter 确定性覆盖：首试/一次/两次重写通过、三次全拒、协议失败不进入语义重写。见 [TB5-7 handoff](./docs/handoffs/2026-09-05-tb5-tb6-tb7-rewrite-distorted-openings.md)。 |
+| TB6 Distorted 回合 | COMPLETE | 单次候选、无重写兜底；entailed/未授权类型/越界 Claim 全部立即终止（VALIDATION_EXHAUSTED/DISTORTION_POLICY_VIOLATION），公开仅 ROLE_TURN_FAILED。真实 distorted 开场经门控通过。见同上 handoff。 |
+| TB7 Session Start 与五条开场 | COMPLETE | game.start 幂等、链式串行五条开场（禁止预建队列）、全部批准→investigation、失败→failed 且历史保留；真实模型五条开场 218s 通过。见同上 handoff。 |
 | TB8 Evidence 与 Board | BLOCKED | 实现 <code>evidence.getAll/updateBoard</code>、服务器解锁、Catalog 投影、全量 Board CAS；覆盖未解锁/跨 Session Evidence、重复 placement、自连、未放置 link 与 revision conflict。 |
 | TB9 Final Accusation 与 Reveal | BLOCKED | 实现 <code>game.accuse/getReveal</code>、确定性正确性与两项分数、严格 Reveal 候选校验与原子发布；提前读取返回 <code>null</code>。 |
 | TB10 P0 全链证明 | BLOCKED | 覆盖所有 P0 写接口的幂等、并发、lease、公开/私有泄漏扫描、恢复、审计事件和聚合指标；完成一次真实模型供应商 smoke。 |
