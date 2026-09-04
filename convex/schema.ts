@@ -134,4 +134,37 @@ export default defineSchema({
     payload_json: v.string(), // GameEventPayload，zod 校验后序列化
     occurred_at_ms: v.number(),
   }).index("by_session_sequence", ["session_id", "sequence"]),
+
+  // TB4：Durable Role Ticket（CONTRACTS 8）。
+  role_turn_tickets: defineTable({
+    request_id: v.string(),
+    session_id: v.string(),
+    role_id: v.string(),
+    kind: v.union(
+      v.literal("ask"),
+      v.literal("present_recording"),
+      v.literal("opening_statement"),
+    ),
+    // 公开状态：accepted / working / succeeded / failed
+    status: v.union(
+      v.literal("accepted"),
+      v.literal("working"),
+      v.literal("succeeded"),
+      v.literal("failed"),
+    ),
+    message_json: v.optional(v.string()), // succeeded：RoleMessagePublic
+    unlocked_ids_json: v.optional(v.string()), // succeeded：新解锁 EvidenceId[]
+    error_json: v.optional(v.string()), // failed：PublicError
+    created_at_ms: v.number(),
+    updated_at_ms: v.number(),
+  })
+    .index("by_request_id", ["request_id"])
+    .index("by_session_status", ["session_id", "status"]),
+
+  // TB4：Session 已解锁 Evidence（服务器规则计算，CONTRACTS 6）。
+  session_evidence_unlocked: defineTable({
+    session_id: v.string(),
+    evidence_id: v.string(),
+    unlocked_at_ms: v.number(),
+  }).index("by_session", ["session_id", "evidence_id"]),
 });

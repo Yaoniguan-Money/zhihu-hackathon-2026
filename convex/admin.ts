@@ -149,6 +149,57 @@ export const resetQuotaState = internalMutation({
   },
 });
 
+/** 测试工具：把 Session 置于任意阶段（生产路径只能经 game.start 等契约入口变更）。 */
+export const forcePhase = internalMutation({
+  args: {
+    session_key: v.string(),
+    phase: v.union(
+      v.literal("briefing"),
+      v.literal("opening_statements"),
+      v.literal("investigation"),
+      v.literal("judging"),
+      v.literal("revealed"),
+      v.literal("failed"),
+    ),
+  },
+  handler: async (ctx, args) => {
+    const session = await ctx.db
+      .query("sessions")
+      .withIndex("by_session_key", (q) => q.eq("session_key", args.session_key))
+      .unique();
+    if (!session) {
+      throw new ConvexError({
+        code: "INTERNAL_INCIDENT",
+        message: "服务内部错误",
+      });
+    }
+    await ctx.db.patch(session._id, {
+      phase: args.phase,
+      updated_at_ms: Date.now(),
+    });
+    return { session_key: args.session_key, phase: args.phase };
+  },
+});
+
+/** 测试工具：插入一个 accepted 的活动 Ticket 以制造排他锁占用。 */
+export const seedActiveTicket = internalMutation({
+  args: { session_id: v.string() },
+  handler: async (ctx, args) => {
+    const nowMs = Date.now();
+    const requestId = `seed-req-${crypto.randomUUID()}`;
+    await ctx.db.insert("role_turn_tickets", {
+      request_id: requestId,
+      session_id: args.session_id,
+      role_id: "role-observer",
+      kind: "ask",
+      status: "accepted",
+      created_at_ms: nowMs,
+      updated_at_ms: nowMs,
+    });
+    return { request_id: requestId };
+  },
+});
+
 /**
  * 内部操作：以冻结的 Golden 标注直接落库系统案件（不走模型，ADR 0004
  * 「进入系统目录只能由内部操作完成并经 A/B Golden 审批」）。

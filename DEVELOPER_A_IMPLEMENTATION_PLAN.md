@@ -113,7 +113,7 @@ AUTH0 + REL0 → AUTH1 知乎 OAuth（独立后续阶段）
 | TB1 Source 与 Durable 建案 Walking Path | COMPLETE | 已完成：A1 纯函数、幂等/邀请码/三重额度、durable 编译 Ticket、原子持久化与 13.3 错误映射；本地后端集成测试 10 项 + 真实模型编译端到端（DeepSeek）通过。见 [TB1 handoff](./docs/handoffs/2026-09-05-tb1-source-durable-creation.md)。 |
 | TB2 生产 Evidence Graph / Case Compiler | IN PROGRESS | Golden 系统案件种子（冻结 JSON 直接落库）、编译器完整校验（Span、Relation、4+1 Role、Policy、Evidence Catalog、评分 rubric、Public Projection）、<code>cases.getPublic</code>/<code>cases.getSource</code>。 |
 | TB3 Session Authority 与公开查询 | COMPLETE | 已完成：sessions.create（幂等→Case 可读性→原子建 Session+事件）、getPublic、messages.listPublic、events.listPublic；Owner 隔离、briefing 初始视图、Board revision 0、增量恢复均经本地后端集成测试证明。见 [TB3 handoff](./docs/handoffs/2026-09-05-tb3-session-authority.md)。 |
-| TB4 Faithful 成功回合 | BLOCKED | <code>roleTurns.ask/observe</code> 经幂等、阶段、排他锁、可见 Claim、Generator、Validator 后，只发布完整 entailed Message。 |
+| TB4 Faithful 成功回合 | COMPLETE | 已完成：ask/observe 全链路（幂等、阶段、锁、可见 Claim、生成、校验、原子发布、证据解锁）；本地后端集成 4 项 + 真实模型 entailed 回合与解锁通过。见 [TB4 handoff](./docs/handoffs/2026-09-05-tb4-faithful-role-turn.md)。 |
 | TB5 Faithful 重写与失败 | BLOCKED | 覆盖字面初次通过、第一次重写通过、第二次重写通过、三次均拒绝；协议/请求失败不得进入语义重写。 |
 | TB6 Distorted 回合 | BLOCKED | 只使用可见来源材料和 Policy allowlist 中的 Distortion Type；新事实、未授权类型或验证失败立即终止，公开结果不泄露 Fidelity。 |
 | TB7 Session Start 与五条开场 | BLOCKED | <code>game.start</code> 幂等，按固定 Role 顺序串行运行五个完整 Validator 回合；全部成功才进入调查，失败终止且不回滚已发布历史。 |

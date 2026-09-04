@@ -136,3 +136,36 @@ export function errorText(result: ConvexCallResult<unknown>): string {
     ? JSON.stringify(result.body)
     : String(result.body);
 }
+
+export interface TurnStatus {
+  status: "accepted" | "working" | "succeeded" | "failed";
+  error?: { code: string; message: string };
+}
+
+/** 轮询角色回合直到终态（succeeded/failed）或超时。 */
+export async function waitForTurnTerminal(
+  token: string,
+  requestId: string,
+  timeoutMs = 30_000,
+): Promise<TurnStatus> {
+  const deadline = Date.now() + timeoutMs;
+  let last: TurnStatus | null = null;
+  while (Date.now() < deadline) {
+    const result = await callConvex<TurnStatus | null>(
+      "query",
+      "roleTurns:observe",
+      { request_id: requestId },
+      { bearer: token },
+    );
+    if (result.ok && result.value) {
+      last = result.value;
+      if (result.value.status === "succeeded" || result.value.status === "failed") {
+        return result.value;
+      }
+    }
+    await new Promise((resolve) => setTimeout(resolve, 300));
+  }
+  throw new Error(
+    `roleTurns.observe 未在 ${timeoutMs}ms 内进入终态，最后状态: ${JSON.stringify(last)}`,
+  );
+}
