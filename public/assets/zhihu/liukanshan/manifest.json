@@ -1,0 +1,83 @@
+{
+  "schema_version": 1,
+  "asset_pack": "刘看山官方黑客松素材",
+  "usage_notice": "来源由用户提供为官方黑客松素材包；压缩包本身未声明具体许可范围，不据此推断赛事范围之外的授权。",
+  "source_archives": [
+    {
+      "file_name": "看山三视图.zip",
+      "bytes": 76105,
+      "sha256": "77B379D758C996E37A7571050C2687D52AA72AAED3034C7F348F84C7F66B3B06"
+    },
+    {
+      "file_name": "刘看山动态.zip",
+      "bytes": 5634357,
+      "sha256": "F568FA507B0D0D7F7B54E1B4437B10145A4B0AFEE182789708218FF1296E1EF6"
+    }
+  ],
+  "assets": [
+    {
+      "source_name": "33f11967cc145627560c3db70c7d3ab8.jpg",
+      "installed_path": "views/view-01.jpg",
+      "bytes": 54213,
+      "sha256": "805A50A7A512A61789BC61176978DF253488ED25EF929107536441E54E850D56",
+      "media": { "format": "jpeg", "width": 1672, "height": 941 }
+    },
+    {
+      "source_name": "c8d9642e1d6a402907200a8fed6c0fc3.jpg",
+      "installed_path": "views/view-02.jpg",
+      "bytes": 45401,
+      "sha256": "54AB0F350F9DC88D22A750CDF781EC39FF14CAE5D4EA245DCA133250370220AD",
+      "media": { "format": "jpeg", "width": 1280, "height": 1707 }
+    },
+    {
+      "source_name": "de232c5a0202dd7512ec1b7bddd150d8.jpg",
+      "installed_path": "views/view-03.jpg",
+      "bytes": 46866,
+      "sha256": "110EBBB19424E5B7BD007AA894C1757757532218564DF47425471F662E736DE5",
+      "media": { "format": "jpeg", "width": 1280, "height": 1707 }
+    },
+    {
+      "source_name": "瞌睡_5秒_320x320_20fps_透明.gif",
+      "installed_path": "motions/sleep.gif",
+      "bytes": 973593,
+      "sha256": "3FFFC7DD4F76B58D57A7D921F5C2A05FE01BF0621C5F9F68B9F5DC9A4E053A59",
+      "media": { "format": "gif", "width": 320, "height": 320, "frames": 100, "fps": 20, "duration_seconds": 5 }
+    },
+    {
+      "source_name": "晃悠_320x320_3秒_20fps_透明.gif",
+      "installed_path": "motions/sway.gif",
+      "bytes": 961040,
+      "sha256": "C1A3BFC35AF4B9FAA1807EC75D6A4A4662EE7E8A3FD89CDCC2EBE863F107CE9E",
+      "media": { "format": "gif", "width": 320, "height": 320, "frames": 60, "fps": 20, "duration_seconds": 3 }
+    },
+    {
+      "source_name": "电脑_6秒_320x320_20fps_透明.gif",
+      "installed_path": "motions/computer.gif",
+      "bytes": 964116,
+      "sha256": "BF1A7BC0D28DC954D449E5D84EC0345F01EE0C57B56346AAFC230CB669A0EF0E",
+      "media": { "format": "gif", "width": 320, "height": 320, "frames": 120, "fps": 20, "duration_seconds": 6 }
+    },
+    {
+      "source_name": "待机_5秒_320x320_20fps_透明.gif",
+      "installed_path": "motions/idle.gif",
+      "bytes": 973881,
+      "sha256": "E18748D708ABA1D82917F41462BBBF2F120615B60D6E15B3C5D448A444D2AE12",
+      "media": { "format": "gif", "width": 320, "height": 320, "frames": 100, "fps": 20, "duration_seconds": 5 }
+    },
+    {
+      "source_name": "运球_4秒_320x320_20fps_透明.gif",
+      "installed_path": "motions/dribble.gif",
+      "bytes": 976293,
+      "sha256": "A026FA4A76682FE6E3C04DD68B05B05E6C64CDBB39BD86749BE1F1369F313812",
+      "media": { "format": "gif", "width": 320, "height": 320, "frames": 80, "fps": 20, "duration_seconds": 4 }
+    },
+    {
+      "source_name": "打招呼_4秒_320x320_20fps_透明.gif",
+      "installed_path": "motions/wave.gif",
+      "bytes": 980029,
+      "sha256": "7CC8D9525A78503B0E746B0D3A9950FD94AB8C89439B3329BF729FC2A2470964",
+      "media": { "format": "gif", "width": 320, "height": 320, "frames": 80, "fps": 20, "duration_seconds": 4 }
+    }
+  ]
+}
+
