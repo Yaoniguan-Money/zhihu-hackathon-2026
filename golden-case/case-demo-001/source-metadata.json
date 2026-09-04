@@ -1,0 +1,23 @@
+{
+  "golden_case": "case-demo-001",
+  "stage": "G0",
+  "frozen_at": "2026-09-04",
+  "source_url": "https://zhuanlan.zhihu.com/p/2020194970120790951",
+  "title": "互联网裁员潮拉开了“AI吃人”的帷幕",
+  "author": "子午",
+  "column_name": "红歌会网",
+  "published_at": "2026-03-25T09:48:03Z",
+  "provided_by": "用户于 2026-09-04 会话中提供来源 URL 与标题，并指示继续任务",
+  "retrieved_at": "2026-09-04",
+  "retrieval_method": "对用户提供的 URL 的渲染抓取。官方 zhihu CLI 0.5.0 无按 URL 读取文章全文的能力（capabilities 核实），官方开放平台 HTTP API 亦无文章内容端点；搜索接口只返回摘要，按项目规则不可作为正文。",
+  "content_sha256": "sha256:2b8556e8ac6e07e53b4695a35d1784be743904e89cc22be97b5339a4949516b4",
+  "content_utf16_code_units": 1733,
+  "content_paragraph_blocks": 33,
+  "normalizations": [
+    "移除原文两处图片嵌入（配图位置已消失，正文文字未改动）",
+    "移除小节标题的加粗渲染标记字符",
+    "其余逐字保留：未做 Unicode normalization、trim、空白折叠、标点转换或截断"
+  ],
+  "completeness_check": "标题与页面 description 开头逐字一致；正文包含全部四个编号小节，以结论句「这不是科幻，这将是新世纪生存权与占有权最激烈的博弈。」收束，无截断迹象。",
+  "user_spot_check": "建议用户对照知乎原页抽查本文件；GC0 冻结标注前如需修正，将替换本文件并重算哈希。"
+}
