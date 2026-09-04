@@ -34,7 +34,7 @@
 | Gate / 阶段 | 当前状态 | 真实含义与解除条件 |
 |---|---:|---|
 | R0 资源完成 | COMPLETE | 文档、官方 Skill/CLI 与素材已审计；不等于工程或 Git 基线完成。 |
-| VCS0 版本基线 | READY | 先扫描 Secret 与不应跟踪素材、确认纳入范围，再创建首个本地基线提交；没有用户授权不得推送远端。 |
+| VCS0 版本基线 | COMPLETE | Secret 扫描通过、纳入范围确认，基线提交 `cea25d5` 已建立；推送按用户既有环节授权执行。见 [VCS0 handoff](./docs/handoffs/2026-09-04-vcs0-version-baseline.md)。 |
 | PF0 工具链骨架 | READY | 只可在 VCS0 后开始；不得提前实现公开 schema、页面或 XState。 |
 | D0 契约修复与 B 评审 | BLOCKED | A/B 必须先把本计划第 3 节的决定写入权威契约/规格（必要时 ADR），并留下 B 签署证据。 |
 | G0 Golden Case 输入 | BLOCKED | 用户须提供真实知乎 URL 和完整正文；不得用搜索摘要、旧缓存、示例或合成内容替代。 |
@@ -105,7 +105,7 @@ AUTH0 + REL0 → AUTH1 知乎 OAuth（独立后续阶段）
 
 | 阶段 | 状态 | 实施结果与关键验收 |
 |---|---:|---|
-| VCS0 版本基线 | READY | 扫描 Secret 与不应跟踪素材，确认纳入范围后建立首个本地基线提交；没有用户授权不推送远端。 |
+| VCS0 版本基线 | COMPLETE | 已完成：Secret 扫描通过，基线提交 `cea25d5` 建立，并按用户环节授权推送。见 [VCS0 handoff](./docs/handoffs/2026-09-04-vcs0-version-baseline.md)。 |
 | PF0 工具链骨架 | READY | 安装并固定 Bun 1.4；初始化 Next.js 16、React 19、TypeScript、Convex、测试和 typecheck 命令；不实现 Public schema、页面或 XState。 |
 | D0 契约修复与 B 评审 | BLOCKED | 落实第 3 节到契约/规格/必要 ADR，建立三张矩阵，并由 B 签署 Public 类型、错误、认证与 P0 Cut。 |
 | PF1 Schema、Auth 与模型 Seam | BLOCKED | 建立 <code>shared/public/private</code> 物理入口、严格 runtime schema、Convex Anonymous Auth、八项显式 <code>AI_*</code> 配置、生产 OpenAI-compatible Adapter 与仅测试可用的 Scripted Adapter。 |

@@ -72,3 +72,4 @@ docs/handoffs/<ticket-or-stage-id>.md
 | 基础资源与工程文档 | complete | [2026-09-04-foundation-resources-and-docs](./2026-09-04-foundation-resources-and-docs.md) |
 | 开发人员 A 根计划迁移 | complete | [2026-09-04-developer-a-plan-migration](./2026-09-04-developer-a-plan-migration.md) |
 | 知乎 Access Secret 配置（含 CLI 重装） | complete | [2026-09-04-zhihu-access-secret-configured](./2026-09-04-zhihu-access-secret-configured.md) |
+| VCS0 版本基线 | complete | [2026-09-04-vcs0-version-baseline](./2026-09-04-vcs0-version-baseline.md) |
