@@ -79,3 +79,4 @@ docs/handoffs/<ticket-or-stage-id>.md
 | G0 Golden Case 源输入 | complete | [2026-09-04-g0-golden-case-source](./2026-09-04-g0-golden-case-source.md) |
 | PF1 契约入口与模型 Seam | blocked | [2026-09-04-pf1-schema-auth-model-seam](./2026-09-04-pf1-schema-auth-model-seam.md) |
 | 工作区 ASCII 路径迁移与 Convex 本地后端验证 | complete | [2026-09-05-workspace-ascii-path](./2026-09-05-workspace-ascii-path.md) |
+| 官方 zhihu Skill 升级至 0.5.3-beta | complete | [2026-09-05-zhihu-skill-upgrade](./2026-09-05-zhihu-skill-upgrade.md) |

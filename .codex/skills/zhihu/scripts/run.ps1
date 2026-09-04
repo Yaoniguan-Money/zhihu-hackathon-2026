@@ -21,8 +21,8 @@ if (-not $MinVersion) { Fail-Package "manifest cli.min_version is empty" }
 $CliHome = if ($env:ZHIHU_CLI_HOME) { $env:ZHIHU_CLI_HOME } else { Join-Path $env:LOCALAPPDATA "ZhihuCLI" }
 $Binary = Join-Path $CliHome "current\zhihu-cli.exe"
 
-# System.Version 不支持 0.2.0-beta.1 这类 SemVer prerelease，
-# 因此这里使用与 setup.ps1 相同的比较规则判断当前 CLI 是否满足最低版本。
+# System.Version does not support SemVer prerelease values such as 0.2.0-beta.1.
+# Use the same comparison rules as setup.ps1 to enforce the minimum CLI version.
 function Compare-SemVer([string]$A, [string]$B) {
     $Pattern = '^(\d+)\.(\d+)\.(\d+)(?:-([0-9A-Za-z.-]+))?$'
     if ($A -notmatch $Pattern) { throw "invalid version: $A" }
@@ -41,7 +41,7 @@ function Compare-SemVer([string]$A, [string]$B) {
     if (-not $APre) { return 1 }
     if (-not $BPre) { return -1 }
 
-    # SemVer prerelease 需要按点分段比较：数字段按数值比较，数字段低于非数字段。
+    # Compare SemVer prerelease dot segments; numeric segments sort below non-numeric ones.
     $AParts = $APre -split '\.'
     $BParts = $BPre -split '\.'
     $PartCount = [Math]::Min($AParts.Count, $BParts.Count)

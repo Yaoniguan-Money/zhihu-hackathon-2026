@@ -14,7 +14,26 @@ SKILL_VERSION=$(sed -n 's/^[[:space:]]*"version":[[:space:]]*"\([^"]*\)".*/\1/p'
 MIN_VERSION=$(sed -n 's/.*"min_version":[[:space:]]*"\([^"]*\)".*/\1/p' "$MANIFEST" | head -n 1)
 [ -n "$SKILL_VERSION" ] || fail_package "manifest version is empty"
 [ -n "$MIN_VERSION" ] || fail_package "manifest cli.min_version is empty"
-CLI_HOME=${ZHIHU_CLI_HOME:-"$HOME/Library/Application Support/zhihu-cli"}
+if [ -n "${ZHIHU_CLI_HOME:-}" ]; then
+  CLI_HOME=$ZHIHU_CLI_HOME
+  if [ "$(uname -s)" = Linux ]; then
+    case "$CLI_HOME" in /*) ;; *) fail_package "ZHIHU_CLI_HOME must be an absolute path" ;; esac
+  fi
+else
+  case "$(uname -s)" in
+    Darwin)
+      [ -n "${HOME:-}" ] || fail_package "HOME is required"
+      CLI_HOME="$HOME/Library/Application Support/zhihu-cli"
+      ;;
+    Linux)
+      [ -n "${HOME:-}" ] || fail_package "HOME is required"
+      DATA_HOME=${XDG_DATA_HOME:-"$HOME/.local/share"}
+      case "$DATA_HOME" in /*) ;; *) fail_package "XDG_DATA_HOME must be an absolute path" ;; esac
+      CLI_HOME="$DATA_HOME/zhihu-cli"
+      ;;
+    *) fail_package "unsupported operating system" ;;
+  esac
+fi
 BINARY="$CLI_HOME/current/zhihu-cli"
 
 installed_version() {

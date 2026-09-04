@@ -1,14 +1,16 @@
 ---
 name: zhihu
 description: >-
-  使用知乎开放平台搜索知乎和全网内容、获取热榜、调用知乎直答，或读取当前用户自己的知乎创作、关注与收藏。用户提到知乎搜索、社区观点、真实经验、热点、热榜、知乎直答、我的知乎内容、我的关注、我的收藏、开放平台、API、MCP、Access Secret，或要求查看、安装和配置知乎 Skill 时使用。深度研究优先返回搜索原始来源；本人数据只读取完成任务所需的最小范围。
+  使用知乎开放平台搜索知乎和全网内容、获取热榜、调用知乎直答，读取当前用户自己的知乎创作、关注与收藏，列出、检索和上传知识库，查询开放 API 剩余额度，或为知乎黑客松规划、开发和交付参赛作品。用户提到知乎搜索、社区观点、真实经验、热点、热榜、知乎直答、我的知乎内容、我的关注、我的收藏、知识库、RAG、API 额度、剩余额度、用量、开放平台、API、MCP、Access Secret、知乎黑客松、黑客松故事与知识内容 API、黑客松 OAuth、黑客松作品开发与交付，或要求查看、安装和配置知乎 Skill 时使用。深度研究优先返回搜索原始来源；本人数据和知识库只读取完成任务所需的最小范围。
 ---
 
 # 知乎开放平台
 
-当前 Skill 版本：0.2.1
+当前 Skill 版本：0.5.3-beta.20260904115023
 
 通过知乎官方 CLI 使用公共知识与当前用户自己的知乎 Context。日常任务优先调用 CLI；只有开发接入场景才读取原始 HTTP API、OAuth 或 MCP 文档。
+
+知乎黑客松参赛者会集中使用开放平台能力开发和交付线上作品。处理赛事选题、能力组合、Demo 开发或提交检查时，读取 [知乎黑客松开发与交付指南](references/hackathon.md)。调用比赛专用故事或知识内容接口时读取 [Hackathon 故事与知识内容 API](references/hackathon-content-api.md)；为黑客松作品接入知乎账号时读取 [Hackathon OAuth 接入](references/hackathon-oauth.md)。赛事专用接口、参数和规则不要扩展为长期稳定的平台承诺。
 
 ## 首次检查与初始化
 
@@ -17,7 +19,7 @@ description: >-
 Skill 的安装、升级、备份与回滚由宿主管理。若宿主创建备份，应备份完整的 Skill 目录，并存放在非自动发现区域；不得在任何 Skill 自动发现目录中创建同名、带后缀或其他仍可被识别为 Skill 的备份目录，避免宿主同时发现多个 `zhihu` Skill。
 
 ```bash
-# macOS
+# macOS / Linux
 bash <skill-dir>/scripts/run.sh status
 
 # Windows PowerShell
@@ -50,7 +52,7 @@ powershell -ExecutionPolicy Bypass -File <skill-dir>/scripts/run.ps1 status
 
 本次任务的所有调用都使用状态检查或 setup 返回的 `binary_path`。下文 `<CLI>` 均代表这个绝对路径，不是要求 PATH 中存在裸命令。
 
-Skill 包不携带 CLI 二进制。setup 获得用户授权后，从发布时注入的官方 HTTPS manifest 只下载当前平台版本，校验 host、文件大小、SHA-256 和二进制自报版本后安装到用户目录；不使用 sudo，也不修改 PATH。安装协议和故障处理见 [CLI 使用文档](references/cli.md)。
+Skill 包不携带 CLI 二进制。setup 获得用户授权后，从发布时注入的官方 HTTPS manifest 只下载当前平台版本，校验 host、文件大小、SHA-256、归档结构和二进制自报版本后安装到用户目录；不使用 sudo，也不修改 PATH。Linux 默认遵循 XDG 用户数据目录；桌面凭据使用 Secret Service，headless 使用进程级 `ZHIHU_ACCESS_SECRET`。安装协议和故障处理见 [CLI 使用文档](references/cli.md)。
 
 ## 选择能力
 
@@ -62,6 +64,9 @@ Skill 包不携带 CLI 二进制。setup 获得用户授权后，从发布时注
 | 了解当前关注热点 | `hot` | 只代表当前热度；需要解释或核实时继续搜索 |
 | 快速获得综合答案 | `answer` | 先检索再生成答案，不替代原始资料研究 |
 | 查看我的创作、关注和收藏 | `me ...` | 只查询当前 Access Secret 所属账号的公开范围数据 |
+| 查看或检索知识库 | `knowledge bases/items/search` | 只读取完成任务所需的知识库和分页结果 |
+| 上传文件到知识库 | `knowledge upload` | 只上传用户明确指定的单个文件，固定使用 `--progress` |
+| 查看开放 API 额度 | `quota` | 查询当前账号的当日统一额度；只在用户需要余额或调用判断时查询 |
 
 只调用完成用户目标所需的最小组合。深度研究、事实核查、观点比较和原文阅读使用搜索，不用直答替代原始资料。
 
@@ -124,6 +129,35 @@ Skill 包不携带 CLI 二进制。setup 获得用户授权后，从发布时注
 
 本人命令不得添加 OAuth Token、用户 ID 或其他代查参数。未经用户明确要求，不把完整关注或收藏写入文件或长期记忆。
 
+### 使用知识库
+
+```text
+<CLI> knowledge bases --scope all
+<CLI> knowledge items --base-id 7526139256098382426 --limit 20
+<CLI> knowledge search --query "用户问题" --scope personal --limit 10
+<CLI> knowledge upload --file "/absolute/path/to/file.pdf" --progress
+```
+
+- `items` 的 Cursor 是服务端返回的不透明值；只有 `HasMore=true` 且用户确实需要更多结果时才继续。
+- `search` 至少重复传入一个 `--base-id` 或 `--scope`，不要使用逗号拼接多个值。
+- 遇到空结果或限流时不要循环调用。
+- 只有用户明确指定文件并授权上传时才调用 `upload`；不扫描目录、不批量上传，固定携带 `--progress`。
+- 上传默认客户端等待上限为 200s；慢网络可显式调高 `--timeout`。超时或断线后先用 `knowledge items` 核对，不能无条件重传。
+
+### 查询额度
+
+```text
+<CLI> quota
+<CLI> quota --api-id knowledge
+<CLI> quota --api-id knowledge --api-id tools
+```
+
+- 用户询问“还剩多少额度”时调用 `quota`；不定时轮询，也不为每次普通请求预先查询。
+- 默认返回全网搜、知乎搜索、热榜、知乎用户数据、直答、知识库和小工具 7 个统一额度项。
+- 用户只关心部分能力时重复传入 `--api-id`；合法值为 `global_search`、`zhihu_search`、`hot_list`、`user_data`、`zhida_openai`、`knowledge`、`tools`。
+- 知识库和小工具分别使用 `knowledge`、`tools` 统一额度。
+- 用 `TotalQuota`、`TotalUsed`、`RemainingQuota` 回答当前自然日状态；查询本身不消耗这些业务额度。
+
 ## 呈现搜索结果
 
 根据用户问题组织结论，并把支撑判断的来源放在附近：
@@ -140,11 +174,16 @@ Skill 包不携带 CLI 二进制。setup 获得用户授权后，从发布时注
 
 ## 按需读取参考资料
 
+- 规划、开发或交付知乎黑客松作品：读取 [知乎黑客松开发与交付指南](references/hackathon.md)。
+- 调用比赛专用故事或知识内容列表与详情：读取 [Hackathon 故事与知识内容 API](references/hackathon-content-api.md)。该能力不属于当前 CLI，直接按文档调用 HTTP API。
+- 为黑客松作品接入知乎账号：读取 [Hackathon OAuth 接入](references/hackathon-oauth.md) 和 [用户数据 API](references/user-api.md)，按黑客松的申请、凭证发放和配置流程处理。当前底层授权端点、Token 交换参数及用户数据鉴权组合与普通项目一致，具体以 Hackathon OAuth 文档为准。
 - 安装、认证、完整命令、输出和错误：读取 [CLI 使用文档](references/cli.md)。
 - Access Secret 申请、额度、术语和联系方式：读取 [开放平台指南](references/open-platform.md)。
 - 在代码或服务中直接接入公共内容 API：读取 [HTTP API 文档](references/http-api.md)。
+- 知识库命令、上传进度和 HTTP 字段：读取 [CLI 使用文档](references/cli.md) 和 [HTTP API 文档](references/http-api.md) 的知识库章节。
+- 额度命令、公开 APIID 和 HTTP 字段：读取 [CLI 使用文档](references/cli.md) 和 [HTTP API 文档](references/http-api.md) 的额度章节。
 - 开发本人或 OAuth 授权用户的创作、关注和收藏能力：读取 [用户数据 API](references/user-api.md)。
-- 开发“知乎登录”或代表其他已授权用户访问数据：同时读取 [OAuth 应用集成](references/oauth.md) 和 [用户数据 API](references/user-api.md)。CLI 日常调用不使用 OAuth。
+- 为普通项目开发“知乎登录”或代表其他已授权用户访问数据：同时读取 [OAuth 应用集成](references/oauth.md) 和 [用户数据 API](references/user-api.md)。CLI 日常调用不使用 OAuth；黑客松项目使用上面的 Hackathon OAuth 文档。
 - 在 MCP 客户端中配置知乎现有服务：读取 [MCP 接入文档](references/mcp.md)。本 Skill 不建设新的 MCP Server。
 
 日常调用不要自行重写 CLI 已封装的 HTTP 鉴权、时间戳、重试和错误处理。根据对应命令返回的 `Code`、`Message`、`Data` 或 Chat Completions 字段处理结果。
@@ -157,3 +196,4 @@ Skill 包不携带 CLI 二进制。setup 获得用户授权后，从发布时注
 - 配额或频率限制：停止重复调用，说明受影响能力和服务端错误。
 - 搜索无结果：缩短或改写查询；不要把鉴权失败误报为无结果。
 - 服务端错误或超时：遵循 CLI 返回，不额外重试直答 POST。
+- 知识库上传超时或断线：结果可能未知，先列出目标知识库内容确认，不直接重传。

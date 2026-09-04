@@ -23,7 +23,7 @@ function Compare-SemVer([string]$A, [string]$B) {
     if (-not $APre) { return 1 }
     if (-not $BPre) { return -1 }
 
-    # SemVer prerelease 需要按点分段比较：数字段按数值比较，数字段低于非数字段。
+    # Compare SemVer prerelease dot segments; numeric segments sort below non-numeric ones.
     $AParts = $APre -split '\.'
     $BParts = $BPre -split '\.'
     $PartCount = [Math]::Min($AParts.Count, $BParts.Count)
@@ -72,7 +72,7 @@ $CliHome = if ($env:ZHIHU_CLI_HOME) { $env:ZHIHU_CLI_HOME } else { Join-Path $en
 $CurrentDir = Join-Path $CliHome "current"
 $Current = Join-Path $CurrentDir "zhihu-cli.exe"
 
-# setup 只负责首次安装或修复；兼容的现有 CLI 由 upgrade 命令独立维护。
+# setup only installs or repairs; upgrade maintains an existing compatible CLI.
 $CurrentVersion = $null
 try { if (Test-Path $Current -PathType Leaf) { $CurrentVersion = [string]((& $Current version | ConvertFrom-Json).version) } } catch {}
 if ($CurrentVersion -and (Compare-SemVer $CurrentVersion $MinVersion) -ge 0) {

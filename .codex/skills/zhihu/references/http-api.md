@@ -140,7 +140,7 @@ Item：
 | ContentType | String | 是 | 内容类型，如回答、文章                    |
 | ContentID | String | 是 | 内容 Token                       |
 | ContentText | String | 是 | 内容摘要，高亮部分用 <em> 标签表示           |
-| Url | String | 是 | 内容链接（带溯源 utm 参数）               |
+| Url | String | 是 | 内容链接（带溯源 UTM 参数） |
 | CommentCount | Int32 | 是 | 评论数                            |
 | VoteUpCount | Int32 | 是 | 赞同数                            |
 | AuthorName | String | 是 | 作者昵称，匿名时，展示为：知乎用户              |
@@ -169,7 +169,7 @@ CommentInfo:
             "ContentType": "Answer",
             "ContentID": "1903044959663284716",
             "ContentText": "首先要澄清一个常见误解：ChatGPT的免费版和付费版使用的是不同模型与功能配置，体验差距确实很大。很多人用了一下免费版就觉得"就这？"，其实是没体验过付费版完整的能力，比如文件上传、多模态理解等功能。\n虽然免费版目前也使用了GPT-4-turbo模型，但功能上仍有限，例如不能用代码解释器、不支持上传文件、无长期记忆能力等，而且还有使用频率限制。\n相比之下，花20美金开通的付费版支持更多高级功能，比如处理图片、文档、复杂代码分析、图表生成等，在实际使用中效率和精度明显提升。\n如果你每天只是问几句闲聊或搜索类问题，的确不必付费，国产的一些大模型（如DeepSeek、Kimi）也能胜任。但如果你依赖它来工作学习、频繁做复杂任务，这20美元绝对是值得投入的，光省下的时间就够本。\n最后不建议拼会员，多人共用一个账号容易导致模型输出错乱，影响效果；账号安全、IP污染等问题也无法忽视。一个账号专人使用，才是最稳定、最优的体验方式。",
-            "Url": "https://www.zhihu.com/answer/1903044959663284716?utm_medium=openapi_platform&utm_source=6d23634e",
+            "Url": "https://www.zhihu.com/answer/1903044959663284716?utm_medium=openapi_platform&utm_source=c2f012356e63",
             "CommentCount": 22,
             "VoteUpCount": 18,
             "AuthorName": "时光纪",
@@ -188,7 +188,7 @@ CommentInfo:
             "ContentType": "Article",
             "ContentID": "18698154193",
             "ContentText": " macOS 版本：14及以上\n 处理器： 建议使用M1芯片或更新的Mac电脑，以获得最佳性能（旧款设备可能出现卡顿）。\n 下载步骤：\n1.打开浏览器，打开 OpenAI 官方下载页面：https://openai.com/chatgpt/desktop/\n2.点击 "Download for macOS" 按钮，开始下载。\n安装步骤：\n1.下载完成后，双击 .dmg 文件，将 ChatGPT 应用拖动到 "应用程序" 文件夹。\n2.如果系统提示 "来自未知开发者"，请在 "系统偏好设置">"安全性与隐私" 中点击 "仍要打开"。\n安装完成： 完成以上步骤，macOS 用户即可正常使用桌面版 ChatGPT。\n 2. Windows 用户安装指南系统时区设置： 需将电脑系统地区和时区设置为阿美莉卡（或其他OpenAI支持服务的地区）。\n1.打开电脑的"设置">"时间和语言">"日期和时间"。\n2.在"自动设置时区"中，先关闭自动设置，然后在"时区"中选择阿美莉卡（或OpenAI支持的地区）的时区。\n下载步骤：\n1.设置好之后，打开OpenAI 官方下载页面： https://openai.com/chatgpt/desktop/\n2.点击 "Download for Windows" 按钮。\n安装步骤：\n1.浏览器会自动打开到微软应用商店页面。\n2.点击 "View in Store/在Microsoft Store中查看" 按钮，跳转到微软应用商店，按照提示完成安装。\n安装完成： 完成以上步骤，Windows 用户即可正常使用桌面版 ChatGPT。\n 三、ChatGPT桌面版使用技巧安装好 ChatGPT 桌面版之后，如何充分利用它的功能，提高效率呢？\n接下来，我分享一些实用的使用技巧：\n1. 快捷键：使用快捷键可以随时随地唤出 ChatGPT，无需切换窗口，非常便捷。\nmacOS： Option + 空格Windows： Alt + 空格 (可以自定义)2. 多模态输入：截图功能： 遇到问题，直接截图发给ChatGPT，它可以帮你分析解读，无论是编程题、Excel 表格，还是其他数据报表，通通不在话下。拍照功能： 拍照上传，可以让 ChatGPT 解答数学题、识别物体等。多文件上传： 可一次性上传多个文档，让 ChatGPT 帮你总结、归纳。3. 高级语音模式：点击输入框右侧的语音图标，即可开始与 ChatGPT 进行语音对话。免费用户也可以体验高级语音模式（有体验时长限制），ChatGPT Plus用户可以享受更长时间的语音对话。4. 多窗口支持：在桌面版中，你可以同时打开多个对话窗口，方便你同时进行多个任务。设置方式：鼠标放到左侧栏相应对话后的"···"，在选项弹窗中选择"在伴随浮窗中打开"。5. 自定义快捷键：如果你觉得默认的快捷键用着不习惯，可以在系统设置中自定义快捷键，让操作更加顺手。设置方式：点击左下角的账号头像>设置>应用，选择"伴随浮窗热键"进行更改。6. 直接启动第三方应用（macOS 独享）：macOS的ChatGPT Plus/Pro和Teams订阅用户，可以直接在ChatGPT中启动VS Code、Xcode、Terminal等第三方应用，进行跨应用协作。对于编辑器类应用，ChatGPT能够读取最前窗口的完整内容；对于终端类应用，可以读取最后200行内容。四、桌面版跟网页版有什么不一样？ChatGPT 桌面版和网页版虽然都使用相同的模型，但使用体验却大相径庭。\n来看一下两者之间的主要区别：\n如果你是一个经常要用的ChatGPT的用户，从效率和功能角度看，桌面版无疑是更好的选择。\n五、ChatGPT Plus或Pro方法不管是哪个端，如果你想解锁ChatGPT的全部功能，包括o1模型、sora、task、高级语音模式等，就需要订阅 ChatGPT Plus或者Pro。\n具体可以看⬇️：\nChatGPT Plus如何升级订阅最新方法全网汇总以上。\n如果有啥疑问也可以在留言告诉我。",
-            "Url": "https://zhuanlan.zhihu.com/p/18698154193?utm_medium=openapi_platform&utm_source=6d23634e",
+            "Url": "https://zhuanlan.zhihu.com/p/18698154193?utm_medium=openapi_platform&utm_source=c2f012356e63",
             "CommentCount": 15,
             "VoteUpCount": 27,
             "AuthorName": "文字机器凸哥",
@@ -347,7 +347,7 @@ Item：
 | ContentType | String | 是 | 内容类型 |
 | ContentID | String | 是 | 内容标识 |
 | ContentText | String | 是 | 内容摘要 |
-| Url | String | 是 | 内容链接（带溯源 utm 参数） |
+| Url | String | 是 | 内容链接（带溯源 UTM 参数） |
 | CommentCount | Int32 | 是 | 评论数 |
 | VoteUpCount | Int32 | 是 | 赞同数 |
 | AuthorName | String | 是 | 作者昵称 |
@@ -379,7 +379,7 @@ CommentInfo：
                 "ContentType": "Article",
                 "ContentID": "123456789",
                 "ContentText": "本文介绍了主流 RAG 评测框架，包括 RAGAS、TruLens ...",
-                "Url": "https://zhuanlan.zhihu.com/p/123456789?utm_medium=openapi_platform&utm_source=6d23634e",
+                "Url": "https://zhuanlan.zhihu.com/p/123456789?utm_medium=openapi_platform&utm_source=c2f012356e63",
                 "CommentCount": 15,
                 "VoteUpCount": 128,
                 "AuthorName": "张三",
@@ -634,3 +634,137 @@ data: [DONE]
 4. `model` 为必填，缺失时返回 `missing_required_parameter`。
 5. 支持 role、content 上下文传参的模型：`zhida-fast-1p5`、`zhida-thinking-1p5`。
 6. 实际可用模型还会受租户授权配置影响。
+
+# 额度查询 API
+
+## 接口说明
+
+查询当前 Access Secret 所属账号在自然日内的开放 API 统一额度。该查询不消耗业务额度。
+
+## 接口信息
+
+| 说明 | 值 |
+|---|---|
+| HTTP URL | `https://developer.zhihu.com/api/v1/quota` |
+| HTTP Method | `GET` |
+
+Header：
+
+- `Authorization: Bearer <your_access_secret>`
+- `X-Request-Timestamp: <unix_seconds>`
+
+Query：
+
+| 名称 | 类型 | 必填 | 说明 |
+|---|---|---:|---|
+| `APIIDs` | String | 否 | 逗号分隔的公开 APIID；省略时返回全部 7 项 |
+
+`APIIDs` 支持 `global_search`、`zhihu_search`、`hot_list`、`user_data`、`zhida_openai`、`knowledge`、`tools`。知识库和小工具分别使用 `knowledge`、`tools` 统一额度。
+
+请求示例：
+
+```http
+GET /api/v1/quota?APIIDs=knowledge,tools
+```
+
+响应 `Data` 是额度项数组：
+
+| 字段 | 类型 | 说明 |
+|---|---|---|
+| `APIID` | String | 公开统一 APIID |
+| `APIName` | String | 展示名称 |
+| `TotalQuota` | Int64 | 当前自然日总额度 |
+| `TotalUsed` | Int64 | 当前自然日已用额度 |
+| `RemainingQuota` | Int64 | 当前自然日剩余额度 |
+
+```json
+{
+  "Code": 0,
+  "Message": "success",
+  "Data": [
+    {
+      "APIID": "knowledge",
+      "APIName": "知识库",
+      "TotalQuota": 500,
+      "TotalUsed": 3,
+      "RemainingQuota": 497
+    }
+  ]
+}
+```
+
+错误码：
+
+| Code | 说明 |
+|---:|---|
+| `10001` | 参数或 APIID 非法 |
+| `20001` | 鉴权失败 |
+| `30001` | 触发频率限制 |
+| `90001` | 请求失败 |
+
+# 知识库 API
+
+四个接口均使用 `Code/Message/Data` 外层、Bearer Access Secret 和秒级 `X-Request-Timestamp`。所有知识库 ID 都按十进制字符串传输。
+
+## 列出知识库
+
+```http
+GET /api/v1/knowledge/bases?Scope=all
+```
+
+`Scope` 支持 `all`、`created`、`subscribed`，默认 `all`。`Data.Items` 返回 `KnowledgeBaseID`、`Name`、`Relation`、`IsDefault`、`Visibility`、`ContentCount`、`UpdatedAt` 和可选 `Description`；接口不分页。
+
+## 列出知识库内容
+
+```http
+GET /api/v1/knowledge/bases/{KnowledgeBaseID}/items?Cursor=<cursor>&Limit=20
+```
+
+`Limit` 为 1-20，默认 20。`Cursor` 是服务端不透明值；`Data.HasMore=true` 时使用 `Data.NextCursor` 请求下一页。内容项包含 `RecallContentID`、`ContentType`、`Title` 及可选摘要、时间和 `OriginUrl`。
+
+## 上传文件
+
+```http
+POST /api/v1/knowledge/files
+Content-Type: multipart/form-data
+```
+
+multipart part：
+
+| 字段 | 必填 | 说明 |
+|---|---:|---|
+| `File` | 是 | 单个非空文件，最大 100 MiB |
+| `KnowledgeBaseID` | 否 | 省略时使用当前用户默认知识库 |
+
+上传是同步、有副作用的 POST，不应自动重试。成功 `Data` 必返 `KnowledgeBaseID`、`RecallContentID`、`FileName`、`FileSize`，并可能返回 `Title`、`Abstract`、`OriginUrl`。
+
+## RAG 检索
+
+```http
+POST /api/v1/knowledge/search
+Content-Type: application/json
+```
+
+```json
+{
+  "Query": "退款规则",
+  "KnowledgeBaseIDs": ["7526139256098382426"],
+  "RecallScopes": ["personal"],
+  "Limit": 10
+}
+```
+
+`KnowledgeBaseIDs` 与 `RecallScopes` 至少提供一种，可以同时提供；scope 支持 `personal`、`subscription`、`public`，`Limit` 为 1-10。结果 `Content` 是有序 `array[string]`，CLI 不拼接 chunk。
+
+## 知识库错误
+
+| Code | Message | 语义 |
+|---:|---|---|
+| `10001` | `invalid request` | 参数、ID、文件或枚举非法 |
+| `20001` | `permission denied` | 无权访问目标资源 |
+| `30001` | `rate limit exceeded` | 调用频率或额度受限 |
+| `40004` | `knowledge base not found` | 知识库不存在 |
+| `40005` | `file is being processed` | 相同文件仍在处理 |
+| `40006` | `file parsing failed` | 文件解析失败 |
+| `50002` | `search failed, please try again later` | RAG 检索失败 |
+| `90001` | `request failed` | 其他安全收敛后的内部失败 |

@@ -22,22 +22,38 @@
 
 ## 2. 内置 `zhihu` Skill 与 CLI
 
-黑客松包中的 `assets/zhihu-cli-skill.zip` 已独立校验并安装：
+黑客松包中的 `assets/zhihu-cli-skill.zip` 已独立校验并完成**初始安装（v0.2.1，现已被 0.5.3-beta 取代，下表保留为安装历史）**：
 
 | 项目 | 结果 |
 |---|---|
 | 内层 ZIP 大小 | 42,489 bytes |
 | 内层 ZIP SHA-256 | `BE08E10BBD8F7C554456599E1BDF9E4A4F9216A7624D0B29218E9E4DC1C2F9F3` |
-| Skill 版本 | `0.2.1` |
+| Skill 版本（初始） | `0.2.1` |
 | 安装目录 | `.codex/skills/zhihu/` |
-| 普通文件数 | 12 |
-| 完整性 | 安装目录相对归档 missing 0、mismatch 0、extra 0 |
+| 普通文件数（初始） | 12 |
 | CLI 版本 | `0.5.0 windows-amd64` |
 | CLI 路径 | `%LOCALAPPDATA%\ZhihuCLI\current\zhihu-cli.exe` |
 | CLI 大小 | 6,891,008 bytes |
 | CLI SHA-256 | `5C69E99414758AF5012B864D90169FC9BA4928DE946730154604D94DA570AB9B` |
-| CLI 兼容性 | compatible = true |
 | 系统改动 | 无管理员权限、未修改 PATH |
+
+### 2026-09-05 升级：0.5.3-beta（当前安装）
+
+用户决定采用官方更新版 skill；源包为官方 beta 渠道下载的 `zhihu-cli-skill-0.5.3-beta.20260904115023/`（保留于工作区根目录，经 `.gitignore` 排除跟踪）。
+
+| 项目 | 结果 |
+|---|---|
+| Skill 版本（当前） | `0.5.3-beta.20260904115023` |
+| manifest 声明 | min CLI `0.5.0-beta.20260826061344`；当前 CLI `0.5.0` stable 按 semver 满足 |
+| 安装目录 | `.codex/skills/zhihu/`（不变） |
+| 普通文件数 | 15（新增 `references/hackathon.md`、`hackathon-content-api.md`、`hackathon-oauth.md`） |
+| 完整性 | 安装目录与源包 `diff -r` 逐字节一致；无隐藏文件、无 `..` 条目、无可执行二进制 |
+| 全树 manifest SHA-256 | `c41e2d9f1b09bfbfe0b7c34dc8fc31bbfde0a3a7b641e31b935877dc8ea76c03` |
+| 关键文件 | SKILL.md `61810f6b…`、manifest.json `468d400f…`、run.ps1 `2f79d346…`、setup.ps1 `66273792…`（见 git 历史记录完整值） |
+| 安装方式 | 原位替换：删除旧 v0.2.1 目录后原样复制；未修改任何官方文件 |
+| CLI 冒烟 | `auth status` 返回 `ok=true`、keychain 可用、Access Secret 保持配置 |
+
+旧版 v0.2.1 保留于 git 历史与赛事包内嵌归档 `zhihu-hackathon/assets/zhihu-cli-skill.zip`（未修改）。0.5.3-beta 的 `run.ps1` 在 Windows PowerShell 5.1 下的兼容性未验证（本机仍无 `pwsh`）；状态检查路径不变。
 
 状态检查必须在 PowerShell 7 中运行：
 
@@ -51,7 +67,9 @@ pwsh -ExecutionPolicy Bypass -File .codex/skills/zhihu/scripts/run.ps1 status
 
 ### 已知版本漂移
 
-状态检查显示，黑客松包固定的 Skill 是 v0.2.1，而当前线上 stable 是 v0.5.0（46,921 bytes，SHA-256 `5C5A7DAE36CABE4E92362E035ECBFFCA1E1B14C6479C28372A8E4A2E1CF99B82`）。当前 CLI 已是 v0.5.0 且与内置 Skill 兼容，但不能把内置 Skill 描述为最新版，也不能静默替换赛事包快照；升级必须作为单独决策进行并重新验证。
+历史记录：黑客松包固定 Skill 为 v0.2.1，线上 stable 曾为 v0.5.0（46,921 bytes，SHA-256 `5C5A7DAE36CABE4E92362E035ECBFFCA1E1B14C6479C28372A8E4A2E1CF99B82`）。
+
+2026-09-05：用户明确决定采用官方更新版，安装 **0.5.3-beta.20260904115023**（见上节）。此为官方 beta 渠道快照：后续若有 stable 或更新 beta 发布，升级仍须作为单独决策并重新校验；不得静默替换。赛事包内嵌 v0.2.1 归档仅作历史快照，不再描述为当前版本。
 
 ### Access Secret 人工步骤
 

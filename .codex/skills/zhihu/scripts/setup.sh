@@ -1,5 +1,6 @@
 #!/bin/sh
 set -eu
+umask 077
 
 say() { printf '%s\n' "$*" >&2; }
 fail_json() {
@@ -20,14 +21,40 @@ UPDATE_MANIFEST_URL=$(sed -n 's/.*"update_manifest_url":[[:space:]]*"\([^"]*\)".
 [ -n "$MIN_VERSION" ] || fail_json "manifest cli.min_version is empty" "INVALID_PACKAGE"
 printf '%s' "$MIN_VERSION" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$' || fail_json "manifest cli.min_version is invalid" "INVALID_PACKAGE"
 
-[ "$(uname -s)" = "Darwin" ] || fail_json "This internal build supports macOS and Windows x64 only" "UNSUPPORTED_PLATFORM"
-case "$(uname -m)" in
-  arm64) PLATFORM=darwin-arm64 ;;
-  x86_64) PLATFORM=darwin-amd64 ;;
-  *) fail_json "Unsupported macOS architecture: $(uname -m)" "UNSUPPORTED_PLATFORM" ;;
+OS_NAME=$(uname -s)
+ARCH_NAME=$(uname -m)
+case "$OS_NAME" in
+  Darwin)
+    case "$ARCH_NAME" in
+      arm64) PLATFORM=darwin-arm64 ;;
+      x86_64) PLATFORM=darwin-amd64 ;;
+      *) fail_json "Unsupported macOS architecture: $ARCH_NAME" "UNSUPPORTED_PLATFORM" ;;
+    esac
+    ;;
+  Linux)
+    case "$ARCH_NAME" in
+      x86_64|amd64) PLATFORM=linux-amd64 ;;
+      aarch64|arm64) PLATFORM=linux-arm64 ;;
+      *) fail_json "Unsupported Linux architecture: $ARCH_NAME" "UNSUPPORTED_PLATFORM" ;;
+    esac
+    ;;
+  *) fail_json "Unsupported operating system: $OS_NAME" "UNSUPPORTED_PLATFORM" ;;
 esac
 
-CLI_HOME=${ZHIHU_CLI_HOME:-"$HOME/Library/Application Support/zhihu-cli"}
+if [ -n "${ZHIHU_CLI_HOME:-}" ]; then
+  CLI_HOME=$ZHIHU_CLI_HOME
+elif [ "$OS_NAME" = Darwin ]; then
+  [ -n "${HOME:-}" ] || fail_json "HOME is required" "INVALID_CONFIGURATION"
+  CLI_HOME="$HOME/Library/Application Support/zhihu-cli"
+else
+  [ -n "${HOME:-}" ] || fail_json "HOME is required" "INVALID_CONFIGURATION"
+  DATA_HOME=${XDG_DATA_HOME:-"$HOME/.local/share"}
+  case "$DATA_HOME" in /*) ;; *) fail_json "XDG_DATA_HOME must be an absolute path" "INVALID_CONFIGURATION" ;; esac
+  CLI_HOME="$DATA_HOME/zhihu-cli"
+fi
+if [ "$OS_NAME" = Linux ]; then
+  case "$CLI_HOME" in /*) ;; *) fail_json "ZHIHU_CLI_HOME must be an absolute path" "INVALID_CONFIGURATION" ;; esac
+fi
 CURRENT_DIR="$CLI_HOME/current"
 CURRENT="$CURRENT_DIR/zhihu-cli"
 
@@ -61,9 +88,25 @@ MANIFEST_AUTHORITY=${UPDATE_MANIFEST_URL#*://}
 MANIFEST_AUTHORITY=${MANIFEST_AUTHORITY%%/*}
 case "$MANIFEST_AUTHORITY" in ''|*@*) fail_json "CLI download manifest URL is invalid" "UPDATE_INTEGRITY_FAILED" ;; esac
 
-for required_command in curl plutil shasum tar; do
+for required_command in curl tar; do
   command -v "$required_command" >/dev/null 2>&1 || fail_json "$required_command is required to install zhihu-cli" "INSTALL_PREREQUISITE_MISSING"
 done
+if command -v plutil >/dev/null 2>&1 && [ "$OS_NAME" = Darwin ]; then
+  JSON_PARSER=plutil
+elif command -v jq >/dev/null 2>&1; then
+  JSON_PARSER=jq
+elif command -v python3 >/dev/null 2>&1; then
+  JSON_PARSER=python3
+else
+  fail_json "jq or python3 is required to install zhihu-cli" "INSTALL_PREREQUISITE_MISSING"
+fi
+if command -v sha256sum >/dev/null 2>&1; then
+  SHA256_TOOL=sha256sum
+elif command -v shasum >/dev/null 2>&1; then
+  SHA256_TOOL=shasum
+else
+  fail_json "sha256sum or shasum is required to install zhihu-cli" "INSTALL_PREREQUISITE_MISSING"
+fi
 
 TMP_ROOT=$(mktemp -d "${TMPDIR:-/tmp}/zhihu-cli-setup.XXXXXX")
 cleanup() { rm -rf -- "$TMP_ROOT"; }
@@ -75,7 +118,24 @@ curl --fail --silent --show-error --connect-timeout 10 --max-time 60 \
   --output "$REMOTE_MANIFEST" "$UPDATE_MANIFEST_URL" || fail_json "Unable to download CLI release manifest" "NETWORK_ERROR"
 [ "$(wc -c < "$REMOTE_MANIFEST" | tr -d '[:space:]')" -le 1048576 ] || fail_json "CLI release manifest is too large" "UPDATE_INTEGRITY_FAILED"
 
-manifest_value() { plutil -extract "$2" raw -o - "$1" 2>/dev/null || true; }
+manifest_value() {
+  case "$JSON_PARSER" in
+    plutil) plutil -extract "$2" raw -o - "$1" 2>/dev/null || true ;;
+    jq) jq -er --arg path "$2" 'getpath($path | split("."))' "$1" 2>/dev/null || true ;;
+    python3)
+      python3 - "$1" "$2" 2>/dev/null <<'PY' || true
+import json
+import sys
+
+with open(sys.argv[1], encoding="utf-8") as manifest_file:
+    value = json.load(manifest_file)
+for part in sys.argv[2].split("."):
+    value = value[part]
+print(value)
+PY
+      ;;
+  esac
+}
 SCHEMA_VERSION=$(manifest_value "$REMOTE_MANIFEST" schema_version)
 LATEST_VERSION=$(manifest_value "$REMOTE_MANIFEST" cli.latest_version)
 ARTIFACT_URL=$(manifest_value "$REMOTE_MANIFEST" "cli.artifacts.$PLATFORM.url")
@@ -103,18 +163,25 @@ curl --fail --silent --show-error --connect-timeout 10 --max-time 60 \
   --output "$ARCHIVE" "$ARTIFACT_URL" || fail_json "Unable to download CLI artifact" "NETWORK_ERROR"
 ACTUAL_SIZE=$(wc -c < "$ARCHIVE" | tr -d '[:space:]')
 [ "$ACTUAL_SIZE" = "$EXPECTED_SIZE" ] || fail_json "CLI artifact size does not match manifest" "UPDATE_INTEGRITY_FAILED"
-ACTUAL_SHA=$(shasum -a 256 "$ARCHIVE" | awk '{print $1}')
+if [ "$SHA256_TOOL" = sha256sum ]; then
+  ACTUAL_SHA=$(sha256sum "$ARCHIVE" | awk '{print $1}')
+else
+  ACTUAL_SHA=$(shasum -a 256 "$ARCHIVE" | awk '{print $1}')
+fi
 [ "$ACTUAL_SHA" = "$EXPECTED_SHA" ] || fail_json "CLI artifact SHA-256 does not match manifest" "CHECKSUM_MISMATCH"
 
-# 只从归档读取命名为 zhihu-cli 的文件，不把归档内路径直接展开到磁盘。
-tar -xOf "$ARCHIVE" zhihu-cli > "$STAGED" 2>/dev/null || fail_json "CLI archive does not contain zhihu-cli" "UPDATE_INTEGRITY_FAILED"
+# 归档必须且只能包含根目录下的单一 zhihu-cli，拒绝额外成员和路径穿越。
+ARCHIVE_LIST=$(tar -tzf "$ARCHIVE" 2>/dev/null) || fail_json "CLI archive is invalid" "UPDATE_INTEGRITY_FAILED"
+[ "$ARCHIVE_LIST" = "zhihu-cli" ] || fail_json "CLI archive structure is invalid" "UPDATE_INTEGRITY_FAILED"
+tar -xOzf "$ARCHIVE" zhihu-cli > "$STAGED" 2>/dev/null || fail_json "CLI archive does not contain zhihu-cli" "UPDATE_INTEGRITY_FAILED"
 chmod 755 "$STAGED"
 STAGED_VERSION=$(read_version "$STAGED")
 [ "$STAGED_VERSION" = "$LATEST_VERSION" ] || fail_json "Downloaded CLI version does not match manifest" "BINARY_INVALID"
 
 VERSION_DIR="$CLI_HOME/versions/$LATEST_VERSION"
 DEST="$VERSION_DIR/zhihu-cli"
-mkdir -p "$VERSION_DIR" "$CURRENT_DIR"
+mkdir -p "$CLI_HOME" "$CLI_HOME/versions" "$VERSION_DIR" "$CURRENT_DIR"
+chmod 700 "$CLI_HOME" "$CLI_HOME/versions" "$VERSION_DIR" "$CURRENT_DIR"
 cp "$STAGED" "$VERSION_DIR/.zhihu-cli.new.$$"
 chmod 755 "$VERSION_DIR/.zhihu-cli.new.$$"
 mv -f "$VERSION_DIR/.zhihu-cli.new.$$" "$DEST"
