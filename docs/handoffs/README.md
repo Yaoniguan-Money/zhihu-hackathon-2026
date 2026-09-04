@@ -73,3 +73,4 @@ docs/handoffs/<ticket-or-stage-id>.md
 | 开发人员 A 根计划迁移 | complete | [2026-09-04-developer-a-plan-migration](./2026-09-04-developer-a-plan-migration.md) |
 | 知乎 Access Secret 配置（含 CLI 重装） | complete | [2026-09-04-zhihu-access-secret-configured](./2026-09-04-zhihu-access-secret-configured.md) |
 | VCS0 版本基线 | complete | [2026-09-04-vcs0-version-baseline](./2026-09-04-vcs0-version-baseline.md) |
+| PF0 工具链骨架 | complete | [2026-09-04-pf0-toolchain-skeleton](./2026-09-04-pf0-toolchain-skeleton.md) |

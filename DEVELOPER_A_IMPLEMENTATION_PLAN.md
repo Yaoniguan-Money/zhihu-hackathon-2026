@@ -21,13 +21,13 @@
 
 ## 2. 审计现场：当前事实与 Gate
 
-截至本计划建立时，现场事实如下；这些事实不是实现完成声明。
+截至本计划建立时，现场事实如下；这些事实不是实现完成声明。当前进展以各阶段状态行与对应 handoff 为准：VCS0 与 PF0 已完成（Bun 1.4.1、Next.js 16.3.4、React 19.2.8、Convex 1.45.0、TypeScript 5.9.3 骨架与首个基线提交已建立），A1–A9 的业务代码与业务测试仍为 0%。
 
-- A1–A9 的业务代码、业务测试和工程骨架均为 0%。
-- 根目录不存在 <code>package.json</code>、Bun lockfile、Next.js/Convex 配置、源码目录或业务测试目录。
-- 当前机器尚未安装 Bun。
-- Git <code>main</code> 没有提交；现有项目成果均未跟踪，尚无本地可回滚基线。
-- 已有成果仅为规格/契约/ADR/交接文档、官方 Skill 与 CLI、3 个 JPG、6 个 GIF；它们不是可运行游戏。
+- A1–A9 的业务代码、业务测试均为 0%；PF0 仅建立工具链骨架，不含业务实现。
+- 根目录已存在 <code>package.json</code>、<code>bun.lock</code>、Next.js/Convex 配置与工具链冒烟测试（PF0 产物）。
+- 当前机器已安装 Bun 1.4.1。
+- Git <code>main</code> 已有本地基线提交，并按用户既有环节授权推送远端。
+- 已有成果为规格/契约/ADR/交接文档、官方 Skill 与 CLI、3 个 JPG、6 个 GIF，以及 PF0 工具链骨架；它们仍不是可运行游戏。
 - G0 Golden Case 缺用户提供的真实知乎 URL 与完整正文；G1 第二案件同样未解除。
 - 没有开发人员 B 已签署 Public Contract、认证设计或 P0 Cut 的证据。
 
@@ -35,7 +35,7 @@
 |---|---:|---|
 | R0 资源完成 | COMPLETE | 文档、官方 Skill/CLI 与素材已审计；不等于工程或 Git 基线完成。 |
 | VCS0 版本基线 | COMPLETE | Secret 扫描通过、纳入范围确认，基线提交 `cea25d5` 已建立；推送按用户既有环节授权执行。见 [VCS0 handoff](./docs/handoffs/2026-09-04-vcs0-version-baseline.md)。 |
-| PF0 工具链骨架 | READY | 只可在 VCS0 后开始；不得提前实现公开 schema、页面或 XState。 |
+| PF0 工具链骨架 | COMPLETE | Bun 1.4.1、Next.js 16.3.4、React 19.2.8、Convex 1.45.0、TypeScript 5.9.3 已固定；typecheck/test/build 验证通过。未实现公开 schema、产品页面或 XState。见 [PF0 handoff](./docs/handoffs/2026-09-04-pf0-toolchain-skeleton.md)。 |
 | D0 契约修复与 B 评审 | BLOCKED | A/B 必须先把本计划第 3 节的决定写入权威契约/规格（必要时 ADR），并留下 B 签署证据。 |
 | G0 Golden Case 输入 | BLOCKED | 用户须提供真实知乎 URL 和完整正文；不得用搜索摘要、旧缓存、示例或合成内容替代。 |
 | GC0 Golden Case 标注 | BLOCKED | G0 与 D0 均完成后，A/B 共同冻结第一案件的可验证标注。 |
@@ -106,7 +106,7 @@ AUTH0 + REL0 → AUTH1 知乎 OAuth（独立后续阶段）
 | 阶段 | 状态 | 实施结果与关键验收 |
 |---|---:|---|
 | VCS0 版本基线 | COMPLETE | 已完成：Secret 扫描通过，基线提交 `cea25d5` 建立，并按用户环节授权推送。见 [VCS0 handoff](./docs/handoffs/2026-09-04-vcs0-version-baseline.md)。 |
-| PF0 工具链骨架 | READY | 安装并固定 Bun 1.4；初始化 Next.js 16、React 19、TypeScript、Convex、测试和 typecheck 命令；不实现 Public schema、页面或 XState。 |
+| PF0 工具链骨架 | COMPLETE | 已完成：Bun 1.4.1 固定，Next.js 16 / React 19 / TypeScript / Convex 骨架与测试、typecheck、build 命令就绪；无公开 schema、页面或 XState。见 [PF0 handoff](./docs/handoffs/2026-09-04-pf0-toolchain-skeleton.md)。 |
 | D0 契约修复与 B 评审 | BLOCKED | 落实第 3 节到契约/规格/必要 ADR，建立三张矩阵，并由 B 签署 Public 类型、错误、认证与 P0 Cut。 |
 | PF1 Schema、Auth 与模型 Seam | BLOCKED | 建立 <code>shared/public/private</code> 物理入口、严格 runtime schema、Convex Anonymous Auth、八项显式 <code>AI_*</code> 配置、生产 OpenAI-compatible Adapter 与仅测试可用的 Scripted Adapter。 |
 | GC0 Golden Case 标注 | BLOCKED | 用户给出真实 URL 和完整正文后，A/B 共同确认 source、paragraphs、claims、relations、roles、policies、Evidence Catalog、truth、评分 rubric、代表性候选、validation 与 reveal fixture。 |

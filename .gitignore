@@ -4,3 +4,15 @@
 /看山三视图/
 /刘看山动态/
 
+
+# PF0 工具链
+node_modules/
+.next/
+out/
+next-env.d.ts
+*.tsbuildinfo
+.convex/
+convex/_generated/
+.env
+.env.*
+!.env.example
