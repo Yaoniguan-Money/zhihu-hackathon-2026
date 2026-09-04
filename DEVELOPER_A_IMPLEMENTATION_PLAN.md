@@ -108,7 +108,7 @@ AUTH0 + REL0 → AUTH1 知乎 OAuth（独立后续阶段）
 | VCS0 版本基线 | COMPLETE | 已完成：Secret 扫描通过，基线提交 `cea25d5` 建立，并按用户环节授权推送。见 [VCS0 handoff](./docs/handoffs/2026-09-04-vcs0-version-baseline.md)。 |
 | PF0 工具链骨架 | COMPLETE | 已完成：Bun 1.4.1 固定，Next.js 16 / React 19 / TypeScript / Convex 骨架与测试、typecheck、build 命令就绪；无公开 schema、页面或 XState。见 [PF0 handoff](./docs/handoffs/2026-09-04-pf0-toolchain-skeleton.md)。 |
 | D0 契约修复与 B 评审 | COMPLETE | 已完成：契约/规格/ADR 0004、三张矩阵、fixture 计划均已落地，B 侧已签署（2026-09-04 用户明确决定）。见 [D0 签署记录](./docs/handoffs/2026-09-04-d0-signoff.md)。 |
-| PF1 Schema、Auth 与模型 Seam | READY | 建立 <code>shared/public/private</code> 物理入口、严格 runtime schema、Convex Anonymous Auth、八项显式 <code>AI_*</code> 配置、生产 OpenAI-compatible Adapter 与仅测试可用的 Scripted Adapter。 |
+| PF1 Schema、Auth 与模型 Seam | IN PROGRESS | contracts 三入口 + 严格 runtime schema、八项显式 <code>AI_*</code> 配置、生产 OpenAI-compatible Adapter 与测试 Scripted Adapter 已完成并测试通过；Convex Anonymous Auth 代码就绪，push/运行时 smoke 待用户 <code>convex dev</code> 交互登录。见 [PF1 handoff](./docs/handoffs/2026-09-04-pf1-schema-auth-model-seam.md)。 |
 | GC0 Golden Case 标注 | READY | G0 与 D0 已解除：用户给出真实 URL，完整正文已冻结；A/B 共同确认 source、paragraphs、claims、relations、roles、policies、Evidence Catalog、truth、评分 rubric、代表性候选、validation 与 reveal fixture。 |
 | TB1 Source 与 Durable 建案 Walking Path | BLOCKED | 完成规范化、段落/引用、精确 Span、邀请码和额度、异步编译 Ticket、幂等及原子持久化；由 Scripted Adapter 驱动 Golden Case，绝不在生产失败时回退 fixture。 |
 | TB2 生产 Evidence Graph / Case Compiler | BLOCKED | 真实 OpenAI-compatible Adapter 生成候选；服务器分配 ID 并验证 Span、Relation、4+1 Role、Policy、Evidence Catalog、评分 rubric 和 Public Projection。 |

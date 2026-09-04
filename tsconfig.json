@@ -25,6 +25,12 @@
     "paths": {
       "@/*": [
         "./*"
+      ],
+      "@contracts/*": [
+        "./contracts/*"
+      ],
+      "@server/*": [
+        "./server/*"
       ]
     }
   },
