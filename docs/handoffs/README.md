@@ -84,3 +84,4 @@ docs/handoffs/<ticket-or-stage-id>.md
 | AI_* 显式配置与真实供应商 smoke | complete | [2026-09-05-ai-config-deepseek-smoke](./2026-09-05-ai-config-deepseek-smoke.md) |
 | TB1 Source 与 Durable 建案 | complete | [2026-09-05-tb1-source-durable-creation](./2026-09-05-tb1-source-durable-creation.md) |
 | TB2a Golden 系统案件种子与公开查询 | complete | [2026-09-05-tb2a-golden-seed-public-queries](./2026-09-05-tb2a-golden-seed-public-queries.md) |
+| TB3 Session Authority 与公开查询 | complete | [2026-09-05-tb3-session-authority](./2026-09-05-tb3-session-authority.md) |

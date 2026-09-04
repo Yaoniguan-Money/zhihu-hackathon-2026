@@ -274,6 +274,7 @@ export const initializeCreation = internalMutation({
         q
           .eq("identity_token", args.identity_token)
           .eq("operation_name", OPERATION_CREATE_FROM_SOURCE)
+          .eq("scope_id", "")
           .eq("client_action_id", args.client_action_id),
       )
       .unique();
@@ -373,6 +374,7 @@ export const initializeCreation = internalMutation({
     await ctx.db.insert("idempotency_records", {
       identity_token: args.identity_token,
       operation_name: OPERATION_CREATE_FROM_SOURCE,
+      scope_id: "",
       client_action_id: args.client_action_id,
       payload_hash: args.payload_hash,
       result_json: JSON.stringify(receipt),

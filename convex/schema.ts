@@ -45,16 +45,20 @@ export default defineSchema({
   idempotency_records: defineTable({
     identity_token: v.string(),
     operation_name: v.string(),
+    // 幂等键的作用域（CONTRACTS 12）：建案为空串、sessions.create 为 case_id、
+    // Session 范围写操作为 session_id。TB1 早期行无此字段（可选以兼容本地开发数据），
+    // 新写入一律携带。
+    scope_id: v.optional(v.string()),
     client_action_id: v.string(), // 调用方 UUID
     payload_hash: v.string(),
-    result_json: v.string(), // 首次持久化的 receipt（同键同哈希重放返回）
+    result_json: v.string(), // 首次持久化的 receipt / SessionView / request 等
     created_at_ms: v.number(),
-  })
-    .index("by_key", [
-      "identity_token",
-      "operation_name",
-      "client_action_id",
-    ]),
+  }).index("by_key", [
+    "identity_token",
+    "operation_name",
+    "scope_id",
+    "client_action_id",
+  ]),
 
   invite_codes: defineTable({
     code_hash: v.string(), // 只存 SHA-256；明文绝不入库（CONTRACTS 4.5）
@@ -93,4 +97,41 @@ export default defineSchema({
     compiler_version: v.string(), // 模型输入/输出 schema 版本（CONTRACTS 9.3）
     created_at_ms: v.number(),
   }).index("by_case_key", ["case_key"]),
+
+  // TB3：Session Authority（CONTRACTS 5 / 6 / 7 / 12）。
+  sessions: defineTable({
+    session_key: v.string(),
+    case_id: v.string(),
+    owner_identity: v.string(),
+    phase: v.union(
+      v.literal("briefing"),
+      v.literal("opening_statements"),
+      v.literal("investigation"),
+      v.literal("judging"),
+      v.literal("revealed"),
+      v.literal("failed"),
+    ),
+    board_json: v.string(), // BoardState，zod 校验后序列化
+    submitted_accusation_json: v.optional(v.string()), // FinalAccusation
+    reveal_available: v.boolean(),
+    terminal_error_json: v.optional(v.string()), // PublicError，仅 failed
+    created_at_ms: v.number(),
+    updated_at_ms: v.number(),
+  })
+    .index("by_session_key", ["session_key"])
+    .index("by_owner", ["owner_identity"]),
+
+  messages: defineTable({
+    session_id: v.string(),
+    message_id: v.string(),
+    payload_json: v.string(), // MessagePublic 判别联合，zod 校验后序列化
+    created_at_ms: v.number(),
+  }).index("by_session_created", ["session_id", "created_at_ms"]),
+
+  events: defineTable({
+    session_id: v.string(),
+    sequence: v.number(), // 从 1 开始连续（公开事件独立序列）
+    payload_json: v.string(), // GameEventPayload，zod 校验后序列化
+    occurred_at_ms: v.number(),
+  }).index("by_session_sequence", ["session_id", "sequence"]),
 });
