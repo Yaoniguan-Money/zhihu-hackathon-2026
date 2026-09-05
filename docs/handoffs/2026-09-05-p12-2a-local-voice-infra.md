@@ -18,13 +18,13 @@
 
 ## 明确未完成
 
-- **五音色 A/B 真人试听锁定**（用户动作）：`voice-pack.json` 当前 `locked=false`、五个槽位为候选映射（含 note），锁定后改 `locked=true`。
+- ~~五音色 A/B 真人试听锁定~~ **已完成（2026-09-05）**：用户以 `audition.py` 生成的 8 个中文候选全量试听后亲自分配——`voice-zh-01`=zf_xiaoxiao（记者）、`voice-zh-02`=zf_xiaoni（分析师）、`voice-zh-03`=zm_yunjian（工程师，较候选变更）、`voice-zh-04`=zm_yunyang（教授）、`voice-zh-05`=zm_yunxia（撰稿人，较候选变更）；`voice-pack.json` `locked=true`。重启 worker 后 `voice_pack_locked=true`，两个变更槽位经 `/tts` 实际合成验证通过（HTTP 200）。
 - REL1 的 P1-2 验收（正常路径 + 两条可见失败路径的人工确认）待用户批量验收。
 - A9 公网部署拓扑未决定（SPEC 明确不宣称公网语音能力）；生产 build 已包含两个 voice route，但生产环境未配置 `VOICE_WORKER_URL`/`CONVEX_SITE_URL` 时它们返回 `SERVICE_NOT_CONFIGURED`（契约行为，非缺陷）。
 
 ## 修改文件
 
-- `voice-worker/worker.py`、`voice-worker/download_models.py`、`voice-worker/voice-pack.json`、`voice-worker/models-manifest.json`、`voice-worker/requirements.lock.txt`（139 pin）— A9 Worker 与供应链。
+- `voice-worker/worker.py`、`voice-worker/download_models.py`、`voice-worker/voice-pack.json`、`voice-worker/models-manifest.json`、`voice-worker/requirements.lock.txt`（139 pin）、`voice-worker/audition.py`（音色试听辅助）— A9 Worker、供应链与音色锁定。
 - `convex/schema.ts` — `role_turn_tickets.envelope_json`。
 - `convex/roleTurns.ts` — finalizeTurnSuccess 持久化 Approved Speech Envelope。
 - `convex/voice.ts`、`convex/http.ts` — Envelope 查询、ASR/TTS 幂等记录、语音文件存取 HTTP action（`/api/voice/stored-speech`）。

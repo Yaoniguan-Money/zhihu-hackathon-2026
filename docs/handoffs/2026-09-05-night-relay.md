@@ -44,7 +44,7 @@
 3. ~~TB10~~ ✅ COMPLETE（2026-09-05，审计/lease/并发/泄漏扫描/恢复全链 + 发布 Gate smoke）
 4. ~~REL0~~ ✅ COMPLETE（2026-09-05，Convex Cloud + Vercel 生产部署；P1-1 后生产 functions 已同步并复验 8/8 PASS）
 5. ~~P1-1~~ ✅ COMPLETE（2026-09-05 深夜，commit 322b1e9；见 p11-1 handoff）
-6. ~~P1-2a~~ ✅ COMPLETE（2026-09-05 深夜；见 p12-2a handoff）——P1-2 收口仅剩：用户五音色 A/B 试听锁定 `voice-pack.json` + REL1 验收
+6. ~~P1-2a~~ ✅ COMPLETE（2026-09-05 深夜；见 p12-2a handoff）——五音色已由用户试听锁定（voice-pack locked=true），P1-2 实现收口；仅剩 REL1 批量验收
 7. P1-3 / G1：等用户提供第二篇真实 URL + 全文，保持 BLOCKED（不降级）。
 8. AUTH1：等用户知乎 App 凭据，保持 BLOCKED。
 

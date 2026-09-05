@@ -1,31 +1,27 @@
 {
-  "comment": "五音色槽位映射（CONTRACTS 14 / 计划 P1-2）。voice_id 是案件公开 Role 的音色槽位；kokoro_voice 为当前候选。locked=false：五音色须经用户 A/B 真人试听后锁定，锁定时改为 true 并可调整 kokoro_voice。pace_speed 把 RoleProsody.pace 映射为 Kokoro speed。本文件是唯一映射事实来源；代码不得内置任何音色默认值。",
-  "locked": false,
+  "comment": "五音色槽位映射（CONTRACTS 14 / 计划 P1-2）。voice_id 是案件公开 Role 的音色槽位；kokoro_voice 为锁定音色。2026-09-05 用户经 audition.py 全量试听 8 个中文候选后亲自分配并锁定（locked=true）；如需更换音色，修改本文件并重启 worker。pace_speed 把 RoleProsody.pace 映射为 Kokoro speed。本文件是唯一映射事实来源；代码不得内置任何音色默认值。",
+  "locked": true,
+  "locked_at": "2026-09-05",
   "voices": {
     "voice-zh-01": {
       "kokoro_voice": "zf_xiaoxiao",
-      "candidate": true,
-      "note": "候选：女声，沉稳（记者/播报位）——待 A/B 锁定"
+      "role_hint": "记者位（role-observer）"
     },
     "voice-zh-02": {
       "kokoro_voice": "zf_xiaoni",
-      "candidate": true,
-      "note": "候选：女声，清晰锐利（分析师位）——待 A/B 锁定"
+      "role_hint": "分析师位（role-analyst）"
     },
     "voice-zh-03": {
-      "kokoro_voice": "zf_xiaoyi",
-      "candidate": true,
-      "note": "候选：女声，偏年轻（工程师位）——待 A/B 锁定"
+      "kokoro_voice": "zm_yunjian",
+      "role_hint": "工程师位（role-engineer）"
     },
     "voice-zh-04": {
       "kokoro_voice": "zm_yunyang",
-      "candidate": true,
-      "note": "候选：男声，端正（教授位）——待 A/B 锁定"
+      "role_hint": "教授位（role-professor）"
     },
     "voice-zh-05": {
-      "kokoro_voice": "zm_yunxi",
-      "candidate": true,
-      "note": "候选：男声，圆滑（撰稿人/篡改位）——待 A/B 锁定"
+      "kokoro_voice": "zm_yunxia",
+      "role_hint": "撰稿人位（role-skeptic）"
     }
   },
   "pace_speed": {

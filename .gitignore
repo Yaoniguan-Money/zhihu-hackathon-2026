@@ -29,3 +29,6 @@ voice-worker/models/
 voice-worker/*.log
 
 __pycache__/
+
+# 试听产物（用户本地播放，不入仓库）
+voice-worker/audition/
