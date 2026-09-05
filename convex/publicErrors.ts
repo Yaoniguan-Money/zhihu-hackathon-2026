@@ -84,3 +84,12 @@ export function isConvexErrorPayload(
     typeof (data as { message: unknown }).message === "string"
   );
 }
+
+/** 读取被 ConvexError 携带的公开错误码（非错误返回 undefined）。 */
+export function convexErrorCode(error: unknown): string | undefined {
+  if (error instanceof ConvexError) {
+    const data = error.data as { code?: unknown };
+    return typeof data?.code === "string" ? data.code : undefined;
+  }
+  return undefined;
+}

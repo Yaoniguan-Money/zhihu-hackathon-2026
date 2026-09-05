@@ -313,6 +313,14 @@ export const initializeAccusation = internalMutation({
         golden.answer_distortion_types.length &&
       [...accusation.distortion_types].sort().join("|") ===
         [...golden.answer_distortion_types].sort().join("|");
+    // TB10：Reveal 判定审计（CONTRACTS 15）——只记录正确性与引用计数。
+    await ctx.runMutation(internal.audit.recordInternal, {
+      event: "reveal_judged",
+      case_id: session.case_id,
+      session_id: args.session_id,
+      client_action_id: args.client_action_id,
+      detail_code: playerCorrect ? "correct" : "incorrect",
+    });
 
     // 进入 judging（瞬态）。
     await ctx.db.patch(session._id, {

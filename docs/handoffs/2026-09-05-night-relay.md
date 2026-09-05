@@ -36,9 +36,9 @@
 
 ## 剩余依赖前沿（按序）
 
-1. **TB8**：Evidence 与 Board——`evidence.getAll`（Catalog 投影/解锁限制）、`evidence.updateBoard`（全量 CAS、`BOARD_REVISION_CONFLICT`）。
-2. **TB2b**：用户案件完整编译器（模型出角色/Catalog 候选、服务器定 4+1 与答案、rubric 落库、Public Projection；Golden 种子路径已示范全部形状）。
-3. **TB10**：P0 全链证明（幂等/并发/锁/泄漏扫描/恢复/审计/指标聚合）+ 发布 Gate 完整套件与真实供应商 smoke（模型 smoke 已多次实际通过）。
+1. ~~TB8~~ ✅ COMPLETE（2026-09-05，见 tb8 handoff）
+2. ~~TB2b~~ ✅ COMPLETE（2026-09-05，真实模型端到端通过）
+3. ~~TB10~~ ✅ COMPLETE（2026-09-05，审计/lease/并发/泄漏扫描/恢复全链 + 发布 Gate smoke；TB9 完整闭环复跑受供应商间歇故障影响待补，见 tb10 handoff）
 4. REL0/AUTH1/G1/P1：需外部资源或用户输入，保持 BLOCKED（不降级）。
 
 ## 继续工作的最小阅读顺序

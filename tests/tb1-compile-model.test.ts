@@ -145,7 +145,7 @@ describe("TB1 真实模型编译（显式 opt-in）", () => {
       if (!created.ok) return;
       const { case_id } = created.value;
 
-      const terminal = await waitForTerminal(token, case_id, 120_000);
+      const terminal = await waitForTerminal(token, case_id, 420_000);
       expect(terminal.status).toBe("succeeded");
 
       const artifacts = await callConvex<Artifacts | null>(
@@ -178,6 +178,6 @@ describe("TB1 真实模型编译（显式 opt-in）", () => {
         expect(span.end).toBeLessThanOrEqual(paragraph!.end);
       }
     },
-    { timeout: 150_000 },
+    { timeout: 480_000 },
   );
 });

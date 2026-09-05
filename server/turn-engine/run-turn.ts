@@ -59,17 +59,59 @@ export type TurnAttemptOutcome =
       attempts: number;
     };
 
+export type TurnAuditEvent =
+  | {
+      type: "model_call_started";
+      task: "role" | "validator";
+      attempt_index: number;
+    }
+  | {
+      type: "model_call_completed";
+      task: "role" | "validator";
+      attempt_index: number;
+      duration_ms: number;
+    }
+  | {
+      type: "model_call_failed";
+      task: "role" | "validator";
+      attempt_index: number;
+      duration_ms: number;
+      detail_code: string;
+    }
+  | { type: "candidate_generated"; attempt_index: number }
+  | {
+      type: "validation_completed";
+      attempt_index: number;
+      detail_code: string;
+    }
+  | { type: "rewrite_started"; attempt_index: number };
+
+export type TurnAuditEmitter = (event: TurnAuditEvent) => Promise<void>;
+
 export async function runGenerationAttempts(
   gateway: ModelGateway,
   context: TurnAttemptContext,
+  emit?: TurnAuditEmitter,
 ): Promise<TurnAttemptOutcome> {
   const faithful = context.policy.fidelity === "faithful";
   const maxAttempts = faithful ? MAX_FAITHFUL_ATTEMPTS : 1;
   const visibleIds = new Set(context.visibleClaims.map((c) => c.claim_id));
   let lastFeedback = "";
+  const record = async (event: TurnAuditEvent): Promise<void> => {
+    if (emit) await emit(event);
+  };
 
   for (let attemptIndex = 1; attemptIndex <= maxAttempts; attemptIndex += 1) {
+    if (attemptIndex > 1) {
+      await record({ type: "rewrite_started", attempt_index: attemptIndex });
+    }
     let candidate;
+    const roleCallStart = Date.now();
+    await record({
+      type: "model_call_started",
+      task: "role",
+      attempt_index: attemptIndex,
+    });
     try {
       candidate = roleCandidateModelSchema.parse(
         await gateway.generateStructured({
@@ -94,6 +136,16 @@ export async function runGenerationAttempts(
         }),
       );
     } catch (error) {
+      await record({
+        type: "model_call_failed",
+        task: "role",
+        attempt_index: attemptIndex,
+        duration_ms: Date.now() - roleCallStart,
+        detail_code:
+          error instanceof z.ZodError
+            ? "MODEL_PROTOCOL_INVALID"
+            : "MODEL_REQUEST_FAILED",
+      });
       return {
         ok: false,
         reason: "PROTOCOL_FAILURE",
@@ -105,6 +157,16 @@ export async function runGenerationAttempts(
         attempts: attemptIndex,
       };
     }
+    await record({
+      type: "model_call_completed",
+      task: "role",
+      attempt_index: attemptIndex,
+      duration_ms: Date.now() - roleCallStart,
+    });
+    await record({
+      type: "candidate_generated",
+      attempt_index: attemptIndex,
+    });
 
     // 服务器前置检查：支持 Claim 必须存在且属于可见集合。
     const supportVisible = candidate.support_claim_ids.every((id) =>
@@ -112,6 +174,12 @@ export async function runGenerationAttempts(
     );
 
     let validation;
+    const validatorCallStart = Date.now();
+    await record({
+      type: "model_call_started",
+      task: "validator",
+      attempt_index: attemptIndex,
+    });
     try {
       validation = roleValidationModelSchema.parse(
         await gateway.generateStructured({
@@ -129,7 +197,17 @@ export async function runGenerationAttempts(
           schema: roleValidationModelSchema,
         }),
       );
-    } catch {
+    } catch (error) {
+      await record({
+        type: "model_call_failed",
+        task: "validator",
+        attempt_index: attemptIndex,
+        duration_ms: Date.now() - validatorCallStart,
+        detail_code:
+          error instanceof z.ZodError
+            ? "VALIDATOR_PROTOCOL_INVALID"
+            : "VALIDATOR_REQUEST_FAILED",
+      });
       return {
         ok: false,
         reason: "PROTOCOL_FAILURE",
@@ -141,6 +219,17 @@ export async function runGenerationAttempts(
         attempts: attemptIndex,
       };
     }
+    await record({
+      type: "model_call_completed",
+      task: "validator",
+      attempt_index: attemptIndex,
+      duration_ms: Date.now() - validatorCallStart,
+    });
+    await record({
+      type: "validation_completed",
+      attempt_index: attemptIndex,
+      detail_code: validation.status,
+    });
 
     if (faithful) {
       if (

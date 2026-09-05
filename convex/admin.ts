@@ -1,7 +1,7 @@
 import { v } from "convex/values";
 import { ConvexError } from "convex/values";
 import { z } from "zod";
-import { internalMutation, internalQuery } from "./_generated/server";
+import { internalMutation, internalQuery, internalAction } from "./_generated/server";
 import { sha256Hex } from "@server/cases/hash.js";
 import {
   assertPlayableCaseInvariants,
@@ -167,8 +167,7 @@ export const seedCompilingCase = internalMutation({
 });
 
 /** 运维/测试工具：清空建案额度记账（不动案件、消息等业务数据）。 */
-export const resetQuotaState = internalMutation({
-  args: {},
+export const resetQuotaState = internalMutation({  args: {},
   handler: async (ctx) => {
     const rows = await ctx.db.query("creation_usage").collect();
     for (const row of rows) {
@@ -238,9 +237,12 @@ export const seedUnlockedEvidence = internalMutation({
   },
 });
 
-/** 测试工具：插入一个 accepted 的活动 Ticket 以制造排他锁占用。 */
+/** 测试工具：插入一个 accepted 的活动 Ticket 以制造排他锁占用（可带已过期 lease）。 */
 export const seedActiveTicket = internalMutation({
-  args: { session_id: v.string() },
+  args: {
+    session_id: v.string(),
+    lease_expires_at_ms: v.optional(v.number()),
+  },
   handler: async (ctx, args) => {
     const nowMs = Date.now();
     const requestId = `seed-req-${crypto.randomUUID()}`;
@@ -250,6 +252,9 @@ export const seedActiveTicket = internalMutation({
       role_id: "role-observer",
       kind: "ask",
       status: "accepted",
+      ...(args.lease_expires_at_ms !== undefined && {
+        lease_expires_at_ms: args.lease_expires_at_ms,
+      }),
       created_at_ms: nowMs,
       updated_at_ms: nowMs,
     });
@@ -370,5 +375,44 @@ export const seedSystemCase = internalMutation({
       created_at_ms: nowMs,
     });
     return { case_key: args.case_key, created: true };
+  },
+});
+
+/**
+ * 运维诊断工具：在 action 运行时内执行一次最小结构化模型调用，
+ * 返回 provider 层错误（含 cause），用于排查 AI_* 配置与供应商可用性。
+ * 只返回错误文本，不记录任何 Secret。
+ */
+export const debugModelProbe = internalAction({
+  args: {},
+  handler: async (ctx) => {
+    void ctx;
+    const { OpenAICompatibleModelGateway } = await import(
+      "@server/model-gateway/openai-compatible-gateway.js"
+    );
+    const { z: zod } = await import("zod");
+    try {
+      const gateway = OpenAICompatibleModelGateway.fromEnv();
+      const result = await gateway.generateStructured({
+        task: "role",
+        schemaName: "probe",
+        system: "只输出 JSON。",
+        prompt: '输出 {"speech":"测试"}',
+        schema: zod.object({ speech: zod.string() }),
+      });
+      return { ok: true as const, speech: result.speech };
+    } catch (error) {
+      const err = error as Error & { cause?: unknown; failure?: unknown };
+      const failure = err.failure as { code?: string } | undefined;
+      const cause = err.cause as Error | undefined;
+      return {
+        ok: false as const,
+        name: err.name,
+        message: err.message.slice(0, 300),
+        failure_code: failure?.code ?? null,
+        cause_name: cause?.name ?? null,
+        cause_message: cause?.message?.slice(0, 500) ?? null,
+      };
+    }
   },
 });

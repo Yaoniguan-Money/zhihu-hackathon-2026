@@ -1,6 +1,12 @@
 import { v } from "convex/values";
+import { ConvexError } from "convex/values";
 import { z } from "zod";
-import { mutation, query } from "./_generated/server";
+import {
+  action,
+  internalMutation,
+  query,
+} from "./_generated/server";
+import { internal } from "./_generated/api";
 import {
   boardLinkSchema,
   boardPlacementSchema,
@@ -12,7 +18,7 @@ import {
 import { clientActionIdSchema } from "@contracts/shared/index.js";
 import { evidenceCatalogItemPrivateSchema } from "@contracts/private/index.js";
 import { canonicalJson, sha256Hex } from "@server/cases/idempotency.js";
-import { throwPublicError } from "./publicErrors.js";
+import { throwPublicError, convexErrorCode } from "./publicErrors.js";
 import { gameEventPayloadSchema } from "@contracts/public/index.js";
 
 /**
@@ -96,7 +102,7 @@ export const getAll = query({
   },
 });
 
-export const updateBoard = mutation({
+export const updateBoard = action({
   args: {
     session_id: v.string(),
     placements: v.array(
@@ -123,13 +129,68 @@ export const updateBoard = mutation({
     if (!identity) {
       throwPublicError("AUTH_REQUIRED", "需要先建立会话身份");
     }
+    try {
+      return await ctx.runMutation(internal.evidence.updateBoardCore, {
+        identity_token: identity.tokenIdentifier,
+        ...args,
+      });
+    } catch (error) {
+      // 拒绝类审计在 action 层落库：mutation 事务会随 throw 回滚，
+      // 审计必须写入独立提交的事务（CONTRACTS 15 / SPEC 11）。
+      const code = convexErrorCode(error);
+      if (
+        code === "BOARD_REVISION_CONFLICT" ||
+        code === "IDEMPOTENCY_CONFLICT" ||
+        code === "EVIDENCE_UNAVAILABLE"
+      ) {
+        await ctx.runMutation(internal.audit.recordInternal, {
+          event:
+            code === "BOARD_REVISION_CONFLICT"
+              ? "board_revision_conflict"
+              : code === "IDEMPOTENCY_CONFLICT"
+                ? "idempotency_conflict"
+                : "board_evidence_rejected",
+          session_id: args.session_id,
+          client_action_id: args.client_action_id,
+          detail_code: code,
+        });
+      }
+      throw error;
+    }
+  },
+});
+
+export const updateBoardCore = internalMutation({
+  args: {
+    identity_token: v.string(),
+    session_id: v.string(),
+    placements: v.array(
+      v.object({
+        evidence_id: v.string(),
+        lane: v.string(),
+        x: v.number(),
+        y: v.number(),
+      }),
+    ),
+    links: v.array(
+      v.object({
+        link_id: v.string(),
+        from_evidence_id: v.string(),
+        to_evidence_id: v.string(),
+        relation: v.string(),
+      }),
+    ),
+    expected_revision: v.number(),
+    client_action_id: v.string(),
+  },
+  handler: async (ctx, args): Promise<BoardState> => {
     // client_action_id 属于输入 schema（缺失/非 UUID 一律 INVALID_ARGUMENT，CONTRACTS 12）
-    const parsed = updateBoardInputSchema.safeParse(args);
+    const { identity_token: identityToken, ...input_args } = args;
+    const parsed = updateBoardInputSchema.safeParse(input_args);
     if (!parsed.success) {
       throwPublicError("INVALID_ARGUMENT", "请求参数不合法");
     }
     const input = parsed.data;
-    const identityToken = identity.tokenIdentifier;
 
     const payloadHash = await sha256Hex(
       canonicalJson({

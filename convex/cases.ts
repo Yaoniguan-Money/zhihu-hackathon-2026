@@ -451,6 +451,27 @@ export const compileCaseWorker = internalAction({
       case_key: args.case_key,
     });
 
+    // TB10：编译期私有审计（CONTRACTS 15）——只记录任务名/耗时/错误码。
+    const audit = (
+      event: string,
+      fields: {
+        task?: string;
+        duration_ms?: number;
+        detail_code?: string;
+      } = {},
+    ) =>
+      ctx.runMutation(internal.audit.recordInternal, {
+        event,
+        case_id: args.case_key,
+        ...(fields.task !== undefined && { task: fields.task }),
+        ...(fields.duration_ms !== undefined && {
+          duration_ms: fields.duration_ms,
+        }),
+        ...(fields.detail_code !== undefined && {
+          detail_code: fields.detail_code,
+        }),
+      });
+
     try {
       // 1) Source Ingestion（A1，纯转换）
       const article = await ingestSourceSnapshot({
@@ -463,12 +484,31 @@ export const compileCaseWorker = internalAction({
 
       // 2) 模型候选（真实外部 Seam；maxRetries=0，无修复无重试）
       const gateway = OpenAICompatibleModelGateway.fromEnv();
-      const candidate = await gateway.generateStructured({
+      const claimCallStart = Date.now();
+      await audit("model_call_started", { task: "claim" });
+      let candidate;
+      try {
+        candidate = await gateway.generateStructured({
+          task: "claim",
+          schemaName: CLAIM_EXTRACTION_SCHEMA_VERSION,
+          system: claimExtractionSystemPrompt(),
+          prompt: claimExtractionUserPrompt({ numberedParagraphs }),
+          schema: candidateClaimGraphSchema,
+        });
+      } catch (error) {
+        await audit("model_call_failed", {
+          task: "claim",
+          duration_ms: Date.now() - claimCallStart,
+          detail_code:
+            error instanceof ModelRequestFailedError
+              ? error.failure.code
+              : "MODEL_REQUEST_FAILED",
+        });
+        throw error;
+      }
+      await audit("model_call_completed", {
         task: "claim",
-        schemaName: CLAIM_EXTRACTION_SCHEMA_VERSION,
-        system: claimExtractionSystemPrompt(),
-        prompt: claimExtractionUserPrompt({ numberedParagraphs }),
-        schema: candidateClaimGraphSchema,
+        duration_ms: Date.now() - claimCallStart,
       });
 
       // 3) 服务器分配可信 ID、定位 Span、装配并校验图谱
@@ -527,21 +567,40 @@ export const compileCaseWorker = internalAction({
       assertEvidenceGraphInvariants(graph);
 
       // 5) 案件编译候选（真实外部 Seam；模型只出内容与下标引用）
-      const compilationCandidate = candidateCaseCompilationSchema.parse(
-        await gateway.generateStructured({
-          task: "case",
-          schemaName: CASE_COMPILATION_SCHEMA_VERSION,
-          system: caseCompilationSystemPrompt(),
-          prompt: caseCompilationUserPrompt({
-            claims: claims.map((claim) => ({
-              proposition: claim.proposition,
-              excerpt: claim.source_span.text,
-            })),
-            relations: candidate.relations,
+      const caseCallStart = Date.now();
+      await audit("model_call_started", { task: "case" });
+      let compilationCandidate;
+      try {
+        compilationCandidate = candidateCaseCompilationSchema.parse(
+          await gateway.generateStructured({
+            task: "case",
+            schemaName: CASE_COMPILATION_SCHEMA_VERSION,
+            system: caseCompilationSystemPrompt(),
+            prompt: caseCompilationUserPrompt({
+              claims: claims.map((claim) => ({
+                proposition: claim.proposition,
+                excerpt: claim.source_span.text,
+              })),
+              relations: candidate.relations,
+            }),
+            schema: candidateCaseCompilationSchema,
           }),
-          schema: candidateCaseCompilationSchema,
-        }),
-      );
+        );
+      } catch (error) {
+        await audit("model_call_failed", {
+          task: "case",
+          duration_ms: Date.now() - caseCallStart,
+          detail_code:
+            error instanceof ModelRequestFailedError
+              ? error.failure.code
+              : "MODEL_PROTOCOL_INVALID",
+        });
+        throw error;
+      }
+      await audit("model_call_completed", {
+        task: "case",
+        duration_ms: Date.now() - caseCallStart,
+      });
 
       // 6) 服务器完成全部决定：可信 ID、voice、4+1、答案子集、
       //    unlock rule、rubric（总和恰 100）与 Public Projection
@@ -572,8 +631,14 @@ export const compileCaseWorker = internalAction({
         rules_json: JSON.stringify(artifacts.evidence_unlock_rules),
         rubric_json: JSON.stringify(artifacts.rubric),
       });
+      await audit("case_compile_succeeded", {
+        detail_code: CASE_COMPILATION_SCHEMA_VERSION,
+      });
     } catch (error) {
       const failure = toPrivateFailure(error);
+      await audit("case_compile_failed", {
+        detail_code: failure.code,
+      });
       await ctx.runMutation(internal.cases.finalizeCompilationFailure, {
         case_key: args.case_key,
         failure_json: JSON.stringify(failure),

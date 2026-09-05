@@ -91,3 +91,4 @@ docs/handoffs/<ticket-or-stage-id>.md
 | TB9 Final Accusation 与 Reveal | complete | [2026-09-05-tb9-accuse-reveal](./2026-09-05-tb9-accuse-reveal.md) |
 | TB8 Evidence 与 Board | complete | [2026-09-05-tb8-evidence-board](./2026-09-05-tb8-evidence-board.md) |
 | TB2b 用户案件完整编译器 | complete | [2026-09-05-tb2b-user-case-compiler](./2026-09-05-tb2b-user-case-compiler.md) |
+| TB10 P0 全链证明 | complete | [2026-09-05-tb10-full-chain](./2026-09-05-tb10-full-chain.md) |

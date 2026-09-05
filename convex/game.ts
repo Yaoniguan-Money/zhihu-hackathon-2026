@@ -25,18 +25,24 @@ import {
   ModelRequestFailedError,
 } from "@server/model-gateway/openai-compatible-gateway.js";
 import { ModelConfigMissingError as ConfigMissingError } from "@server/model-gateway/config.js";
-import { runGenerationAttempts } from "@server/turn-engine/run-turn.js";
-import { throwPublicError } from "./publicErrors.js";
+import {
+  runGenerationAttempts,
+  type TurnAuditEvent,
+} from "@server/turn-engine/run-turn.js";
+import { internal as internalApi } from "./_generated/api";
+import { throwPublicError, convexErrorCode } from "./publicErrors.js";
 
 /**
  * TB7：game.start 与五条开场（CONTRACTS 11，ENGINEERING_SPEC 5.2）。
  * briefing → opening_statements：按 CasePublic.roles 固定顺序串行五条开场；
  * 一次只存在一个活动 Ticket：worker 成功后才创建下一条（禁止预建队列）；
  * 五条全部批准才进入 investigation；任一失败 Session 进入 failed，历史保留。
+ * TB10：开场 Ticket 同样持有 lease 并写入私有审计。
  */
 
 const OPERATION_START = "game.start";
 const uuidSchema = z.uuid();
+const TICKET_LEASE_MS = 10 * 60_000;
 
 async function insertEvent(
   ctx: { db: import("./_generated/server").MutationCtx["db"] },
@@ -130,6 +136,7 @@ export const start = mutation({
       role_id: casePublic.roles[0]!.role_id,
       kind: "opening_statement",
       status: "accepted",
+      lease_expires_at_ms: nowMs + TICKET_LEASE_MS,
       created_at_ms: nowMs,
       updated_at_ms: nowMs,
     });
@@ -182,6 +189,7 @@ export const openingTicketFor = internalMutation({
       role_id: role.role_id,
       kind: "opening_statement",
       status: "accepted",
+      lease_expires_at_ms: nowMs + TICKET_LEASE_MS,
       created_at_ms: nowMs,
       updated_at_ms: nowMs,
     });
@@ -302,17 +310,40 @@ export const openingWorker = internalAction({
       request_id: args.request_id,
     });
 
+    const emitTurnAudit = async (event: TurnAuditEvent): Promise<void> => {
+      await ctx.runMutation(internalApi.audit.recordInternal, {
+        event: event.type,
+        case_id: context.case_id,
+        session_id: context.session_id,
+        request_id: args.request_id,
+        ...("task" in event ? { task: event.task } : {}),
+        ...("attempt_index" in event
+          ? { attempt_index: event.attempt_index }
+          : {}),
+        ...(event.type === "model_call_completed" ||
+        event.type === "model_call_failed"
+          ? { duration_ms: event.duration_ms }
+          : {}),
+        ...("detail_code" in event && event.detail_code !== undefined
+          ? { detail_code: event.detail_code }
+          : {}),
+      });
+    };
     try {
       const gateway = OpenAICompatibleModelGateway.fromEnv();
-      const outcome = await runGenerationAttempts(gateway, {
-        policy: context.policy,
-        displayName: context.displayName,
-        visibleClaims: context.visibleClaims,
-        history: context.history,
-        question: "（开场陈述）请向玩家做一段符合你身份与立场的开场陈述。",
-        mode: "opening",
-        incidentRef: args.request_id,
-      });
+      const outcome = await runGenerationAttempts(
+        gateway,
+        {
+          policy: context.policy,
+          displayName: context.displayName,
+          visibleClaims: context.visibleClaims,
+          history: context.history,
+          question: "（开场陈述）请向玩家做一段符合你身份与立场的开场陈述。",
+          mode: "opening",
+          incidentRef: args.request_id,
+        },
+        emitTurnAudit,
+      );
       if (!outcome.ok) {
         await failSessionAndTicket(ctx, args, outcome.failure);
         return;
@@ -449,15 +480,33 @@ export const accuse = action({
     if (!uuidSchema.safeParse(args.client_action_id).success) {
       throwPublicError("INVALID_ARGUMENT", "client_action_id 必须是 UUID");
     }
-    return ctx.runAction(internal.reveal.accuseCore, {
-      identity_token: identity.tokenIdentifier,
-      session_id: args.session_id,
-      suspect_role_id: args.suspect_role_id,
-      distortion_types: args.distortion_types,
-      evidence_ids: args.evidence_ids,
-      note: args.note,
-      client_action_id: args.client_action_id,
-    });
+    try {
+      return await ctx.runAction(internal.reveal.accuseCore, {
+        identity_token: identity.tokenIdentifier,
+        session_id: args.session_id,
+        suspect_role_id: args.suspect_role_id,
+        distortion_types: args.distortion_types,
+        evidence_ids: args.evidence_ids,
+        note: args.note,
+        client_action_id: args.client_action_id,
+      });
+    } catch (error) {
+      // Reveal gate 拒绝审计（SPEC 11）：action 层独立事务落库。
+      const code = convexErrorCode(error);
+      if (
+        code === "SESSION_PHASE_CONFLICT" ||
+        code === "EVIDENCE_UNAVAILABLE" ||
+        code === "ROLE_NOT_FOUND"
+      ) {
+        await ctx.runMutation(internal.audit.recordInternal, {
+          event: "reveal_gate_rejected",
+          session_id: args.session_id,
+          client_action_id: args.client_action_id,
+          detail_code: code,
+        });
+      }
+      throw error;
+    }
   },
 });
 

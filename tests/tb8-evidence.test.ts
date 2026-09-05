@@ -146,7 +146,7 @@ describe("TB8 Evidence 与 Board（本地后端，无模型）", () => {
 
   test("updateBoard：鉴权与输入 schema 拒绝（UUID/lane/坐标/自连/重复 placement）", async () => {
     const noAuth = await callConvex(
-      "mutation",
+      "action",
       "evidence:updateBoard",
       {
         session_id: "s",
@@ -165,7 +165,7 @@ describe("TB8 Evidence 与 Board（本地后端，无模型）", () => {
     await forceInvestigation(sessionId);
 
     const badUuid = await callConvex(
-      "mutation",
+      "action",
       "evidence:updateBoard",
       {
         session_id: sessionId,
@@ -180,7 +180,7 @@ describe("TB8 Evidence 与 Board（本地后端，无模型）", () => {
     expect(errorText(badUuid)).toContain("INVALID_ARGUMENT");
 
     const badLane = await callConvex(
-      "mutation",
+      "action",
       "evidence:updateBoard",
       {
         session_id: sessionId,
@@ -197,7 +197,7 @@ describe("TB8 Evidence 与 Board（本地后端，无模型）", () => {
     expect(errorText(badLane)).toContain("INVALID_ARGUMENT");
 
     const outOfRange = await callConvex(
-      "mutation",
+      "action",
       "evidence:updateBoard",
       {
         session_id: sessionId,
@@ -214,7 +214,7 @@ describe("TB8 Evidence 与 Board（本地后端，无模型）", () => {
     expect(errorText(outOfRange)).toContain("INVALID_ARGUMENT");
 
     const selfLink = await callConvex(
-      "mutation",
+      "action",
       "evidence:updateBoard",
       {
         session_id: sessionId,
@@ -245,7 +245,7 @@ describe("TB8 Evidence 与 Board（本地后端，无模型）", () => {
       { admin: true },
     );
     const duplicate = await callConvex(
-      "mutation",
+      "action",
       "evidence:updateBoard",
       {
         session_id: sessionId,
@@ -266,7 +266,7 @@ describe("TB8 Evidence 与 Board（本地后端，无模型）", () => {
   test("updateBoard：SESSION_NOT_FOUND / 越权 / 阶段门控", async () => {
     const token = await signInAnonymous();
     const missing = await callConvex(
-      "mutation",
+      "action",
       "evidence:updateBoard",
       {
         session_id: "no-such-session",
@@ -282,7 +282,7 @@ describe("TB8 Evidence 与 Board（本地后端，无模型）", () => {
 
     const foreignSessionId = await createSession(await signInAnonymous());
     const foreign = await callConvex(
-      "mutation",
+      "action",
       "evidence:updateBoard",
       {
         session_id: foreignSessionId,
@@ -298,7 +298,7 @@ describe("TB8 Evidence 与 Board（本地后端，无模型）", () => {
 
     const sessionId = await createSession(token);
     const inBriefing = await callConvex(
-      "mutation",
+      "action",
       "evidence:updateBoard",
       {
         session_id: sessionId,
@@ -320,7 +320,7 @@ describe("TB8 Evidence 与 Board（本地后端，无模型）", () => {
 
     // 版本冲突先于内容校验：expected_revision 与当前 revision 不一致
     const stale = await callConvex(
-      "mutation",
+      "action",
       "evidence:updateBoard",
       {
         session_id: sessionId,
@@ -338,7 +338,7 @@ describe("TB8 Evidence 与 Board（本地后端，无模型）", () => {
 
     // 未解锁的 Evidence 不得上板（含跨 Session/陌生 ID）
     const locked = await callConvex(
-      "mutation",
+      "action",
       "evidence:updateBoard",
       {
         session_id: sessionId,
@@ -363,7 +363,7 @@ describe("TB8 Evidence 与 Board（本地后端，无模型）", () => {
 
     // link 两端必须都已放置
     const unplacedLink = await callConvex(
-      "mutation",
+      "action",
       "evidence:updateBoard",
       {
         session_id: sessionId,
@@ -416,7 +416,7 @@ describe("TB8 Evidence 与 Board（本地后端，无模型）", () => {
     );
 
     const first = await callConvex<BoardStateLike>(
-      "mutation",
+      "action",
       "evidence:updateBoard",
       {
         session_id: sessionId,
@@ -451,7 +451,7 @@ describe("TB8 Evidence 与 Board（本地后端，无模型）", () => {
 
     // 全量替换：rev1 → rev2 只保留一个 placement、无 link
     const second = await callConvex<BoardStateLike>(
-      "mutation",
+      "action",
       "evidence:updateBoard",
       {
         session_id: sessionId,
@@ -523,7 +523,7 @@ describe("TB8 Evidence 与 Board（本地后端，无模型）", () => {
       { evidence_id: "ev-meta-quote", lane: "source", x: 0.2, y: 0.2 },
     ];
     const first = await callConvex<BoardStateLike>(
-      "mutation",
+      "action",
       "evidence:updateBoard",
       {
         session_id: sessionId,
@@ -539,7 +539,7 @@ describe("TB8 Evidence 与 Board（本地后端，无模型）", () => {
     expect(first.value.revision).toBe(1);
 
     const replay = await callConvex<BoardStateLike>(
-      "mutation",
+      "action",
       "evidence:updateBoard",
       {
         session_id: sessionId,
@@ -556,7 +556,7 @@ describe("TB8 Evidence 与 Board（本地后端，无模型）", () => {
     }
 
     const conflict = await callConvex(
-      "mutation",
+      "action",
       "evidence:updateBoard",
       {
         session_id: sessionId,

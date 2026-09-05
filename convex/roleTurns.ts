@@ -26,22 +26,29 @@ import { evidenceGraphPrivateSchema } from "@contracts/private/index.js";
 import { sha256Hex } from "@server/cases/hash.js";
 import { canonicalJson } from "@server/cases/idempotency.js";
 import {
-  ModelRequestFailedError,
   OpenAICompatibleModelGateway,
+  ModelRequestFailedError,
 } from "@server/model-gateway/openai-compatible-gateway.js";
 import { ModelConfigMissingError as ConfigMissingError } from "@server/model-gateway/config.js";
-import { runGenerationAttempts } from "@server/turn-engine/run-turn.js";
-import { throwPublicError } from "./publicErrors.js";
+import {
+  runGenerationAttempts,
+  type TurnAuditEvent,
+} from "@server/turn-engine/run-turn.js";
+import { internal as internalApi } from "./_generated/api";
+import { throwPublicError, convexErrorCode } from "./publicErrors.js";
 
 /**
  * TB4：角色回合（CONTRACTS 5 / 8 / 9，ENGINEERING_SPEC 5.2 / 7）。
  * ask 是薄 action：auth/schema 后全部权威判定（阶段、Role、排他锁、幂等）
  * 在 initializeAskTurn 单事务内完成；模型调用在 worker（maxRetries=0）。
  * 忠实角色只发布 Validator 判为 entailed 的完整消息；最多两次语义重写。
+ * TB10：Ticket 持有 lease；过期锁在下一个写操作事务中被显式判失败
+ * （TURN_LEASE_EXPIRED），不自动重新调用模型。
  */
 
 const OPERATION_ASK = "roleTurns.ask";
 const uuidSchema = z.uuid();
+const TICKET_LEASE_MS = 10 * 60_000;
 
 function newOpaqueId(prefix: string): string {
   try {
@@ -87,20 +94,39 @@ export const ask = action({
     if (!parsed.success || args.text.trim() === "") {
       throwPublicError("INVALID_ARGUMENT", "请求参数不合法");
     }
-    const { receipt } = await ctx.runMutation(internal.roleTurns.initializeAskTurn, {
-      identity_token: identity.tokenIdentifier,
-      session_id: args.session_id,
-      role_id: args.role_id,
-      mode: args.mode,
-      text: args.text,
-      source: args.source,
-      client_action_id: args.client_action_id,
-    });
-    return receipt;
+    try {
+      const { receipt } = await ctx.runMutation(
+        internal.roleTurns.initializeAskTurn,
+        {
+          identity_token: identity.tokenIdentifier,
+          session_id: args.session_id,
+          role_id: args.role_id,
+          mode: args.mode,
+          text: args.text,
+          source: args.source,
+          client_action_id: args.client_action_id,
+        },
+      );
+      return receipt;
+    } catch (error) {
+      // 拒绝类审计在 action 层落库：mutation 事务随 throw 回滚，
+      // 审计必须写入独立提交的事务（CONTRACTS 15 / SPEC 11）。
+      const code = convexErrorCode(error);
+      if (code === "ROLE_TURN_BUSY" || code === "IDEMPOTENCY_CONFLICT") {
+        await ctx.runMutation(internal.audit.recordInternal, {
+          event:
+            code === "ROLE_TURN_BUSY"
+              ? "role_turn_busy"
+              : "idempotency_conflict",
+          session_id: args.session_id,
+          client_action_id: args.client_action_id,
+          detail_code: code,
+        });
+      }
+      throw error;
+    }
   },
-});
-
-export const observe = query({
+});export const observe = query({
   args: { request_id: v.string() },
   handler: async (ctx, args): Promise<PublicRoleTurn | null> => {
     const identity = await ctx.auth.getUserIdentity();
@@ -229,7 +255,9 @@ export const initializeAskTurn = internalMutation({
       throwPublicError("ROLE_NOT_FOUND", "角色不存在");
     }
 
-    // 排他锁：存在 accepted/working Ticket 立即 BUSY，不排队（SPEC §8）。
+    // 排他锁（CONTRACTS 8.2）：先显式清出已过期的 accepted/working Ticket
+    // （TURN_LEASE_EXPIRED，不自动重调模型），再检查存活锁。
+    await expireStaleTickets(ctx, args.session_id);
     const active = await ctx.db
       .query("role_turn_tickets")
       .withIndex("by_session_status", (q) =>
@@ -243,6 +271,12 @@ export const initializeAskTurn = internalMutation({
       )
       .collect();
     if (active.length + working.length > 0) {
+      await ctx.runMutation(internalApi.audit.recordInternal, {
+        event: "role_turn_busy",
+        case_id: session.case_id,
+        session_id: args.session_id,
+        client_action_id: args.client_action_id,
+      });
       throwPublicError("ROLE_TURN_BUSY", "已有角色回合正在进行");
     }
 
@@ -271,6 +305,7 @@ export const initializeAskTurn = internalMutation({
       role_id: args.role_id,
       kind: "ask",
       status: "accepted",
+      lease_expires_at_ms: nowMs + TICKET_LEASE_MS,
       created_at_ms: nowMs,
       updated_at_ms: nowMs,
     });
@@ -317,6 +352,55 @@ async function insertEvent(
     occurred_at_ms: Date.now(),
   });
   return sequence;
+}
+
+/**
+ * TB10：把 lease 已过期的 accepted/working Ticket 显式判为失败
+ * （CONTRACTS 8.2 / 13.2：TURN_LEASE_EXPIRED → ROLE_TURN_FAILED），
+ * 释放排他锁；不自动重新调用模型。缺省 lease（旧数据/seed）视为未过期。
+ */
+async function expireStaleTickets(
+  ctx: import("./_generated/server").MutationCtx,
+  sessionId: string,
+): Promise<void> {
+  const nowMs = Date.now();
+  for (const status of ["accepted", "working"] as const) {
+    const tickets = await ctx.db
+      .query("role_turn_tickets")
+      .withIndex("by_session_status", (q) =>
+        q.eq("session_id", sessionId).eq("status", status),
+      )
+      .collect();
+    for (const ticket of tickets) {
+      if (
+        ticket.lease_expires_at_ms === undefined ||
+        ticket.lease_expires_at_ms > nowMs
+      ) {
+        continue;
+      }
+      const publicError = {
+        code: "ROLE_TURN_FAILED",
+        message: "角色回合失败，可稍后重试",
+      } as const;
+      await insertEvent(ctx, sessionId, {
+        type: "role_turn_failed",
+        request_id: ticket.request_id,
+        role_id: ticket.role_id,
+        error: publicError,
+      });
+      await ctx.db.patch(ticket._id, {
+        status: "failed",
+        error_json: JSON.stringify(publicError),
+        updated_at_ms: nowMs,
+      });
+      await ctx.runMutation(internalApi.audit.recordInternal, {
+        event: "turn_lease_expired",
+        session_id: sessionId,
+        request_id: ticket.request_id,
+        detail_code: "TURN_LEASE_EXPIRED",
+      });
+    }
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -372,20 +456,43 @@ export const roleTurnWorker = internalAction({
     });
 
     const context = loaded as TurnContext & { kind: string };
+    const emitTurnAudit = async (event: TurnAuditEvent): Promise<void> => {
+      await ctx.runMutation(internalApi.audit.recordInternal, {
+        event: event.type,
+        case_id: context.case_id,
+        session_id: context.session_id,
+        request_id: args.request_id,
+        ...("task" in event ? { task: event.task } : {}),
+        ...( "attempt_index" in event
+          ? { attempt_index: event.attempt_index }
+          : {}),
+        ...(event.type === "model_call_completed" ||
+        event.type === "model_call_failed"
+          ? { duration_ms: event.duration_ms }
+          : {}),
+        ...("detail_code" in event && event.detail_code !== undefined
+          ? { detail_code: event.detail_code }
+          : {}),
+      });
+    };
     try {
       const gateway = OpenAICompatibleModelGateway.fromEnv();
-      const outcome = await runGenerationAttempts(gateway, {
-        policy: context.policy,
-        displayName: context.displayName,
-        visibleClaims: context.visibleClaims.map((claim) => ({
-          claim_id: claim.claim_id,
-          proposition: claim.proposition,
-        })),
-        history: context.history,
-        question: context.question,
-        mode: context.mode,
-        incidentRef: args.request_id,
-      });
+      const outcome = await runGenerationAttempts(
+        gateway,
+        {
+          policy: context.policy,
+          displayName: context.displayName,
+          visibleClaims: context.visibleClaims.map((claim) => ({
+            claim_id: claim.claim_id,
+            proposition: claim.proposition,
+          })),
+          history: context.history,
+          question: context.question,
+          mode: context.mode,
+          incidentRef: args.request_id,
+        },
+        emitTurnAudit,
+      );
 
       if (!outcome.ok) {
         // 协议/校验器失败与语义耗尽都是终止结果；私有原因进 incident，公开只映射。
@@ -585,6 +692,7 @@ export const markTurnWorking = internalMutation({
     if (!ticket || ticket.status !== "accepted") return;
     await ctx.db.patch(ticket._id, {
       status: "working",
+      lease_expires_at_ms: Date.now() + TICKET_LEASE_MS,
       updated_at_ms: Date.now(),
     });
     await insertEvent(ctx, ticket.session_id, {
@@ -665,12 +773,23 @@ export const finalizeTurnSuccess = internalMutation({
         type: "evidence_unlocked",
         evidence_ids: newlyUnlocked,
       });
+      await ctx.runMutation(internalApi.audit.recordInternal, {
+        event: "evidence_unlock_evaluated",
+        session_id: ticket.session_id,
+        request_id: ticket.request_id,
+        detail_code: `unlocked:${newlyUnlocked.length}`,
+      });
     }
     await insertEvent(ctx, ticket.session_id, {
       type: "role_message_published",
       request_id: ticket.request_id,
       message_id: messageId,
       role_id: ticket.role_id,
+    });
+    await ctx.runMutation(internalApi.audit.recordInternal, {
+      event: "role_turn_succeeded",
+      session_id: ticket.session_id,
+      request_id: ticket.request_id,
     });
     await ctx.db.patch(ticket._id, {
       status: "succeeded",
@@ -720,6 +839,12 @@ export const finalizeTurnFailure = internalMutation({
       request_id: ticket.request_id,
       role_id: ticket.role_id,
       error: publicError,
+    });
+    await ctx.runMutation(internalApi.audit.recordInternal, {
+      event: "role_turn_failed",
+      session_id: ticket.session_id,
+      request_id: ticket.request_id,
+      detail_code: failure.code,
     });
     await ctx.db.patch(ticket._id, {
       status: "failed",

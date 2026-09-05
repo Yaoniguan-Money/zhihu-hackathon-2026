@@ -156,11 +156,37 @@ export default defineSchema({
     unlocked_ids_json: v.optional(v.string()), // succeeded：新解锁 EvidenceId[]
     validation_json: v.optional(v.string()), // succeeded：Validator 结果摘要（Reveal 构建用）
     error_json: v.optional(v.string()), // failed：PublicError
+    // TB10：lease。accepted/working Ticket 持有 Session 排他锁直至终态或过期；
+    // 过期锁在下一个写操作的事务中被显式判失败（TURN_LEASE_EXPIRED），
+    // 不自动重新调用模型。缺省（旧数据/seed）视为未过期。
+    lease_expires_at_ms: v.optional(v.number()),
     created_at_ms: v.number(),
     updated_at_ms: v.number(),
   })
     .index("by_request_id", ["request_id"])
     .index("by_session_status", ["session_id", "status"]),
+
+  // TB10：私有审计事件（CONTRACTS 15 / SPEC 11）。独立于公开事件序列，
+  // 不设全局连续 sequence（公开编号缺口不泄露私有步骤）。
+  // 只记录 ID、任务名、attempt、错误码与计数；禁止 Prompt、候选原文、完整正文。
+  private_audit: defineTable({
+    event: v.string(), // model_call_started/completed/failed、candidate_generated、
+    // validation_completed、rewrite_started、distortion_policy_checked、
+    // evidence_unlock_evaluated、reveal_judged、turn_lease_expired、
+    // role_turn_busy/succeeded/failed、idempotency_conflict、
+    // board_revision_conflict、case_compile_succeeded/failed
+    case_id: v.optional(v.string()),
+    session_id: v.optional(v.string()),
+    request_id: v.optional(v.string()),
+    client_action_id: v.optional(v.string()),
+    task: v.optional(v.string()), // claim / case / role / validator / reveal
+    attempt_index: v.optional(v.number()),
+    duration_ms: v.optional(v.number()),
+    detail_code: v.optional(v.string()), // 仅错误码/状态码，不含文本体
+    created_at_ms: v.number(),
+  })
+    .index("by_event", ["event"])
+    .index("by_session_created", ["session_id", "created_at_ms"]),
 
   // TB4：Session 已解锁 Evidence（服务器规则计算，CONTRACTS 6）。
   session_evidence_unlocked: defineTable({
