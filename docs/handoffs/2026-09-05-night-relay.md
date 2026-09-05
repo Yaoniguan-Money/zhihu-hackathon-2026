@@ -19,6 +19,7 @@
 | TB4 Faithful 成功回合 | 9610862 | ask/observe 全链路、生成+校验+重写门控、证据解锁；真实模型 entailed 回合通过 |
 | TB5+TB6+TB7 | df6ae4a | 重写矩阵/Distorted 门控（Scripted 11 项确定性测试）+ game.start 串行五条开场；真实五条开场 218s 通过 |
 | TB9 指控与 Reveal | 825a345 | 服务器判定与两项评分、truth chain/altered links、Reveal 模型候选严格校验、原子 revealed；真实完整 golden 闭环 293s 通过（开场→审讯→指控→Reveal） |
+| P1-1 Recording 与对质 | 322b1e9 | saveRecording（支持∩已公开可见推导、创建即解锁、内容级去重）+ presentRecording（共用排他锁、对质硬约束、rebuttal 服务器权威）；Scripted 8 项 + 集成 7 项 + 真实模型对质闭环通过；生产 `agile-turtle-860` 已部署并 8/8 验证 PASS |
 
 另外：PF1 补齐 auth.config.ts + JWKS（JWT 校验链路首次真正打通）、AI_* 配置落地（DeepSeek v4）+ smoke、AI 配置 handoff。
 
@@ -38,8 +39,12 @@
 
 1. ~~TB8~~ ✅ COMPLETE（2026-09-05，见 tb8 handoff）
 2. ~~TB2b~~ ✅ COMPLETE（2026-09-05，真实模型端到端通过）
-3. ~~TB10~~ ✅ COMPLETE（2026-09-05，审计/lease/并发/泄漏扫描/恢复全链 + 发布 Gate smoke；TB9 完整闭环复跑受供应商间歇故障影响待补，见 tb10 handoff）
-4. REL0/AUTH1/G1/P1：需外部资源或用户输入，保持 BLOCKED（不降级）。
+3. ~~TB10~~ ✅ COMPLETE（2026-09-05，审计/lease/并发/泄漏扫描/恢复全链 + 发布 Gate smoke）
+4. ~~REL0~~ ✅ COMPLETE（2026-09-05，Convex Cloud + Vercel 生产部署；P1-1 后生产 functions 已同步并复验 8/8 PASS）
+5. ~~P1-1~~ ✅ COMPLETE（2026-09-05 深夜，commit 322b1e9；见 p11-1 handoff）
+6. P1-2 本地 Voice：模型/音色锁定需用户 A/B 真人试听；基建（Python Worker、同源 Route、供应链固定哈希）可先开工。
+7. P1-3 / G1：等用户提供第二篇真实 URL + 全文，保持 BLOCKED（不降级）。
+8. AUTH1：等用户知乎 App 凭据，保持 BLOCKED。
 
 ## 继续工作的最小阅读顺序
 
