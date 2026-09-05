@@ -1,6 +1,6 @@
-# GC0 标注草案（DRAFT — 待 A/B 与用户确认后冻结）
+# GC0 标注（FROZEN — 用户已于 2026-09-05 签署确认）
 
-状态：**草案**。本目录内所有文件均为提案，尚未冻结；确认通过后按“冻结流程”移出本目录并记录。
+状态：**已冻结**。本目录内文件为发布基线：Canonical Source sha256 `2b8556e8ac6e07e53b4695a35d1784be743904e89cc22be97b5339a4949516b4`（1,733 UTF-16 code units，33 段块）。九项确认清单已于 2026-09-05 由用户逐项通过；任何修改都需要重算哈希、重建全部 Span 并重新签署。
 
 依据：`docs/developer-a/CONTRACTS.md` 第 3、4、6、10 节；`DEVELOPER_A_IMPLEMENTATION_PLAN.md` GC0 行；Canonical Source 为上级目录 `source.md`（sha256 `2b8556e8ac6e07e53b4695a35d1784be743904e89cc22be97b5339a4949516b4`，1,733 UTF-16 code units，33 段块）。
 

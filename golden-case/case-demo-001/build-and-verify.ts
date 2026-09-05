@@ -1,7 +1,7 @@
 /**
  * GC0 草案构建与验证脚本（golden-case/case-demo-001）。
  *
- * 运行：`bun golden-case/case-demo-001/gc0-draft/build-and-verify.ts`
+ * 运行：`bun golden-case/case-demo-001/build-and-verify.ts`
  *
  * 职责：
  * 1. 读取冻结的 Canonical Source（source.md），校验 sha256 与 UTF-16 长度；
@@ -33,22 +33,22 @@ import {
   type EvidenceUnlockRulePrivate,
   type GoldenAnswerPrivate,
   type RolePrivatePolicy,
-} from "../../../contracts/private/index.js";
+} from "../../contracts/private/index.js";
 import {
   casePublicSchema,
   evidenceTypeSchema,
   finalAccusationSchema,
   revealResultSchema,
   type CasePublic,
-} from "../../../contracts/public/index.js";
+} from "../../contracts/public/index.js";
 import {
   sourceSpanSchema,
   validateSourceSpan,
   type RelationType,
-} from "../../../contracts/shared/index.js";
+} from "../../contracts/shared/index.js";
 
 const HERE = fileURLToPath(new URL(".", import.meta.url));
-const CASE_DIR = join(HERE, "..");
+const CASE_DIR = HERE;
 const CANONICAL_PATH = join(CASE_DIR, "source.md");
 const METADATA_PATH = join(CASE_DIR, "source-metadata.json");
 

@@ -4,13 +4,12 @@ import { join } from "node:path";
 import { callConvex, CASE_DIR } from "./convex-local.js";
 
 /**
- * 把冻结的 Golden 标注（当前位于 gc0-draft/ 工作基线）通过内部
- * admin:seedSystemCase 直接落库为系统案件——不走模型（ADR 0004）。
+ * 把冻结的 Golden 标注（golden-case/case-demo-001/，2026-09-05 用户签署冻结）
+ * 通过内部 admin:seedSystemCase 直接落库为系统案件——不走模型（ADR 0004）。
  * 幂等：重复调用返回 created:false。
  */
 
 const GOLDEN_DIR = join(CASE_DIR, "golden-case", "case-demo-001");
-const DRAFT_DIR = join(GOLDEN_DIR, "gc0-draft");
 
 export const GOLDEN_CASE_ID = "case-demo-001";
 
@@ -34,12 +33,12 @@ export async function seedGoldenCaseViaAdmin(): Promise<{
     );
   }
 
-  const casePublic = await readJson(join(DRAFT_DIR, "case-public.json"));
+  const casePublic = await readJson(join(GOLDEN_DIR, "case-public.json"));
   const casePrivate = (await readJson(
-    join(DRAFT_DIR, "case-private.json"),
+    join(GOLDEN_DIR, "case-private.json"),
   )) as Record<string, unknown>;
-  const paragraphs = await readJson(join(DRAFT_DIR, "paragraphs.json"));
-  const rubric = await readJson(join(DRAFT_DIR, "rubric.json"));
+  const paragraphs = await readJson(join(GOLDEN_DIR, "paragraphs.json"));
+  const rubric = await readJson(join(GOLDEN_DIR, "rubric.json"));
 
   const result = await callConvex<{ case_key: string; created: boolean }>(
     "mutation",

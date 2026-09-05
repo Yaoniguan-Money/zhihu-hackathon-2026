@@ -80,7 +80,7 @@ docs/handoffs/<ticket-or-stage-id>.md
 | PF1 契约入口与模型 Seam | complete | [2026-09-04-pf1-schema-auth-model-seam](./2026-09-04-pf1-schema-auth-model-seam.md) |
 | 工作区 ASCII 路径迁移与 Convex 本地后端验证 | complete | [2026-09-05-workspace-ascii-path](./2026-09-05-workspace-ascii-path.md) |
 | 官方 zhihu Skill 升级至 0.5.3-beta | complete | [2026-09-05-zhihu-skill-upgrade](./2026-09-05-zhihu-skill-upgrade.md) |
-| GC0 标注草案（待确认冻结） | blocked | [2026-09-05-gc0-annotation-draft](./2026-09-05-gc0-annotation-draft.md) |
+| GC0 标注（已冻结） | complete | [2026-09-05-gc0-annotation-draft](./2026-09-05-gc0-annotation-draft.md) |
 | AI_* 显式配置与真实供应商 smoke | complete | [2026-09-05-ai-config-deepseek-smoke](./2026-09-05-ai-config-deepseek-smoke.md) |
 | TB1 Source 与 Durable 建案 | complete | [2026-09-05-tb1-source-durable-creation](./2026-09-05-tb1-source-durable-creation.md) |
 | TB2a Golden 系统案件种子与公开查询 | complete | [2026-09-05-tb2a-golden-seed-public-queries](./2026-09-05-tb2a-golden-seed-public-queries.md) |
