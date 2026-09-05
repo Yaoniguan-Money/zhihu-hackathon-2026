@@ -40,6 +40,7 @@ export function compileContextPublicError(
     case "CREATION_QUOTA_EXCEEDED":
       return { code: "RATE_LIMITED", message: "建案额度已用尽，请稍后再试" };
     case "SOURCE_SPAN_INVALID":
+    case "CASE_INVARIANT_FAILED":
     case "NEW_FACT_INTRODUCED":
     case "MODEL_REQUEST_FAILED":
     case "MODEL_PROTOCOL_INVALID":

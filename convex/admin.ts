@@ -92,6 +92,35 @@ export const compiledArtifactsInternal = internalQuery({
   },
 });
 
+/** 测试工具：读取案件完整私有工件（TB2b 编译器端到端断言用）。 */
+export const caseArtifactsInternal = internalQuery({
+  args: { case_key: v.string() },
+  handler: async (ctx, args) => {
+    const privateDoc = await ctx.db
+      .query("case_private")
+      .withIndex("by_case_key", (q) => q.eq("case_key", args.case_key))
+      .unique();
+    const caseDoc = await ctx.db
+      .query("cases")
+      .withIndex("by_case_key", (q) => q.eq("case_key", args.case_key))
+      .unique();
+    if (!privateDoc || !caseDoc) return null;
+    return {
+      status: caseDoc.status,
+      visibility: caseDoc.visibility,
+      title: caseDoc.title ?? null,
+      summary: caseDoc.summary ?? null,
+      theme: caseDoc.theme ?? null,
+      public_json: caseDoc.public_json ?? null,
+      policies_json: privateDoc.policies_json ?? null,
+      golden_answer_json: privateDoc.golden_answer_json ?? null,
+      catalog_json: privateDoc.catalog_json ?? null,
+      rules_json: privateDoc.rules_json ?? null,
+      rubric_json: privateDoc.rubric_json ?? null,
+    };
+  },
+});
+
 export const seedCreationUsage = internalMutation({
   args: {
     identity_token: v.string(),

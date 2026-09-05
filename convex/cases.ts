@@ -19,8 +19,15 @@ import {
 } from "@contracts/public/index.js";
 import {
   assertEvidenceGraphInvariants,
+  assertPlayableCaseInvariants,
   canonicalParagraphPrivateSchema,
+  casePrivateSchema,
+  evidenceCatalogItemPrivateSchema,
   evidenceGraphPrivateSchema,
+  evidenceUnlockRulePrivateSchema,
+  goldenAnswerPrivateSchema,
+  rolePrivatePolicySchema,
+  type CasePrivate,
   type PrivateFailure,
 } from "@contracts/private/index.js";
 import {
@@ -53,6 +60,16 @@ import {
   claimExtractionUserPrompt,
   CLAIM_EXTRACTION_SCHEMA_VERSION,
 } from "@server/model/schemas/claim-extraction.js";
+import {
+  candidateCaseCompilationSchema,
+  caseCompilationSystemPrompt,
+  caseCompilationUserPrompt,
+  CASE_COMPILATION_SCHEMA_VERSION,
+} from "@server/model/schemas/case-compilation.js";
+import {
+  compileCaseFromCandidates,
+  CaseInvariantFailure,
+} from "@server/cases/compile-case.js";
 import {
   compileContextPublicError,
   throwPublicError,
@@ -399,6 +416,15 @@ function toPrivateFailure(error: unknown): PrivateFailure {
   if (error instanceof ModelConfigMissingError) return error.failure;
   if (error instanceof ModelRequestFailedError) return error.failure;
   if (error instanceof SourceIngestionError) return error.failure;
+  if (error instanceof CaseInvariantFailure) return error.failure;
+  if (error instanceof z.ZodError) {
+    // 模型候选未通过严格运行时 schema：协议级失败（SPEC §6），不是重写机会。
+    return {
+      code: "MODEL_PROTOCOL_INVALID",
+      incident_id: `worker:${Date.now().toString(36)}`,
+      detail: "模型输出未通过严格运行时 schema",
+    };
+  }
   return {
     code: "INTERNAL_INVARIANT_VIOLATION",
     incident_id: `worker:${Date.now().toString(36)}`,
@@ -500,16 +526,51 @@ export const compileCaseWorker = internalAction({
       });
       assertEvidenceGraphInvariants(graph);
 
-      // 4) 原子持久化（TB1 管线成功 = source_documents + graph 落库；
-      // 可玩性投影与五角色编译在 TB2 落地）
+      // 5) 案件编译候选（真实外部 Seam；模型只出内容与下标引用）
+      const compilationCandidate = candidateCaseCompilationSchema.parse(
+        await gateway.generateStructured({
+          task: "case",
+          schemaName: CASE_COMPILATION_SCHEMA_VERSION,
+          system: caseCompilationSystemPrompt(),
+          prompt: caseCompilationUserPrompt({
+            claims: claims.map((claim) => ({
+              proposition: claim.proposition,
+              excerpt: claim.source_span.text,
+            })),
+            relations: candidate.relations,
+          }),
+          schema: candidateCaseCompilationSchema,
+        }),
+      );
+
+      // 6) 服务器完成全部决定：可信 ID、voice、4+1、答案子集、
+      //    unlock rule、rubric（总和恰 100）与 Public Projection
+      const artifacts = compileCaseFromCandidates({
+        case_id: args.case_key,
+        source_url: args.source_url,
+        theme: args.theme ?? null,
+        graph,
+        candidate: compilationCandidate,
+      });
+
+      // 7) 原子持久化：source + 完整 Private + Public 投影，一次 ready
       await ctx.runMutation(internal.cases.finalizeCompilationSuccess, {
         case_key: args.case_key,
         source_url: args.source_url,
         canonical_text: article.canonical_text,
         content_sha256: article.content_sha256,
         paragraphs_json: JSON.stringify(article.paragraphs),
-        graph_json: JSON.stringify(graph),
-        compiler_version: CLAIM_EXTRACTION_SCHEMA_VERSION,
+        graph_json: JSON.stringify(artifacts.case_private.graph),
+        compiler_version: CASE_COMPILATION_SCHEMA_VERSION,
+        title: artifacts.case_public.title,
+        summary: artifacts.case_public.summary,
+        theme: artifacts.case_public.theme,
+        public_json: JSON.stringify(artifacts.case_public),
+        policies_json: JSON.stringify(artifacts.case_private.role_policies),
+        golden_answer_json: JSON.stringify(artifacts.case_private.golden_answer),
+        catalog_json: JSON.stringify(artifacts.case_private.evidence_catalog),
+        rules_json: JSON.stringify(artifacts.evidence_unlock_rules),
+        rubric_json: JSON.stringify(artifacts.rubric),
       });
     } catch (error) {
       const failure = toPrivateFailure(error);
@@ -569,6 +630,15 @@ export const finalizeCompilationSuccess = internalMutation({
     paragraphs_json: v.string(),
     graph_json: v.string(),
     compiler_version: v.string(),
+    title: v.string(),
+    summary: v.string(),
+    theme: v.string(),
+    public_json: v.string(),
+    policies_json: v.string(),
+    golden_answer_json: v.string(),
+    catalog_json: v.string(),
+    rules_json: v.string(),
+    rubric_json: v.string(),
   },
   handler: async (ctx, args) => {
     // 写入边界经 contracts runtime schema 复验（单一校验层）。
@@ -578,6 +648,55 @@ export const finalizeCompilationSuccess = internalMutation({
       .array(canonicalParagraphPrivateSchema)
       .parse(JSON.parse(args.paragraphs_json));
     void paragraphs; // 段落索引随案件整体持久化，读取侧按需解析。
+    const casePublic = casePublicSchema.parse(JSON.parse(args.public_json));
+    const policies = z
+      .array(rolePrivatePolicySchema)
+      .parse(JSON.parse(args.policies_json));
+    const goldenAnswer = goldenAnswerPrivateSchema.parse(
+      JSON.parse(args.golden_answer_json),
+    );
+    const catalog = z
+      .array(evidenceCatalogItemPrivateSchema)
+      .parse(JSON.parse(args.catalog_json));
+    const rules = z
+      .array(evidenceUnlockRulePrivateSchema)
+      .parse(JSON.parse(args.rules_json));
+    const rubric = JSON.parse(args.rubric_json) as {
+      case_id: string;
+      criteria: { weight: number }[];
+    };
+    const rubricSum = rubric.criteria.reduce((sum, c) => sum + c.weight, 0);
+    if (
+      rubric.case_id !== args.case_key ||
+      rubricSum !== 100 ||
+      !rubric.criteria.every((c) => Number.isInteger(c.weight))
+    ) {
+      throw new ConvexError({
+        code: "INTERNAL_INCIDENT",
+        message: "服务内部错误",
+      });
+    }
+    const compiledCase: CasePrivate = casePrivateSchema.parse({
+      case_id: args.case_key,
+      graph,
+      role_policies: policies,
+      golden_answer: goldenAnswer,
+      evidence_catalog: catalog,
+      evidence_unlock_rules: rules,
+    });
+    assertPlayableCaseInvariants(compiledCase);
+    if (
+      casePublic.case_id !== args.case_key ||
+      compiledCase.case_id !== args.case_key ||
+      compiledCase.graph.case_id !== args.case_key ||
+      compiledCase.graph.source_id !== `src-${args.case_key}` ||
+      casePublic.roles.length !== 5
+    ) {
+      throw new ConvexError({
+        code: "INTERNAL_INCIDENT",
+        message: "服务内部错误",
+      });
+    }
 
     const nowMs = Date.now();
     const caseDoc = await ctx.db
@@ -607,11 +726,20 @@ export const finalizeCompilationSuccess = internalMutation({
     await ctx.db.insert("case_private", {
       case_key: args.case_key,
       graph_json: JSON.stringify(graph),
+      policies_json: JSON.stringify(policies),
+      golden_answer_json: JSON.stringify(goldenAnswer),
+      catalog_json: JSON.stringify(catalog),
+      rules_json: JSON.stringify(rules),
+      rubric_json: args.rubric_json,
       compiler_version: args.compiler_version,
       created_at_ms: nowMs,
     });
     await ctx.db.patch(caseDoc._id, {
       status: "ready",
+      title: args.title,
+      summary: args.summary,
+      theme: args.theme,
+      public_json: JSON.stringify(casePublic),
       updated_at_ms: nowMs,
     });
     await ctx.db.patch(ticket._id, {

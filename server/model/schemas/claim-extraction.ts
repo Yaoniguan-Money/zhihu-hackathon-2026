@@ -45,7 +45,8 @@ export function claimExtractionSystemPrompt(): string {
     "2. paragraph_index 必须是 excerpt 所在段块的编号（从 0 开始）。",
     "3. proposition 用一句中文陈述该命题；作者观点需保留归属（如“文章认为”）。",
     "4. relations 使用 from_claim_index/to_claim_index 引用 claims 数组下标，type 只能取：supports, qualifies, contradicts, temporal_before, temporal_after, causal, correlated, source_of。",
-    "5. 只输出符合给定 JSON schema 的对象；不要输出任何解释文字。",
+    "5. 每个 claim / relation 对象只允许包含规定字段（claim: paragraph_index, excerpt, proposition, subject, predicate, object, time, scope, condition, modality；relation: from_claim_index, to_claim_index, type）；禁止添加 id、note 等任何额外字段；可选字段（subject/predicate/object/time/scope/condition/modality）无内容时必须直接省略，禁止输出空字符串。",
+    "6. 只输出符合给定 JSON schema 的对象；不要输出任何解释文字。",
   ].join("\n");
 }
 
