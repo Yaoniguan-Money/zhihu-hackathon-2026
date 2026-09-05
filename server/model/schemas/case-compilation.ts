@@ -12,7 +12,7 @@ import { evidenceTypeSchema } from "@contracts/public/index.js";
  * 所有下标引用指向输入中编号的 claims / catalog 下标，越界由服务器判编译失败。
  */
 
-export const CASE_COMPILATION_SCHEMA_VERSION = "case-compilation-v1@1";
+export const CASE_COMPILATION_SCHEMA_VERSION = "case-compilation-v1@2";
 
 export const candidateRolePersonaSchema = z.strictObject({
   display_name: z.string().min(1).max(40),
@@ -57,6 +57,7 @@ export function caseCompilationSystemPrompt(): string {
     "规则：",
     "1. roles 恰好 5 个：身份立场互异、贴合材料主题；display_name 用「名字 · 身份」格式。",
     "2. evidence_catalog（2-12 条）：每个条目必须包含全部必填字段 type、title、body、claim_indices（conflict_indices 可省略，其余字段禁止省略）；type 只能取 quote/claim/source/timeline/contradiction；body 是玩家可见的证据文字，必须完全来自所引 claims 的原文内容，禁止引入新事实；claim_indices 引用 claims 数组下标；conflict_indices（若提供）引用与其语义冲突的其它 catalog 条目下标。",
+    "2b. 解锁覆盖约束（违反即案件无效）：每个 catalog 条目的全部 claim_indices 必须能被某一个角色的 visible_claim_indices 完整覆盖——即存在角色 r，使该条目的每个 claim 下标都 ∈ visible_claim_indices[r]。组织可见集时，让同一角色的可见 Claim 集中支撑分配给该角色方向的相关证据条目；不要把一个条目的 Claim 拆散到任何单一角色都看不全的程度。",
     "3. distortion_plan：恰有 1 名失真角色（distorted_role_index）。",
     "   - 篡改方式（DistortionType）只能取以下 10 个 ID，禁止自造：scope_expand, degree_strengthen, condition_delete, causal_swap, time_montage, source_splice, context_omit, subject_swap, concept_shift, cherry_pick。",
     "   - allowed_distortion_types 是该角色获准的篡改方式（非空，只能从上述 10 个 ID 中选取）。",
@@ -66,6 +67,7 @@ export function caseCompilationSystemPrompt(): string {
     "   - distorted_goal 用一句话描述失真角色的私下目标（仅供服务器与该角色 Prompt 使用）。",
     "4. 所有 body/title/summary 不得泄露谁是失真角色，也不得出现「篡改」「失真」等提示。",
     "5. 只输出符合给定 JSON schema 的对象；不要输出任何解释文字。",
+    "6. 输出前逐项自检（任一不满足先修正再输出）：(a) 恰有 5 个 roles，distorted_role_index 指向其中一个；(b) answer_distortion_types 非空且每一项都 ∈ allowed_distortion_types；(c) 每个 catalog 条目的 claim_indices 全部 < claims 总数且被某个角色的 visible_claim_indices 完整覆盖；(d) visible_claim_indices 恰有 5 个非空子数组；(e) 所有下标（truth/visible/claim/conflict）都在合法范围内且 conflict 不自指。",
     "字段完整性清单（缺任何必填字段即为无效输出）：",
     "- roles[i] 必须同时包含：display_name、public_bio、persona_key（共 5 个角色）。",
     "- evidence_catalog[i] 必须同时包含：type、title、body、claim_indices（conflict_indices 可省略）。",

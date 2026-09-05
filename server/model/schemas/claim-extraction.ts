@@ -8,7 +8,7 @@ import { relationTypeSchema } from "@contracts/shared/index.js";
  * 摘录必须是所给段块中逐字、连续且唯一的片段（服务器据此定位 Span）。
  */
 
-export const CLAIM_EXTRACTION_SCHEMA_VERSION = "claim-extraction-v1@1";
+export const CLAIM_EXTRACTION_SCHEMA_VERSION = "claim-extraction-v1@2";
 
 export const candidateClaimSchema = z.strictObject({
   paragraph_index: z.number().int().min(0),
@@ -42,11 +42,14 @@ export function claimExtractionSystemPrompt(): string {
     "任务：抽取最小可验证命题（claims）与命题之间的语义关系（relations）。",
     "规则：",
     "1. excerpt 必须是所给段块内逐字、连续、唯一的原文片段；禁止改写、摘要或跨段块拼接。",
-    "2. paragraph_index 必须是 excerpt 所在段块的编号（从 0 开始）。",
-    "3. proposition 用一句中文陈述该命题；作者观点需保留归属（如“文章认为”）。",
-    "4. relations 使用 from_claim_index/to_claim_index 引用 claims 数组下标，type 只能取：supports, qualifies, contradicts, temporal_before, temporal_after, causal, correlated, source_of。",
-    "5. 每个 claim / relation 对象只允许包含规定字段（claim: paragraph_index, excerpt, proposition, subject, predicate, object, time, scope, condition, modality；relation: from_claim_index, to_claim_index, type）；禁止添加 id、note 等任何额外字段；可选字段（subject/predicate/object/time/scope/condition/modality）无内容时必须直接省略，禁止输出空字符串。",
-    "6. 只输出符合给定 JSON schema 的对象；不要输出任何解释文字。",
+    "2. excerpt 长度至少 10 个字符；若短语在段块内出现多次，扩展摘录上下文使其在该段块内只出现一次。",
+    "3. excerpt 的标点、引号必须与段块原文逐字符一致（原文用什么样的引号就复制什么样的引号），禁止把原文标点替换成其他形态。",
+    "4. paragraph_index 必须是 excerpt 所在段块的编号（从 0 开始）。",
+    "5. proposition 用一句中文陈述该命题；作者观点需保留归属（如“文章认为”）。",
+    "6. relations 使用 from_claim_index/to_claim_index 引用 claims 数组下标，type 只能取：supports, qualifies, contradicts, temporal_before, temporal_after, causal, correlated, source_of。",
+    "7. 每个 claim / relation 对象只允许包含规定字段（claim: paragraph_index, excerpt, proposition, subject, predicate, object, time, scope, condition, modality；relation: from_claim_index, to_claim_index, type）；禁止添加 id、note 等任何额外字段；可选字段（subject/predicate/object/time/scope/condition/modality）无内容时必须直接省略，禁止输出空字符串。",
+    "8. 输出前逐条核对：每个 excerpt 都能在其 paragraph_index 段块中找到且只找到一次；核对不通过的条目先修正再输出。",
+    "9. 只输出符合给定 JSON schema 的对象；不要输出任何解释文字。",
   ].join("\n");
 }
 

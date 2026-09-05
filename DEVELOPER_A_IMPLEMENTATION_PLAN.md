@@ -39,7 +39,7 @@
 | D0 契约修复与 B 评审 | COMPLETE | A 侧修复包 + B 侧签署均已完成：用户于 2026-09-04 会话中明确决定「D0 同意签署意见」，Public 类型、错误、认证与 P0 Cut 视为通过评审。见 [D0 A 侧 handoff](./docs/handoffs/2026-09-04-d0-contract-repair-a-side.md) 与 [D0 签署记录](./docs/handoffs/2026-09-04-d0-signoff.md)。 |
 | G0 Golden Case 输入 | COMPLETE | 用户已提供真实知乎 URL（红歌会网专栏文章），完整正文经渲染抓取获得并冻结于 `golden-case/case-demo-001/`（含哈希与来源元数据）。见 [G0 handoff](./docs/handoffs/2026-09-04-g0-golden-case-source.md)。 |
 | GC0 Golden Case 标注 | COMPLETE | 用户于 2026-09-05 签署确认九项清单；冻结流程已执行（标注移至 `golden-case/case-demo-001/`，构建复验全绿、JSON 零漂移）。见 [GC0 handoff](./docs/handoffs/2026-09-05-gc0-annotation-draft.md)。 |
-| G1 第二案件输入 | BLOCKED | 第一案件闭环后，由用户提供第二篇真实 URL 和完整正文。 |
+| G1 第二案件输入 | COMPLETE | 用户委托 Agent 挑选并冻结第二真实来源（养老金/延迟退休，`golden-case/case-demo-002/`，3,514 单元、SHA-256 固定）；`me contents` 核实账号无公开创作后经官方 search 检索推荐，用户保留替换权。见 [P1-3 handoff](./docs/handoffs/2026-09-05-p13-g1-second-case.md)。 |
 | REL0 公网 P0 | COMPLETE | Convex Cloud（`agile-turtle-860`）与 Vercel Web（https://zhihu-hackathon-2026.vercel.app ）均部署并验证；生产 build 通过。见 [REL0 handoff](./docs/handoffs/2026-09-05-rel0-convex-cloud.md)。 |
 | AUTH1 知乎 OAuth | BLOCKED | 是 P0 后的独立外部 Gate；不以 OAuth 阻塞游客 P0。 |
 
@@ -123,7 +123,7 @@ AUTH0 + REL0 → AUTH1 知乎 OAuth（独立后续阶段）
 | REL0 公网 P0 | COMPLETE | Convex Cloud（`agile-turtle-860`：functions、AI_*/JWT/JWKS、Golden 案件种子、8 项验证）与 Vercel Web（https://zhihu-hackathon-2026.vercel.app ：production env、部署、线上冒烟）均完成；生产 build 通过。线上页面为 PF0 骨架（产品 UI 属 B）。见 [REL0 handoff](./docs/handoffs/2026-09-05-rel0-convex-cloud.md)。 |
 | P1-1 Recording / 对质 | COMPLETE | 已完成：`evidence.saveRecording`（Approved Role Message → type=quote 录音证据，公开 Claim 引用按「支持 ∩ 已公开可见」推导，创建即解锁、内容级去重）与 `roleTurns.presentRecording`（与 ask 共用排他锁，对质候选须引用非空可见 Claim，回应由服务器设置 `rebuttal_to_message_id`）；allowed_actions 动态开放、录音参与 evidence_score 命中、不计入 questioning_score；Scripted 8 项 + 集成 7 项 + 真实模型对质闭环通过。见 [P1-1 handoff](./docs/handoffs/2026-09-05-p11-1-recording-confrontation.md)。 |
 | P1-2 本地 Voice | COMPLETE | P1-2a 基建完成（2026-09-05）：本地 Worker（仅绑 127.0.0.1，SenseVoice+FSMN-VAD+Kokoro，模型/音色 143 文件 sha256 清单固定、离线缓存）、两个同源 Voice Route、Approved Speech Envelope 落库、ASR/TTS 幂等持久化（Convex storage）；TTS→ASR 往返与全链 e2e 通过。同日用户以 `audition.py` 全量试听 8 个中文候选并锁定五音色（`voice-pack.json` locked=true：记者 zf_xiaoxiao / 分析师 zf_xiaoni / 工程师 zm_yunjian / 教授 zm_yunyang / 撰稿人 zm_yunxia），变更槽位经 `/tts` 合成验证。见 [P1-2a handoff](./docs/handoffs/2026-09-05-p12-2a-local-voice-infra.md)。REL1 批量验收另行执行。 |
-| P1-3 第二案件 | BLOCKED | 用第二篇真实 URL 与全文证明没有写死 Golden Claims、角色、答案、Policy 或 Evidence；不得以合成内容替代。 |
+| P1-3 第二案件 | IN PROGRESS | 实现与静态验证完成：第二真实来源经真实模型 durable 编译成功（claim-extraction@2 / case-compilation@2，新增解锁覆盖约束与抽取硬化），案件不变量 + Span 逐字回溯 + 不含第一案工件 + 用户案件不进目录全部断言通过；开场链验证中因 DeepSeek 余额耗尽（Insufficient Balance）外部阻塞，充值后重跑 tests/p13-second-case.test.ts 收口。见 [P1-3 handoff](./docs/handoffs/2026-09-05-p13-g1-second-case.md)。 |
 | REL1 P1 验收 | BLOCKED | Recording、对质、本地 Voice 和第二案件分别验收；P1 失败绝不回写为 P0 已完成。 |
 | AUTH1 知乎登录 | BLOCKED | P0 先使用游客身份。只有取得 App ID/App Key/Access Secret、公网 HTTPS callback、稳定用户标识，并确认 state/CSRF、过期、撤销等官方协议后，才把匿名用户安全绑定为知乎账号。OAuth Token 仅存服务端，最终授权由用户本人完成。不得修改官方 Skill，也不得让 OAuth 阻塞 P0。 |
 

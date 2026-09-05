@@ -92,7 +92,27 @@ export const compiledArtifactsInternal = internalQuery({
   },
 });
 
-/** 测试工具：读取案件完整私有工件（TB2b 编译器端到端断言用）。 */
+/** 运维诊断工具：最近 N 条私有审计事件（只含事件名/ID/错误码/耗时，不含文本体）。 */
+export const recentAuditInternal = internalQuery({
+  args: { limit: v.optional(v.number()) },
+  handler: async (ctx, args) => {
+    const limit = Math.min(args.limit ?? 20, 100);
+    const rows = await ctx.db.query("private_audit").collect();
+    rows.sort((a, b) => b.created_at_ms - a.created_at_ms);
+    return rows.slice(0, limit).map((row) => ({
+      event: row.event,
+      case_id: row.case_id ?? null,
+      session_id: row.session_id ?? null,
+      task: row.task ?? null,
+      attempt_index: row.attempt_index ?? null,
+      duration_ms: row.duration_ms ?? null,
+      detail_code: row.detail_code ?? null,
+      created_at_ms: row.created_at_ms,
+    }));
+  },
+});
+
+/** 运维诊断工具：读取案件完整私有工件（TB2b 编译器端到端断言用）。 */
 export const caseArtifactsInternal = internalQuery({
   args: { case_key: v.string() },
   handler: async (ctx, args) => {

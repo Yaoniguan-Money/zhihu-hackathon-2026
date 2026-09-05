@@ -95,3 +95,4 @@ docs/handoffs/<ticket-or-stage-id>.md
 | REL0 P0 公网部署 | complete | [2026-09-05-rel0-convex-cloud](./2026-09-05-rel0-convex-cloud.md) |
 | P1-1 Recording 与对质 | complete | [2026-09-05-p11-1-recording-confrontation](./2026-09-05-p11-1-recording-confrontation.md) |
 | P1-2a 本地 Voice 基建 | complete | [2026-09-05-p12-2a-local-voice-infra](./2026-09-05-p12-2a-local-voice-infra.md) |
+| P1-3 / G1 第二案件 | blocked（外部：DeepSeek 余额） | [2026-09-05-p13-g1-second-case](./2026-09-05-p13-g1-second-case.md) |

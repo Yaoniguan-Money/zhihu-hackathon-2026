@@ -45,8 +45,8 @@
 4. ~~REL0~~ ✅ COMPLETE（2026-09-05，Convex Cloud + Vercel 生产部署；P1-1 后生产 functions 已同步并复验 8/8 PASS）
 5. ~~P1-1~~ ✅ COMPLETE（2026-09-05 深夜，commit 322b1e9；见 p11-1 handoff）
 6. ~~P1-2a~~ ✅ COMPLETE（2026-09-05 深夜；见 p12-2a handoff）——五音色已由用户试听锁定（voice-pack locked=true），P1-2 实现收口；仅剩 REL1 批量验收
-7. P1-3 / G1：等用户提供第二篇真实 URL + 全文，保持 BLOCKED（不降级）。
-8. AUTH1：等用户知乎 App 凭据，保持 BLOCKED。
+7. P1-3 / G1：源已冻结（golden-case/case-demo-002，用户委托挑选、引号保真修复）、真实模型编译与全部静态断言通过；最终全链闭环被外部阻塞——DeepSeek 账户余额不足（Insufficient Balance），充值后重跑 `RUN_MODEL_INTEGRATION=1 bun test tests/p13-second-case.test.ts` 收口（见 p13 handoff）。
+8. AUTH1：Access Secret 已在 keychain（2026-09-05 在线复验 valid）；待用户从赛事页面复制 App ID + App Key，并在赛事页登记回调 `https://zhihu-hackathon-2026.vercel.app/api/auth/zhihu/callback`。
 
 ## 继续工作的最小阅读顺序
 

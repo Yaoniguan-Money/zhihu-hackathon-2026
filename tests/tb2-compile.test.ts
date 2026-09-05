@@ -92,7 +92,7 @@ const BASE = {
 
 describe("TB2b 编译器纯函数层", () => {
   test("schema 版本化", () => {
-    expect(CASE_COMPILATION_SCHEMA_VERSION).toBe("case-compilation-v1@1");
+    expect(CASE_COMPILATION_SCHEMA_VERSION).toBe("case-compilation-v1@2");
   });
 
   test("合法候选 → 完整工件：Public/Private 分离、4+1、rubric 总和恰 100、规则可解锁", () => {
