@@ -84,9 +84,12 @@ import {
 
 const uuidSchema = z.uuid();
 const httpsUrlSchema = z.url({ protocol: /^https$/ });
-// 编译 lease：覆盖观测到的最长编译（claim 240-360s + case 100-120s）留足余量；
-// worker 存活时在 markTicketWorking 续期，进程死亡后由下一次建案事务显式清账。
-const COMPILE_LEASE_MS = 15 * 60_000;
+// 编译 lease：覆盖观测到的最长编译留足余量。DeepSeek 基线为 claim 240-360s +
+// case 100-120s；切换智谱 glm-4.7-flash（reasoning 模型，供应商对非流式请求
+// 约 900s 即切断）后按 claim ≤900s + case ≤300s 重校准为 30 分钟。
+// 语义不变：worker 存活时在 markTicketWorking 续期，进程死亡后由下一次建案
+// 事务显式清账；过期即显式失败、不自动重调、迟到写入防复活（SPEC 8）。
+const COMPILE_LEASE_MS = 30 * 60_000;
 
 // ---------------------------------------------------------------------------
 // 公开 Interface

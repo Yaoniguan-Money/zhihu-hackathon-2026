@@ -96,3 +96,6 @@ docs/handoffs/<ticket-or-stage-id>.md
 | P1-1 Recording 与对质 | complete | [2026-09-05-p11-1-recording-confrontation](./2026-09-05-p11-1-recording-confrontation.md) |
 | P1-2a 本地 Voice 基建 | complete | [2026-09-05-p12-2a-local-voice-infra](./2026-09-05-p12-2a-local-voice-infra.md) |
 | P1-3 / G1 第二案件 | blocked（外部：DeepSeek 余额） | [2026-09-05-p13-g1-second-case](./2026-09-05-p13-g1-second-case.md) |
+| developer-b 分支合并可行性研究 | complete | [2026-09-06-developer-b-merge-feasibility](./2026-09-06-developer-b-merge-feasibility.md) |
+| AI 供应商切换：智谱 GLM | complete | [2026-09-06-ai-provider-switch-glm](./2026-09-06-ai-provider-switch-glm.md) |
+| 2026-09-06 夜间开发中继 | complete | [2026-09-06-night-relay](./2026-09-06-night-relay.md) |

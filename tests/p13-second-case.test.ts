@@ -159,7 +159,7 @@ describe("P1-3 第二案件真实编译与闭环（显式 opt-in）", () => {
         expect(created.ok).toBe(true);
         if (!created.ok) throw new Error(errorText(created));
         caseId = created.value.case_id;
-        const terminal = await waitForTerminal(token, caseId, 480_000);
+        const terminal = await waitForTerminal(token, caseId, 1_200_000);
         if (terminal.status === "succeeded") {
           ownerToken = token;
           console.log(`编译成功（第 ${attempt} 次尝试）: ${caseId}`);
@@ -279,7 +279,7 @@ describe("P1-3 第二案件真实编译与闭环（显式 opt-in）", () => {
       if (!started.ok) throw new Error(errorText(started));
 
       // 等五条开场全部批准（investigation）。
-      const deadline = Date.now() + 600_000;
+      const deadline = Date.now() + 1_500_000;
       let phase = "";
       while (Date.now() < deadline) {
         const view = await callConvex<{ phase: string; terminal_error?: unknown }>(
@@ -315,7 +315,7 @@ describe("P1-3 第二案件真实编译与闭环（显式 opt-in）", () => {
       const askTurn = (await waitForTurnTerminal(
         ownerToken,
         asked.value.request_id,
-        240_000,
+        600_000,
       )) as {
         status: string;
         message?: { message_id: string };
@@ -354,7 +354,7 @@ describe("P1-3 第二案件真实编译与闭环（显式 opt-in）", () => {
       const presentTurn = (await waitForTurnTerminal(
         ownerToken,
         presented.value.request_id,
-        240_000,
+        600_000,
       )) as {
         status: string;
         message?: { rebuttal_to_message_id?: string };
@@ -404,6 +404,6 @@ describe("P1-3 第二案件真实编译与闭环（显式 opt-in）", () => {
       );
       expect(reveal.value!.truth_chain.length).toBeGreaterThan(0);
     },
-    { timeout: 1_500_000 },
+    { timeout: 5_400_000 },
   );
 });

@@ -1,6 +1,6 @@
 # P1-3 / G1：第二案件（真实来源 + 无写死证明）
 
-状态：`blocked`（实现与静态验证全部完成；最终真实模型全链闭环被外部阻塞——DeepSeek 账户余额不足 `Insufficient Balance`，充值后补跑 tests/p13-second-case.test.ts 即可收口）  
+状态：`blocked`（实现与静态验证全部完成；最终真实模型全链闭环被外部阻塞。2026-09-06 事实修正：原阻塞「DeepSeek 余额不足」已由用户切换供应商至智谱 `glm-4.7-flash` 解除——本地/生产八项 AI_* 已切换且 smoke 通过，见 [AI 切换 handoff](./2026-09-06-ai-provider-switch-glm.md)；当前阻塞为智谱免费档时段性过载（错误 1305、非流式请求约 900s 被供应商切断），`COMPILE_LEASE_MS` 已重校准 15→30 分钟（convex/cases.ts，机制不变），最终收口以吞吐探测门控在健康窗口重跑 `RUN_MODEL_INTEGRATION=1 bun test tests/p13-second-case.test.ts`，测试观察窗预算已同步重校准）  
 完成时间：`2026-09-05`  
 负责人：`开发人员 A / ZCode`
 
