@@ -36,7 +36,6 @@ function TableScene({ roles, dialogues, onRoleClick }: RoundTableProps) {
     });
   }, [roles]);
 
-  // 只显示AI角色的最新发言（不显示玩家自己的消息）
   const latestAIDialogue = useMemo(() => {
     for (let i = dialogues.length - 1; i >= 0; i--) {
       if (dialogues[i].role_id !== 'player') return dialogues[i];
@@ -54,26 +53,19 @@ function TableScene({ roles, dialogues, onRoleClick }: RoundTableProps) {
     return pressureMap;
   }, [dialogues]);
 
-  useFrame((state) => {
-    if (tableRef.current) {
-      tableRef.current.rotation.y += 0.0005;
-    }
-  });
-
   const handleRoleClickInternal = (roleId: string, pos: [number, number, number]) => {
     setFocusPos(pos);
     onRoleClick?.(roleId);
     setTimeout(() => setFocusPos(null), 3000);
   };
 
-  // 截断对话内容，3D气泡只显示前60字
-  const truncateText = (text: string, max = 60) => {
+  const truncateText = (text: string, max = 50) => {
     return text.length > max ? text.slice(0, max) + '...' : text;
   };
 
   return (
     <>
-      <ambientLight intensity={0.3} />
+      <ambientLight intensity={0.4} />
       <pointLight position={[0, 5, 0]} intensity={0.8} color="#818cf8" />
       <pointLight position={[3, 2, 3]} intensity={0.3} color="#f472b6" />
       <pointLight position={[-3, 2, -3]} intensity={0.3} color="#60a5fa" />
@@ -109,7 +101,7 @@ function TableScene({ roles, dialogues, onRoleClick }: RoundTableProps) {
         />
       ))}
 
-      {/* 对话气泡 - 只显示AI角色回复，截断长文本 */}
+      {/* 对话气泡 — 固定宽度，防止文字竖排溢出 */}
       {currentSpeakerId && latestAIDialogue && (() => {
         const seat = seatPositions.find((s) => s.role.role_id === currentSpeakerId);
         if (!seat) return null;
@@ -119,7 +111,7 @@ function TableScene({ roles, dialogues, onRoleClick }: RoundTableProps) {
             position={[seat.position[0], 1.8, seat.position[2]]}
             center
             distanceFactor={10}
-            style={{ pointerEvents: 'none' }}
+            style={{ pointerEvents: 'none', width: '180px' }}
           >
             <AnimatePresence>
               <motion.div
@@ -128,13 +120,30 @@ function TableScene({ roles, dialogues, onRoleClick }: RoundTableProps) {
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: -10 }}
                 transition={{ duration: 0.3 }}
-                className="bg-slate-900/90 backdrop-blur-sm rounded-xl px-3 py-2 max-w-[200px] border border-white/10 shadow-xl"
+                style={{
+                  background: 'rgba(15, 23, 42, 0.95)',
+                  backdropFilter: 'blur(8px)',
+                  borderRadius: '12px',
+                  padding: '8px 12px',
+                  border: '1px solid rgba(255,255,255,0.1)',
+                  boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
+                  width: '180px',
+                  boxSizing: 'border-box',
+                }}
               >
-                <div className="flex items-center gap-1.5 mb-0.5">
-                  <span className="text-base">{getRoleAvatar(role)}</span>
-                  <span className="text-xs font-bold text-white">{getRoleName(role)}</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
+                  <span style={{ fontSize: '16px' }}>{getRoleAvatar(role)}</span>
+                  <span style={{ fontSize: '12px', fontWeight: 'bold', color: 'white' }}>{getRoleName(role)}</span>
                 </div>
-                <p className="text-xs text-slate-200 leading-snug">
+                <p style={{
+                  fontSize: '12px',
+                  color: '#e2e8f0',
+                  lineHeight: '1.4',
+                  margin: 0,
+                  wordBreak: 'break-all',
+                  whiteSpace: 'normal',
+                  overflow: 'hidden',
+                }}>
                   {truncateText(latestAIDialogue.content)}
                 </p>
               </motion.div>
@@ -152,7 +161,7 @@ function TableScene({ roles, dialogues, onRoleClick }: RoundTableProps) {
 export default function RoundTable(props: RoundTableProps) {
   return (
     <Canvas
-      camera={{ position: [0, 3, 6], fov: 50 }}
+      camera={{ position: [0, 4, 7], fov: 55 }}
       style={{ background: 'transparent' }}
     >
       <TableScene {...props} />

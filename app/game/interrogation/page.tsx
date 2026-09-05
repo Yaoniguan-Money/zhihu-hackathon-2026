@@ -20,7 +20,7 @@ let replyIndex = 0;
 
 export default function InterrogationPage() {
   const router = useRouter();
-  const { casePublic, gameConfig, dialogues, addDialogue, currentRound, nextRound } = useGame();
+  const { casePublic, gameConfig, dialogues, addDialogue, currentRound, nextRound, unlockEvidenceByRole } = useGame();
   const [inputText, setInputText] = useState('');
   const [selectedRoleId, setSelectedRoleId] = useState<string | null>(null);
   const [timeLeft, setTimeLeft] = useState(90);
@@ -62,7 +62,9 @@ export default function InterrogationPage() {
     setIsThinking(true);
 
     setTimeout(() => {
-      const reply = mockReplies[replyIndex % mockReplies.length];
+      const reply = selectedRoleId
+        ? mockReplies.find((r) => r.roleId === selectedRoleId) || mockReplies[replyIndex % mockReplies.length]
+        : mockReplies[replyIndex % mockReplies.length];
       replyIndex++;
       const roleTurn: DialogueTurn = {
         turn_id: `t-${Date.now()}`,
@@ -76,9 +78,10 @@ export default function InterrogationPage() {
         },
       };
       addDialogue(roleTurn);
+      unlockEvidenceByRole(reply.roleId);
       setIsThinking(false);
     }, 1500);
-  }, [inputText, casePublic, addDialogue]);
+  }, [inputText, casePublic, addDialogue, selectedRoleId, unlockEvidenceByRole]);
 
   const handleRoleClick = (roleId: string) => {
     setSelectedRoleId(roleId);

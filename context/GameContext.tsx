@@ -39,6 +39,7 @@ interface GameContextType {
   setSelectedRoleId: (id: string | null) => void;
   nextRound: () => void;
   submitAccusation: (a: Accusation) => void;
+  unlockEvidenceByRole: (roleId: string) => void;
   restart: () => void;
 }
 
@@ -61,10 +62,27 @@ export function GameProvider({ children }: { children: ReactNode }) {
     setCasePublic(caseData);
     setSourceDoc(source);
     setDialogues(mockDialogues);
-    setEvidences(mockEvidences);
+    setEvidences(mockEvidences.filter((e) => e.type === 'claim'));
     setCurrentRound(1);
     setTimeRemaining(mockGameConfig.interrogation_time_limit);
     setGameState('briefing');
+  }, []);
+
+  const unlockEvidence = useCallback((evidenceId: string) => {
+    setEvidences((prev) => {
+      if (prev.some((e) => e.evidence_id === evidenceId)) return prev;
+      const newEvidence = mockEvidences.find((e) => e.evidence_id === evidenceId);
+      return newEvidence ? [...prev, newEvidence] : prev;
+    });
+  }, []);
+
+  const unlockEvidenceByRole = useCallback((roleId: string) => {
+    setEvidences((prev) => {
+      const locked = mockEvidences.filter(
+        (e) => !prev.some((p) => p.evidence_id === e.evidence_id) && e.related_role_ids.includes(roleId)
+      );
+      return locked.length > 0 ? [...prev, ...locked] : prev;
+    });
   }, []);
 
   const goToBriefing = useCallback(() => setGameState('briefing'), []);
@@ -121,6 +139,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
       setSelectedRoleId,
       nextRound,
       submitAccusation,
+      unlockEvidenceByRole,
       restart,
     }}>
       {children}

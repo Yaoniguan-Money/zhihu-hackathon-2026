@@ -31,7 +31,9 @@ export default function RevealPage() {
   const distortedRef = useRef<HTMLDivElement>(null);
   const scoreRef = useRef<HTMLDivElement>(null);
 
-  const result = mockRevealResult;
+  const baseResult = mockRevealResult;
+  const isCorrect = accusation?.accused_role_id === baseResult.distorted_role_id;
+  const result = { ...baseResult, is_correct: isCorrect };
   const distortedRole = casePublic?.roles.find((r: RolePublic) => r.role_id === result.distorted_role_id);
   const accusedRole = casePublic?.roles.find((r: RolePublic) => r.role_id === accusation?.accused_role_id);
 
