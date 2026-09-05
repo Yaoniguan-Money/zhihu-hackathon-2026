@@ -159,6 +159,9 @@ export default defineSchema({
     // P1-1：kind=present_recording 时被对质录音的来源 Message（服务器权威，
     // 回应消息的 rebuttal_to_message_id 由此设置）。
     confront_message_id: v.optional(v.string()),
+    // P1-2：succeeded 时持久化的 Approved Speech Envelope（CONTRACTS 9/14，
+    // approvedSpeechEnvelopePrivateSchema 序列化）——TTS Route 唯一合法来源。
+    envelope_json: v.optional(v.string()),
     // TB10：lease。accepted/working Ticket 持有 Session 排他锁直至终态或过期；
     // 过期锁在下一个写操作的事务中被显式判失败（TURN_LEASE_EXPIRED），
     // 不自动重新调用模型。缺省（旧数据/seed）视为未过期。

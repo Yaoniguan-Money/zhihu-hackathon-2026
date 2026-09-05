@@ -271,10 +271,10 @@ export const seedActiveTicket = internalMutation({
 });
 
 /**
- * 测试工具（P1-1）：插入一条已批准角色消息及其 succeeded Ticket，
+ * 测试工具（P1-1/P1-2）：插入一条已批准角色消息及其 succeeded Ticket，
  * 复刻 finalizeTurnSuccess 的持久化形状（message_json + validation_json
- * 含 support_claim_ids），供 saveRecording 无模型构造来源消息。
- * 绝不进入生产调用链：生产唯一路径是 TB4/TB7 的回合 worker。
+ * 含 support_claim_ids + envelope_json），供 saveRecording / TTS Route
+ * 无模型构造来源消息。绝不进入生产调用链：生产唯一路径是回合 worker。
  */
 export const seedRoleMessage = internalMutation({
   args: {
@@ -282,6 +282,7 @@ export const seedRoleMessage = internalMutation({
     role_id: v.string(),
     text: v.string(),
     support_claim_ids: v.array(v.string()),
+    voice_id: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const nowMs = Date.now();
@@ -303,6 +304,17 @@ export const seedRoleMessage = internalMutation({
       payload_json: JSON.stringify(roleMessage),
       created_at_ms: nowMs,
     });
+    const digest = await sha256Hex(args.text);
+    const envelope = {
+      request_id,
+      message_id: messageId,
+      role_id: args.role_id,
+      exact_text: args.text,
+      exact_text_sha256: `sha256:${digest}`,
+      support_claim_ids: args.support_claim_ids,
+      validation_id: `val-${crypto.randomUUID()}`,
+      voice_id: args.voice_id ?? "voice-zh-01",
+    };
     await ctx.db.insert("role_turn_tickets", {
       request_id,
       session_id: args.session_id,
@@ -317,6 +329,7 @@ export const seedRoleMessage = internalMutation({
         referenced_claim_ids: args.support_claim_ids,
         support_claim_ids: args.support_claim_ids,
       }),
+      envelope_json: JSON.stringify(envelope),
       created_at_ms: nowMs,
       updated_at_ms: nowMs,
     });

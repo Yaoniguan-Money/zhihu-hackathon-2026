@@ -171,6 +171,11 @@ cases.createFromSource
 - TTS 请求只能引用 Approved Role Message；服务器读取 exact text、Role voice 与允许的 pace，再调用 Kokoro Adapter。
 - TTS 输入文字必须逐字等于 Approved Role Message。`intensity` 只作为 UI / Rive 表演元数据，不承诺 Kokoro 声学强度控制。
 - A9 当前只承诺本地运行。公网部署拓扑、容量和认证尚未决定，不能标记为已完成。
+- Voice 链路的显式配置（缺失即 `SERVICE_NOT_CONFIGURED`，不得内置默认值）：
+  - `VOICE_WORKER_URL`：本地 Worker 地址（Worker 只绑定 `127.0.0.1`，Browser 不直连）。
+  - `CONVEX_SITE_URL`：Convex HTTP action 基址（本地 `:3211` 端口 / 生产 `*.convex.site`），与 API 端 `.convex.cloud` 不同源。
+  - `voice-worker/voice-pack.json`：五音色槽位到具体音色的唯一映射；五音色经用户 A/B 真人试听后锁定（`locked=true`），代码不得绕过该文件选择音色。
+- 模型与音色供应链固定：`voice-worker/download_models.py` 按 `voice-worker/models-manifest.json` 的逐文件 sha256 下载/复验（SenseVoiceSmall、FSMN-VAD、Kokoro-82M）；Worker 以离线缓存模式运行，运行期禁止联网拉取。
 
 ## 6. Model Gateway
 

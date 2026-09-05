@@ -13,7 +13,7 @@ import {
   sourceSpanSchema,
   isoDateTimeSchema,
   eventIdSchema,
-} from "../shared/index.js";
+} from "../shared/index";
 import {
   evidenceTypeSchema,
   questionModeSchema,
@@ -21,7 +21,7 @@ import {
   roleEmotionSchema,
   roleProsodySchema,
   roleStanceSchema,
-} from "../public/index.js";
+} from "../public/index";
 
 /**
  * contracts/private — 只允许 Convex internal functions、AI Orchestrator、

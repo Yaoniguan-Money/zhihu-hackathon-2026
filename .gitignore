@@ -22,3 +22,10 @@ convex/_generated/
 
 .vercel
 .env*
+
+# P1-2 本地语音：模型权重/日志/虚拟环境不入仓库（哈希清单与下载脚本入库）
+voice-worker/.venv/
+voice-worker/models/
+voice-worker/*.log
+
+__pycache__/

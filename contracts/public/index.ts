@@ -13,7 +13,7 @@ import {
   sessionIdSchema,
   sha256DigestSchema,
   sourceIdSchema,
-} from "../shared/index.js";
+} from "../shared/index";
 
 /**
  * contracts/public — Browser、B 端页面和 XState 唯一可以导入的类型。

@@ -20,14 +20,16 @@
 | TB5+TB6+TB7 | df6ae4a | 重写矩阵/Distorted 门控（Scripted 11 项确定性测试）+ game.start 串行五条开场；真实五条开场 218s 通过 |
 | TB9 指控与 Reveal | 825a345 | 服务器判定与两项评分、truth chain/altered links、Reveal 模型候选严格校验、原子 revealed；真实完整 golden 闭环 293s 通过（开场→审讯→指控→Reveal） |
 | P1-1 Recording 与对质 | 322b1e9 | saveRecording（支持∩已公开可见推导、创建即解锁、内容级去重）+ presentRecording（共用排他锁、对质硬约束、rebuttal 服务器权威）；Scripted 8 项 + 集成 7 项 + 真实模型对质闭环通过；生产 `agile-turtle-860` 已部署并 8/8 验证 PASS |
+| P1-2a 本地 Voice 基建 | 见 p12 handoff | Worker（127.0.0.1，SenseVoice+VAD+Kokoro，143 文件哈希清单、离线缓存）+ 两个同源 Voice Route + Envelope 落库 + ASR/TTS 幂等持久化；TTS→ASR 往返与全链 e2e 通过；全套件 133 pass。收口待用户五音色 A/B 锁定 |
 
 另外：PF1 补齐 auth.config.ts + JWKS（JWT 校验链路首次真正打通）、AI_* 配置落地（DeepSeek v4）+ smoke、AI 配置 handoff。
 
 ## 测试状态
 
-- `bun test`：89 pass / 0 fail / 4 skip（模型测试显式 opt-in，各自单独通过）
-- `RUN_MODEL_INTEGRATION=1`：TB1 编译、TB4 回合各自通过（消耗真实 DeepSeek 调用）
-- `bun run typecheck`：通过
+- `bun test`：133 pass / 0 fail / 10 skip（模型与 worker 测试显式 opt-in，各自单独通过）
+- `RUN_MODEL_INTEGRATION=1`：TB1 编译、TB4 回合、P1-1 对质闭环各自通过（消耗真实 DeepSeek 调用）
+- `RUN_VOICE_WORKER=1`：P1-2 worker e2e 4 项通过（需本地 worker.py 运行）
+- `bun run typecheck`：通过；`bun run build`（含 voice routes）通过
 
 ## 待用户醒后批量验收清单
 
@@ -42,7 +44,7 @@
 3. ~~TB10~~ ✅ COMPLETE（2026-09-05，审计/lease/并发/泄漏扫描/恢复全链 + 发布 Gate smoke）
 4. ~~REL0~~ ✅ COMPLETE（2026-09-05，Convex Cloud + Vercel 生产部署；P1-1 后生产 functions 已同步并复验 8/8 PASS）
 5. ~~P1-1~~ ✅ COMPLETE（2026-09-05 深夜，commit 322b1e9；见 p11-1 handoff）
-6. P1-2 本地 Voice：模型/音色锁定需用户 A/B 真人试听；基建（Python Worker、同源 Route、供应链固定哈希）可先开工。
+6. ~~P1-2a~~ ✅ COMPLETE（2026-09-05 深夜；见 p12-2a handoff）——P1-2 收口仅剩：用户五音色 A/B 试听锁定 `voice-pack.json` + REL1 验收
 7. P1-3 / G1：等用户提供第二篇真实 URL + 全文，保持 BLOCKED（不降级）。
 8. AUTH1：等用户知乎 App 凭据，保持 BLOCKED。
 

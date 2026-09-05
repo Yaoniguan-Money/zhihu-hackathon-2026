@@ -20,6 +20,7 @@ import {
 import {
   evidenceUnlockRulePrivateSchema,
   rolePrivatePolicySchema,
+  approvedSpeechEnvelopePrivateSchema,
   type ClaimPrivate,
   type PrivateFailure,
 } from "@contracts/private/index.js";
@@ -984,6 +985,38 @@ export const finalizeTurnSuccess = internalMutation({
 
     const nowMs = Date.now();
     const messageId = newOpaqueId("msg-");
+
+    // P1-2：持久化 Approved Speech Envelope（CONTRACTS 9 / 14）——
+    // voice_id 来自案件公开 Role；TTS Route 只接受本信封。
+    const session = await ctx.db
+      .query("sessions")
+      .withIndex("by_session_key", (q) => q.eq("session_key", ticket.session_id))
+      .unique();
+    const caseDoc = session
+      ? await ctx.db
+          .query("cases")
+          .withIndex("by_case_key", (q) => q.eq("case_key", session.case_id))
+          .unique()
+      : null;
+    const casePublic = caseDoc?.public_json
+      ? (JSON.parse(caseDoc.public_json) as {
+          roles: { role_id: string; voice_id: string }[];
+        })
+      : null;
+    const voiceId = casePublic?.roles.find(
+      (role) => role.role_id === ticket.role_id,
+    )?.voice_id;
+    const envelope = approvedSpeechEnvelopePrivateSchema.parse({
+      request_id: ticket.request_id,
+      message_id: messageId,
+      role_id: ticket.role_id,
+      exact_text: args.speech,
+      exact_text_sha256: `sha256:${await sha256Hex(args.speech)}`,
+      support_claim_ids: args.support_claim_ids,
+      validation_id: `val-${crypto.randomUUID()}`,
+      ...(voiceId !== undefined && { voice_id: voiceId }),
+    });
+
     const roleMessage = roleMessagePublicSchema.parse({
       message_id: messageId,
       session_id: ticket.session_id,
@@ -1049,6 +1082,7 @@ export const finalizeTurnSuccess = internalMutation({
       status: "succeeded",
       message_json: JSON.stringify(roleMessage),
       unlocked_ids_json: JSON.stringify(newlyUnlocked),
+      envelope_json: JSON.stringify(envelope),
       ...(args.validation_json !== undefined && {
         validation_json: args.validation_json,
       }),

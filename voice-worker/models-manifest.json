@@ -1,0 +1,595 @@
+{
+  "comment": "本地语音供应链固定清单：revision 与文件 sha256 由下载脚本解析记录。",
+  "entries": {
+    "sensevoice-small": {
+      "source": "modelscope:iic/SenseVoiceSmall",
+      "revision": "master",
+      "files": {
+        ".gitattributes": {
+          "sha256": "abb4b1aa654526de5abde955a3c42787604c95baee0656216cd4498fcd12aecf",
+          "bytes": 1643
+        },
+        "am.mvn": {
+          "sha256": "29b3c740a2c0cfc6b308126d31d7f265fa2be74f3bb095cd2f143ea970896ae5",
+          "bytes": 11203
+        },
+        "chn_jpn_yue_eng_ko_spectok.bpe.model": {
+          "sha256": "aa87f86064c3730d799ddf7af3c04659151102cba548bce325cf06ba4da4e6a8",
+          "bytes": 377341
+        },
+        "config.yaml": {
+          "sha256": "f71e239ba36705564b5bf2d2ffd07eece07b8e3f2bbf6d2c99d8df856339ac19",
+          "bytes": 1855
+        },
+        "configuration.json": {
+          "sha256": "02810a7f8e9e8aee10370a265f7e799728ce25b4c00cdbf4602b303ee395a38e",
+          "bytes": 396
+        },
+        "example/.DS_Store": {
+          "sha256": "162f733224c8f768c276ac6aa95c13665a972f269d4ae53d44d8b68d740884e3",
+          "bytes": 6148
+        },
+        "example/en.mp3": {
+          "sha256": "f10378336a4e584f3f63799e62f99d5add3c2a401b51d3abe7d3a3a82f255ada",
+          "bytes": 57441
+        },
+        "example/ja.mp3": {
+          "sha256": "496dbc43b289e1d0d0cb916df9737450bca56acd8aaca046a7a2472363b1be53",
+          "bytes": 57837
+        },
+        "example/ko.mp3": {
+          "sha256": "8612f62db8319a6cb4ab4b1d2039bfc32f174f89611889ddafdeb5c0a6070b5f",
+          "bytes": 27909
+        },
+        "example/yue.mp3": {
+          "sha256": "5098eebc13530a66e4eac1f30d3246e65c9cfc4e096665f9d395aca8eff0d181",
+          "bytes": 31246
+        },
+        "example/zh.mp3": {
+          "sha256": "0e64de19e4ff9a02e682955c9112f32d2317cfdbb5bc2f3504664044c993f195",
+          "bytes": 44973
+        },
+        "fig/aed_figure.png": {
+          "sha256": "643a2705d9b2ac1fe95cc4f1ca7df23c0f030e256e351541287391128665b5b8",
+          "bytes": 118715
+        },
+        "fig/asr_results.png": {
+          "sha256": "fda4390934fc6d309cbac7f22053580cbedd8a608ad52e3cfac0fb2947a8c4fe",
+          "bytes": 243908
+        },
+        "fig/inference.png": {
+          "sha256": "0bcde7dd81dcb5b1198cb7fd210fa05a6861512b844027fe8508c8f6a997352e",
+          "bytes": 957677
+        },
+        "fig/sensevoice.png": {
+          "sha256": "e570d2fad030bb48b0094a3085791d3a6aa1be338f0a003736a11e58e5034afc",
+          "bytes": 900892
+        },
+        "fig/ser_figure.png": {
+          "sha256": "eaf050fa5d775a3b84031d8eb5a200699312d7e9a7d769550643cf02edbdb13b",
+          "bytes": 198915
+        },
+        "fig/ser_table.png": {
+          "sha256": "a0a8ae6dcc63b89a7d9160461b7c78333d0c8c0cdcf7bd0311d59a3b36d26370",
+          "bytes": 325753
+        },
+        "model.pt": {
+          "sha256": "833ca2dcfdf8ec91bd4f31cfac36d6124e0c459074d5e909aec9cabe6204a3ea",
+          "bytes": 936291369
+        },
+        "README.md": {
+          "sha256": "1e9a3ad58f907aeb099a650a2f2565c64f9936820c8654016c3980b767a6407b",
+          "bytes": 12091
+        },
+        "tokens.json": {
+          "sha256": "a2594fc1474e78973149cba8cd1f603ebed8c39c7decb470631f66e70ce58e97",
+          "bytes": 352064
+        }
+      }
+    },
+    "fsmn-vad": {
+      "source": "modelscope:iic/speech_fsmn_vad_zh-cn-16k-common-pytorch",
+      "revision": "master",
+      "files": {
+        ".gitattributes": {
+          "sha256": "f3d04437c926962476701a7939d22f21400b4eb0bdd31a15f0012576f2d00932",
+          "bytes": 1414
+        },
+        "am.mvn": {
+          "sha256": "6820fef9687708c4fc3fab2530179c8fcea6262daa25514380056cd8f6eb1754",
+          "bytes": 8040
+        },
+        "config.yaml": {
+          "sha256": "486861ca26ddb79081663b6179cb204c6bfae71c52f04aafc48a9e9d8dde1e93",
+          "bytes": 1215
+        },
+        "configuration.json": {
+          "sha256": "7bce8867e37d55c3dd8f672695ced18077a2be199ea529a5d432d5350fc0acba",
+          "bytes": 365
+        },
+        "example/vad_example.wav": {
+          "sha256": "a7431f0169ef76ef630c945a1d2c3675d8c8c2df2ae4a6b16f8a88ba1bccfbbb",
+          "bytes": 2261722
+        },
+        "fig/struct.png": {
+          "sha256": "c745bcc2fd4952fb1fe5a0f7f9fdabda510c3771e7a47dd22be605e26db4ee2c",
+          "bytes": 27914
+        },
+        "model.pt": {
+          "sha256": "b3be75be477f0780277f3bae0fe489f48718f585f3a6e45d7dd1fbb1a4255fc5",
+          "bytes": 1721366
+        },
+        "README.md": {
+          "sha256": "42377011603a186fc2bae41a5cc5e548ebf98d8ec307bbae9dd405f82567f543",
+          "bytes": 11567
+        }
+      }
+    },
+    "kokoro-82m": {
+      "source": "huggingface:hexgrad/Kokoro-82M",
+      "revision": "v1.0",
+      "files": {
+        ".cache/huggingface/.gitignore": {
+          "sha256": "684888c0ebb17f374298b65ee2807526c066094c701bcc7ebbe1c1095f494fc1",
+          "bytes": 1
+        },
+        ".cache/huggingface/CACHEDIR.TAG": {
+          "sha256": "e8893e2dcb3f4545ef67a0a5b7b769113d38eef1aa61c7c7ba14659b02af955f",
+          "bytes": 195
+        },
+        ".cache/huggingface/download/config.json.metadata": {
+          "sha256": "0bcd10cb46f2265969b00166289eab1e107d3d936a274e6097b5d52a88245702",
+          "bytes": 104
+        },
+        ".cache/huggingface/download/kokoro-v1_0.pth.metadata": {
+          "sha256": "a1634c44da482336e1c7d7dea7bb858cd431cda669fb520fabb349aa209781f2",
+          "bytes": 127
+        },
+        ".cache/huggingface/download/voices/af_alloy.pt.metadata": {
+          "sha256": "2883e17f99e33ae5c33047bd13a87c5369054c7d9b9170d7594f16b8cc69b0f4",
+          "bytes": 128
+        },
+        ".cache/huggingface/download/voices/af_aoede.pt.metadata": {
+          "sha256": "8efbeb1e14498592dfb2d7ac4bb24a7beaafb332adcacb4eb59b0833efdcc8c2",
+          "bytes": 127
+        },
+        ".cache/huggingface/download/voices/af_bella.pt.metadata": {
+          "sha256": "0b1ac2575e6ef9c63bde10e6117d76088d1cad0675d083192386b2b95fb15077",
+          "bytes": 127
+        },
+        ".cache/huggingface/download/voices/af_heart.pt.metadata": {
+          "sha256": "861e9d6251127a851c38bc4334cbffb0497e30dc32b6660e47780e6ed5d564c8",
+          "bytes": 128
+        },
+        ".cache/huggingface/download/voices/af_jessica.pt.metadata": {
+          "sha256": "bf63cf40f7833e724212f851a03701eb1635d4ad5a74f7ae7b00e3ac19c482af",
+          "bytes": 128
+        },
+        ".cache/huggingface/download/voices/af_kore.pt.metadata": {
+          "sha256": "b0a9cfc03af330d039e24b845e22b5f97cffe1f3a0d7c01e8f70ebe789070d47",
+          "bytes": 128
+        },
+        ".cache/huggingface/download/voices/af_nicole.pt.metadata": {
+          "sha256": "c9c14f9d35e0fd97fe71f6e664eeffa69764e0659405d6dd93de87cf33bf203f",
+          "bytes": 128
+        },
+        ".cache/huggingface/download/voices/af_nova.pt.metadata": {
+          "sha256": "6c4547e102a5ef6b40d7b53e9ca15dfd2b400a1022736a018ebe0f9c09b8c0cb",
+          "bytes": 128
+        },
+        ".cache/huggingface/download/voices/af_river.pt.metadata": {
+          "sha256": "723d7d0dea7e58c8f927b81d5ffa35dc948051739fa3d34fd39949c20bd5f8ed",
+          "bytes": 128
+        },
+        ".cache/huggingface/download/voices/af_sarah.pt.metadata": {
+          "sha256": "5e444f3661072a02a65585991eef8eae112c482988558342987303911d55b6db",
+          "bytes": 128
+        },
+        ".cache/huggingface/download/voices/af_sky.pt.metadata": {
+          "sha256": "29eb759db92fb5f3adeae22f8c6011c9c4403f154557973e128d08bc20dc4d72",
+          "bytes": 128
+        },
+        ".cache/huggingface/download/voices/am_adam.pt.metadata": {
+          "sha256": "0538d14fba89c1e790ba6a799a1fec59a1448918b09a5c369c6202b46d9e09bd",
+          "bytes": 128
+        },
+        ".cache/huggingface/download/voices/am_echo.pt.metadata": {
+          "sha256": "b0ad981ef05c066006ad2c74b93b2316c87d41fb92ebca11c7f8875992742e1c",
+          "bytes": 127
+        },
+        ".cache/huggingface/download/voices/am_eric.pt.metadata": {
+          "sha256": "3640257bdafc7a041bfed34ca692c51cf3424dd56e46578784c9552358d99315",
+          "bytes": 128
+        },
+        ".cache/huggingface/download/voices/am_fenrir.pt.metadata": {
+          "sha256": "d8ce735da693171dff7c07e0bbeda286ad0db485fec934b86cb1364ed71dcf94",
+          "bytes": 128
+        },
+        ".cache/huggingface/download/voices/am_liam.pt.metadata": {
+          "sha256": "dacbaab223aa9d19f2ecb47de26d3ff4b81e359a978114fe10769c4a6dedc5f0",
+          "bytes": 127
+        },
+        ".cache/huggingface/download/voices/am_michael.pt.metadata": {
+          "sha256": "c3d7a81b7293d40b0778f25be85da24e085890c3fd2773876c0334351a21fffb",
+          "bytes": 125
+        },
+        ".cache/huggingface/download/voices/am_onyx.pt.metadata": {
+          "sha256": "cc4808960e8f922eba0a8df295f591b16b66707e6ab1efe3a790783dd806dd63",
+          "bytes": 128
+        },
+        ".cache/huggingface/download/voices/am_puck.pt.metadata": {
+          "sha256": "167c6e7c1535518513d42b322fb88ee116dcd5092a02bfc494c4b3a5a7f21173",
+          "bytes": 128
+        },
+        ".cache/huggingface/download/voices/am_santa.pt.metadata": {
+          "sha256": "01e42de799adb4e4a1ad370c1f7ac4a84339c138867a41d492c51e17200c6909",
+          "bytes": 127
+        },
+        ".cache/huggingface/download/voices/bf_alice.pt.metadata": {
+          "sha256": "f10d1af6e4589205588fce8243b57afa8e2b81d606ec4a3659152865c9bb3901",
+          "bytes": 128
+        },
+        ".cache/huggingface/download/voices/bf_emma.pt.metadata": {
+          "sha256": "387853873dd7f40ea56b5b97b1202fb2ccc50a2d453e352a94ef5758ec18c666",
+          "bytes": 128
+        },
+        ".cache/huggingface/download/voices/bf_isabella.pt.metadata": {
+          "sha256": "cd4b8cacf0138f83223586b66e4d19a228afbeb7fe8413b47fa482471775ff21",
+          "bytes": 128
+        },
+        ".cache/huggingface/download/voices/bf_lily.pt.metadata": {
+          "sha256": "17482450e250d15d9d6151ec2d3e83b382cdf6a67b4c132a90ee5e6a70fea75a",
+          "bytes": 128
+        },
+        ".cache/huggingface/download/voices/bm_daniel.pt.metadata": {
+          "sha256": "c9fcbca9f3abd7dc8491f5614c1fb258e50cbbcc02853d5a348876ba39513a84",
+          "bytes": 128
+        },
+        ".cache/huggingface/download/voices/bm_fable.pt.metadata": {
+          "sha256": "5501877ed3f0150daac0a3f9000dc0a3a9112409bf10291872f9b18af8841529",
+          "bytes": 127
+        },
+        ".cache/huggingface/download/voices/bm_george.pt.metadata": {
+          "sha256": "78701d1fccc1a7cbf6d7465b0d81f8bb5f2d606fe3dcca739ce2b4613e93d30f",
+          "bytes": 128
+        },
+        ".cache/huggingface/download/voices/bm_lewis.pt.metadata": {
+          "sha256": "7d8cdcb48cd64f82f18111568eeeed8fdb39d3bb98ed51ccd527d089f37eb5a9",
+          "bytes": 128
+        },
+        ".cache/huggingface/download/voices/ef_dora.pt.metadata": {
+          "sha256": "b9786dddce7a03c843b4cc05295331edce466e3e93f023507df6c531bdab992c",
+          "bytes": 128
+        },
+        ".cache/huggingface/download/voices/em_alex.pt.metadata": {
+          "sha256": "0d5d406ead6ac111f4a4a4581a7482fc929fbec625d37a507b9c37aaeee4d3bd",
+          "bytes": 128
+        },
+        ".cache/huggingface/download/voices/em_santa.pt.metadata": {
+          "sha256": "0c662f2455229ec77b87cbf2d99d6f96b1f72edbde67e0d315de072748321c0e",
+          "bytes": 127
+        },
+        ".cache/huggingface/download/voices/ff_siwis.pt.metadata": {
+          "sha256": "6a83b12b162637f1b611f4c6bb2c62f442d5da73fab81cb1360e6d39ed3e1c29",
+          "bytes": 128
+        },
+        ".cache/huggingface/download/voices/hf_alpha.pt.metadata": {
+          "sha256": "8309e6a88aa7041cb6a6e40d291cd89b2121b9895cc2e844ceffe57d71316782",
+          "bytes": 128
+        },
+        ".cache/huggingface/download/voices/hf_beta.pt.metadata": {
+          "sha256": "fce548f8d6f7637acaa22d9fb11e8f993720a6b1d7c5aa1ca3aebbeb22d02e7e",
+          "bytes": 128
+        },
+        ".cache/huggingface/download/voices/hm_omega.pt.metadata": {
+          "sha256": "d1de7e16b0584788cd15e551f1d943d5a1677eac852f869f87efd1d8e027e45f",
+          "bytes": 128
+        },
+        ".cache/huggingface/download/voices/hm_psi.pt.metadata": {
+          "sha256": "01eac35ba9b773781f70a19593e1e2af5b153322bc761b0c7e446c87b6eef95b",
+          "bytes": 128
+        },
+        ".cache/huggingface/download/voices/if_sara.pt.metadata": {
+          "sha256": "a56a3727b2db081792cd9377b62c92fc739ac66ae300df565f107355933b3569",
+          "bytes": 128
+        },
+        ".cache/huggingface/download/voices/im_nicola.pt.metadata": {
+          "sha256": "ee673c816292c53de29b6e05d6149b78eae169178a08f3fee25e1f57338d72b2",
+          "bytes": 128
+        },
+        ".cache/huggingface/download/voices/jf_alpha.pt.metadata": {
+          "sha256": "a8ee0321472e5345f74eda9682da71dac0a59a59cb96477d06f4efdab50b4df7",
+          "bytes": 128
+        },
+        ".cache/huggingface/download/voices/jf_gongitsune.pt.metadata": {
+          "sha256": "09b56cc4e97b24b0e1c8c82ad25f4486b412e86adf5b3d1e7dd95c1106fb9df8",
+          "bytes": 127
+        },
+        ".cache/huggingface/download/voices/jf_nezumi.pt.metadata": {
+          "sha256": "2cf8d83e79604c9d34a36377a2016002eca09714dd7eb2de5c8b4725e5565d46",
+          "bytes": 128
+        },
+        ".cache/huggingface/download/voices/jf_tebukuro.pt.metadata": {
+          "sha256": "1502f12768ff14f88bc472861cf200ab22175acd4cefb63cef43053a9d60db1d",
+          "bytes": 128
+        },
+        ".cache/huggingface/download/voices/jm_kumo.pt.metadata": {
+          "sha256": "0ea5c4f642d720fa4e97662aaa0ef7f4b4c8ff84ba7570c06db2dc8e0c799a0d",
+          "bytes": 127
+        },
+        ".cache/huggingface/download/voices/pf_dora.pt.metadata": {
+          "sha256": "26170661049996fb384f6e9078da418a33632a2f71f9bb41d8fe2c62d5661954",
+          "bytes": 128
+        },
+        ".cache/huggingface/download/voices/pm_alex.pt.metadata": {
+          "sha256": "5b0f7ae9700b793bbfb45b4fecfdc008b9671edb7bc11df183a882da391729e9",
+          "bytes": 128
+        },
+        ".cache/huggingface/download/voices/pm_santa.pt.metadata": {
+          "sha256": "b247bbbb3dad4bc849ac6b89c25d147574750a11ce59825f953791070d504a17",
+          "bytes": 128
+        },
+        ".cache/huggingface/download/voices/zf_xiaobei.pt.metadata": {
+          "sha256": "5b69e902df27c46a4735b29d2531632117b95d6bf3272e9ef16a8b475c017096",
+          "bytes": 127
+        },
+        ".cache/huggingface/download/voices/zf_xiaoni.pt.metadata": {
+          "sha256": "2c4aea3cd98f84034786fdd08a6be27d06664b691ce83a812ea84d3bf7d6b8e9",
+          "bytes": 128
+        },
+        ".cache/huggingface/download/voices/zf_xiaoxiao.pt.metadata": {
+          "sha256": "71cb650f0481581bcb8eb7082430dc1c5a38c3cc88e3d777fa1ca41d80f4e5b8",
+          "bytes": 128
+        },
+        ".cache/huggingface/download/voices/zf_xiaoyi.pt.metadata": {
+          "sha256": "a431ee824516076baffbd8da32d8e02b924e95c5f0727932147a352f58aecc48",
+          "bytes": 128
+        },
+        ".cache/huggingface/download/voices/zm_yunjian.pt.metadata": {
+          "sha256": "16cbe60b6c098a2c0cef8680ffff7e27e2ea7a23e82273606c1be6cf6617610e",
+          "bytes": 128
+        },
+        ".cache/huggingface/download/voices/zm_yunxi.pt.metadata": {
+          "sha256": "3d29af5aed062b48fbdc8397aa939ca5b059bcb3e4a9f38c8883f73f8cc48966",
+          "bytes": 128
+        },
+        ".cache/huggingface/download/voices/zm_yunxia.pt.metadata": {
+          "sha256": "63f77abf046184b78b9d1c004200ac74a473d0dc52e8f1fdbad925ad4942e90e",
+          "bytes": 128
+        },
+        ".cache/huggingface/download/voices/zm_yunyang.pt.metadata": {
+          "sha256": "8d32f405f55fa5842b6fab5f5eaee0bb9086b740645d836ba0fe2d6105d987c0",
+          "bytes": 128
+        },
+        ".cache/huggingface/trees/f3ff3571791e39611d31c381e3a41a3af07b4987.json": {
+          "sha256": "d8e4bcfcabbe1f55df40a2d025cf084197efc96bd121bfd640c4e2ed680306e7",
+          "bytes": 19894
+        },
+        "config.json": {
+          "sha256": "5abb01e2403b072bf03d04fde160443e209d7a0dad49a423be15196b9b43c17f",
+          "bytes": 2351
+        },
+        "kokoro-v1_0.pth": {
+          "sha256": "496dba118d1a58f5f3db2efc88dbdc216e0483fc89fe6e47ee1f2c53f18ad1e4",
+          "bytes": 327212226
+        },
+        "voices/af_alloy.pt": {
+          "sha256": "6d877149dd8b348fbad12e5845b7e43d975390e9f3b68a811d1d86168bef5aa3",
+          "bytes": 523425
+        },
+        "voices/af_aoede.pt": {
+          "sha256": "c03bd1a4c3716c2d8eaa3d50022f62d5c31cfbd6e15933a00b17fefe13841cc4",
+          "bytes": 523425
+        },
+        "voices/af_bella.pt": {
+          "sha256": "8cb64e02fcc8de0327a8e13817e49c76c945ecf0052ceac97d3081480e8e48d6",
+          "bytes": 523425
+        },
+        "voices/af_heart.pt": {
+          "sha256": "0ab5709b8ffab19bfd849cd11d98f75b60af7733253ad0d67b12382a102cb4ff",
+          "bytes": 523425
+        },
+        "voices/af_jessica.pt": {
+          "sha256": "cdfdccb8cc975aa34ee6b89642963b0064237675de0e41a30ae64cc958dd4e87",
+          "bytes": 523435
+        },
+        "voices/af_kore.pt": {
+          "sha256": "8bfbc512321c3db49dff984ac675fa5ac7eaed5a96cc31104d3a9080e179d69d",
+          "bytes": 523420
+        },
+        "voices/af_nicole.pt": {
+          "sha256": "c5561808bcf5250fe8c5f5de32caf2d94f27e57e95befdb098c5c85991d4c5da",
+          "bytes": 523430
+        },
+        "voices/af_nova.pt": {
+          "sha256": "e0233676ddc21908c37a1f102f6b88a59e4e5c1bd764983616eb9eda629dbcd2",
+          "bytes": 523420
+        },
+        "voices/af_river.pt": {
+          "sha256": "e149459bd9c084416b74756b9bd3418256a8b839088abb07d463730c369dab8f",
+          "bytes": 523425
+        },
+        "voices/af_sarah.pt": {
+          "sha256": "49bd364ea3be9eb3e9685e8f9a15448c4883112a7c0ff7ab139fa4088b08cef9",
+          "bytes": 523425
+        },
+        "voices/af_sky.pt": {
+          "sha256": "c799548aed06e0cb0d655a85a01b48e7f10484d71663f9a3045a5b9362e8512c",
+          "bytes": 523351
+        },
+        "voices/am_adam.pt": {
+          "sha256": "ced7e284aba12472891be1da3ab34db84cc05cc02b5889535796dbf2d8b0cb34",
+          "bytes": 523420
+        },
+        "voices/am_echo.pt": {
+          "sha256": "8bcfdc852bc985fb45c396c561e571ffb9183930071f962f1b50df5c97b161e8",
+          "bytes": 523420
+        },
+        "voices/am_eric.pt": {
+          "sha256": "ada66f0eefff34ec921b1d7474d7ac8bec00cd863c170f1c534916e9b8212aae",
+          "bytes": 523420
+        },
+        "voices/am_fenrir.pt": {
+          "sha256": "98e507eca1db08230ae3b6232d59c10aec9630022d19accac4f5d12fcec3c37a",
+          "bytes": 523430
+        },
+        "voices/am_liam.pt": {
+          "sha256": "c82550757ddb31308b97f30040dda8c2d609a9e2de6135848d0a948368138518",
+          "bytes": 523420
+        },
+        "voices/am_michael.pt": {
+          "sha256": "9a443b79a4b22489a5b0ab7c651a0bcd1a30bef675c28333f06971abbd47bd37",
+          "bytes": 523435
+        },
+        "voices/am_onyx.pt": {
+          "sha256": "e8452be16cd0f6da7b4579eaf7b1e4506e92524882053d86d72b96b9a7fed584",
+          "bytes": 523420
+        },
+        "voices/am_puck.pt": {
+          "sha256": "dd1d8973f4ce4b7d8ae407c77a435f485dabc052081b80ea75c4f30b84f36223",
+          "bytes": 523420
+        },
+        "voices/am_santa.pt": {
+          "sha256": "7f2f7582fa2b1f160e90aafe6d0b442a685e773608b6667e545d743b073e97a7",
+          "bytes": 523425
+        },
+        "voices/bf_alice.pt": {
+          "sha256": "d292651b6af6c0d81705c2580dcb4463fccc0ff7b8d618a471dbb4e45655b3f3",
+          "bytes": 523425
+        },
+        "voices/bf_emma.pt": {
+          "sha256": "d0a423deabf4a52b4f49318c51742c54e21bb89bbbe9a12141e7758ddb5da701",
+          "bytes": 523420
+        },
+        "voices/bf_isabella.pt": {
+          "sha256": "cdd4c37003805104d1d08fb1e05855c8fb2c68de24ca6e71f264a30aaa59eefd",
+          "bytes": 523440
+        },
+        "voices/bf_lily.pt": {
+          "sha256": "6e09c2e481e2d53004d7e5ae7d3a325369e130a6f45c35a6002de75084be9285",
+          "bytes": 523420
+        },
+        "voices/bm_daniel.pt": {
+          "sha256": "fc3fce4e9c12ed4dbc8fa9680cfe51ee190a96444ce7c3ad647549a30823fc5d",
+          "bytes": 523430
+        },
+        "voices/bm_fable.pt": {
+          "sha256": "d44935f3135257a9064df99f007fc1342ff1aa767552b4a4fa4c3b2e6e59079c",
+          "bytes": 523425
+        },
+        "voices/bm_george.pt": {
+          "sha256": "f1bc812213dc59774769e5c80004b13eeb79bd78130b11b2d7f934542dab811b",
+          "bytes": 523430
+        },
+        "voices/bm_lewis.pt": {
+          "sha256": "b5204750dcba01029d2ac9cec17aec3b20a6d64073c579d694a23cb40effbd0e",
+          "bytes": 523425
+        },
+        "voices/ef_dora.pt": {
+          "sha256": "d9d69b0f8a2b87a345f269d89639f89dfbd1a6c9da0c498ae36dd34afcf35530",
+          "bytes": 523420
+        },
+        "voices/em_alex.pt": {
+          "sha256": "5eac53f767c3f31a081918ba531969aea850bed18fe56419b804d642c6973431",
+          "bytes": 523420
+        },
+        "voices/em_santa.pt": {
+          "sha256": "aa8620cb96cec705823efca0d956a63e158e09ad41aca934d354b7f0778f63cb",
+          "bytes": 523430
+        },
+        "voices/ff_siwis.pt": {
+          "sha256": "8073bf2d2c4b9543a90f2f0fd2144de4ed157e2d4b79ddeb0d5123066171fbc9",
+          "bytes": 523425
+        },
+        "voices/hf_alpha.pt": {
+          "sha256": "06906fe05746d13a79c5c01e21fd7233b05027221a933c9ada650f5aafc8f044",
+          "bytes": 523425
+        },
+        "voices/hf_beta.pt": {
+          "sha256": "63c0a1a6272e98d43f4511bba40e30dd9c8ceaf5f39af869509b9f51a71c503e",
+          "bytes": 523420
+        },
+        "voices/hm_omega.pt": {
+          "sha256": "b55f02a8e8483fffe0afa566e7d22ed8013acf47ad4f6bbee2795a840155703e",
+          "bytes": 523425
+        },
+        "voices/hm_psi.pt": {
+          "sha256": "2f0f055cea4f1083f4ef127ece48d71606347f6557dbb961c0ca5740a2da485b",
+          "bytes": 523351
+        },
+        "voices/if_sara.pt": {
+          "sha256": "6c0b253b955fe32f1a1a86006aebe83d050ea95afd0e7be15182f087deedbf55",
+          "bytes": 523425
+        },
+        "voices/im_nicola.pt": {
+          "sha256": "234ed06648649f9bd874b37508ea17560b9c993ef85b4ddb3e3a71e062bd2c12",
+          "bytes": 523341
+        },
+        "voices/jf_alpha.pt": {
+          "sha256": "1bf4c9dc69e45ee46183b071f4db766349aac5592acbcfeaf051018048a5d787",
+          "bytes": 523425
+        },
+        "voices/jf_gongitsune.pt": {
+          "sha256": "1b171917f18f351e65f2bf9657700cd6bfec4e65589c297525b9cf3c20105770",
+          "bytes": 523351
+        },
+        "voices/jf_nezumi.pt": {
+          "sha256": "d83f007a7f01783b77014561a7d493d327a0210e143440e91c9b697590d27661",
+          "bytes": 523420
+        },
+        "voices/jf_tebukuro.pt": {
+          "sha256": "0d6917904438aec85f73a6fa1f7ac2be6481aae47c697834936930a91796c576",
+          "bytes": 523435
+        },
+        "voices/jm_kumo.pt": {
+          "sha256": "98340afd68b1cee84fe0cd95528cfa6d4b39e416aa75a9df64049d52c8b55896",
+          "bytes": 523425
+        },
+        "voices/pf_dora.pt": {
+          "sha256": "07e4ff987c5d5a8c3995efd15cc4f0db7c4c15e881b198d8ab7f67ecf51f5eb7",
+          "bytes": 523425
+        },
+        "voices/pm_alex.pt": {
+          "sha256": "cf0ba8c573c2480fc54123683a35cf1e2ae130428e441eb91f9149bdb188a526",
+          "bytes": 523425
+        },
+        "voices/pm_santa.pt": {
+          "sha256": "d42103169c5c872abbafb9129133af7e942bb9d272c3cc3b95c203e7d7198c29",
+          "bytes": 523430
+        },
+        "voices/zf_xiaobei.pt": {
+          "sha256": "9b76be63dab4f4f96962030acc0126a9aee9728608fbbe115e2b58a2bd504df6",
+          "bytes": 523435
+        },
+        "voices/zf_xiaoni.pt": {
+          "sha256": "95b49f169bf1640f4f43c25e13daa39f7b98d15d00823e83ef5c14b3ced59e49",
+          "bytes": 523430
+        },
+        "voices/zf_xiaoxiao.pt": {
+          "sha256": "cfaf6f2ded1ee56f1ff94fcd2b0e6cdf32e5b794bdc05b44e7439d44aef5887c",
+          "bytes": 523440
+        },
+        "voices/zf_xiaoyi.pt": {
+          "sha256": "b5235dbaeef85a4c613bf78af9a88ff63c25bac5f26ba77e36186d8b7ebf05e2",
+          "bytes": 523430
+        },
+        "voices/zm_yunjian.pt": {
+          "sha256": "76cbf8bad35901d011d9628a2fdceb7b4f1f127e7a3269cb393b3941eb7fc417",
+          "bytes": 523435
+        },
+        "voices/zm_yunxi.pt": {
+          "sha256": "dbe6e1ce7c3dbaf2f5667432947b638b1c6831ccbe154c4610dbcc44f431e27b",
+          "bytes": 523425
+        },
+        "voices/zm_yunxia.pt": {
+          "sha256": "bb2b03b08e84d64e1214440ce3b624987fac177f2eeb5bab8571799a3d980acd",
+          "bytes": 523430
+        },
+        "voices/zm_yunyang.pt": {
+          "sha256": "5238ac22e0c7f8b6cdd2eddd6e444b8a700b73c4674d9a047d59a94ff96379a2",
+          "bytes": 523435
+        }
+      }
+    }
+  }
+}
