@@ -1,0 +1,1803 @@
+{
+  "case_id": "1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+  "graph": {
+    "case_id": "1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+    "source_id": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+    "claims": [
+      {
+        "claim_id": "cl-1",
+        "proposition": "文章认为，中国养老金制度没有崩溃，但其运行逻辑已经改变。",
+        "source_span": {
+          "start": 36,
+          "end": 52,
+          "text": "养老金制度没有崩，但它的逻辑变了",
+          "paragraph_index": 1
+        },
+        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "confidence": 1
+      },
+      {
+        "claim_id": "cl-2",
+        "proposition": "文章称，养老金制度从“国家给你养老”转变为“国家帮你养老”。",
+        "source_span": {
+          "start": 53,
+          "end": 74,
+          "text": "从“国家给你养老”，变成了“国家帮你养老”",
+          "paragraph_index": 1
+        },
+        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "confidence": 1
+      },
+      {
+        "claim_id": "cl-3",
+        "proposition": "文章称，很多人误以为每月缴纳的社保钱存入个人账户，退休后逐渐领取。",
+        "source_span": {
+          "start": 114,
+          "end": 152,
+          "text": "很多人以为，自己每个月社保扣的那笔钱，是存在一个账户里，等自己退休了再慢慢领",
+          "paragraph_index": 3
+        },
+        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "confidence": 1
+      },
+      {
+        "claim_id": "cl-4",
+        "proposition": "文章称，中国当前养老金制度为现收现付制。",
+        "source_span": {
+          "start": 162,
+          "end": 180,
+          "text": "中国现在的养老金制度是“现收现付制”",
+          "paragraph_index": 5
+        },
+        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "confidence": 1
+      },
+      {
+        "claim_id": "cl-5",
+        "proposition": "文章称，当前缴纳的养老金正在用于支付已退休人员的养老金。",
+        "source_span": {
+          "start": 180,
+          "end": 199,
+          "text": "你现在交的钱，正在发给现在已经退休的人",
+          "paragraph_index": 5
+        },
+        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "confidence": 1
+      },
+      {
+        "claim_id": "cl-6",
+        "proposition": "文章称，等到个人退休时，将由那时工作的年轻人缴纳的养老金来支付其养老金。",
+        "source_span": {
+          "start": 200,
+          "end": 226,
+          "text": "等你退休了，那时候还在工作的年轻人交的钱，才会发给你",
+          "paragraph_index": 5
+        },
+        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "confidence": 1
+      },
+      {
+        "claim_id": "cl-7",
+        "proposition": "文章称，现收现付制在人口结构稳定时可以完全正常运转。",
+        "source_span": {
+          "start": 229,
+          "end": 256,
+          "text": "这个制度的设计逻辑在人口结构稳定的时候是完全可以运转的",
+          "paragraph_index": 6
+        },
+        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "confidence": 1
+      },
+      {
+        "claim_id": "cl-8",
+        "proposition": "文章称，中国正在经历建国以来最剧烈的人口结构变化。",
+        "source_span": {
+          "start": 262,
+          "end": 283,
+          "text": "中国的人口结构正在经历建国以来最剧烈的变化",
+          "paragraph_index": 6
+        },
+        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "confidence": 1
+      },
+      {
+        "claim_id": "cl-9",
+        "proposition": "据国家统计局数据，中国60岁及以上人口已超过3亿。",
+        "source_span": {
+          "start": 297,
+          "end": 313,
+          "text": "中国60岁及以上人口已经超过3亿",
+          "paragraph_index": 7
+        },
+        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "confidence": 1
+      },
+      {
+        "claim_id": "cl-10",
+        "proposition": "中国16-59岁劳动年龄人口自2012年起持续下降。",
+        "source_span": {
+          "start": 315,
+          "end": 343,
+          "text": "劳动年龄人口（16-59岁）从2012年开始就在持续下降",
+          "paragraph_index": 7
+        },
+        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "confidence": 1
+      },
+      {
+        "claim_id": "cl-11",
+        "proposition": "文章概括称，缴纳养老金的人数增速放缓，而领取养老金的人数激增。",
+        "source_span": {
+          "start": 352,
+          "end": 371,
+          "text": "交钱的人增速在放缓，领钱的人数量在暴涨",
+          "paragraph_index": 8
+        },
+        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "confidence": 1
+      },
+      {
+        "claim_id": "cl-12",
+        "proposition": "文章认为，养老金问题不是某一国家的政策失误，而是全球性老龄化难题。",
+        "source_span": {
+          "start": 374,
+          "end": 402,
+          "text": "这不是任何一个国家的“政策失误”，这是全球性的老龄化难题",
+          "paragraph_index": 9
+        },
+        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "confidence": 1
+      },
+      {
+        "claim_id": "cl-13",
+        "proposition": "文章称，中国老龄化具有“未富先老”特征，进程更快更猛。",
+        "source_span": {
+          "start": 421,
+          "end": 437,
+          "text": "中国“未富先老”，来得更快、更猛",
+          "paragraph_index": 9
+        },
+        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "confidence": 1
+      },
+      {
+        "claim_id": "cl-14",
+        "proposition": "文章定义养老金替代率为退休后每月领取的养老金除以退休前月工资。",
+        "source_span": {
+          "start": 469,
+          "end": 498,
+          "text": "养老金替代率 = 退休后每月领的养老金 ÷ 退休前的月工资",
+          "paragraph_index": 11
+        },
+        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "confidence": 1
+      },
+      {
+        "claim_id": "cl-15",
+        "proposition": "文章举例说明，退休前月薪1万元者退休后每月领4000元，替代率即为40%。",
+        "source_span": {
+          "start": 506,
+          "end": 535,
+          "text": "你退休前月薪1万，退休后每个月领4000，替代率就是40%",
+          "paragraph_index": 12
+        },
+        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "confidence": 1
+      },
+      {
+        "claim_id": "cl-16",
+        "proposition": "文章称，2026年中国养老金的平均替代率约为40%。",
+        "source_span": {
+          "start": 538,
+          "end": 563,
+          "text": "2026年，中国养老金的平均替代率大概在40%左右",
+          "paragraph_index": 13
+        },
+        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "confidence": 1
+      },
+      {
+        "claim_id": "cl-17",
+        "proposition": "文章称，替代率40%意味着退休前月薪1万元者退休后每月到手约4000元。",
+        "source_span": {
+          "start": 575,
+          "end": 607,
+          "text": "意味着一个退休前月薪1万的人，退休后每月到手的钱大约是4000块",
+          "paragraph_index": 15
+        },
+        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "confidence": 1
+      },
+      {
+        "claim_id": "cl-18",
+        "proposition": "国际劳工组织建议养老金替代率最低标准为55%。",
+        "source_span": {
+          "start": 675,
+          "end": 698,
+          "text": "国际劳工组织建议的养老金替代率最低标准是55%",
+          "paragraph_index": 16
+        },
+        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "confidence": 1
+      },
+      {
+        "claim_id": "cl-19",
+        "proposition": "世界银行建议养老金替代率不低于70%才能维持退休前生活水平。",
+        "source_span": {
+          "start": 699,
+          "end": 725,
+          "text": "世界银行建议的是不低于70%才能维持退休前的生活水平",
+          "paragraph_index": 16
+        },
+        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "confidence": 1
+      },
+      {
+        "claim_id": "cl-20",
+        "proposition": "文章称，养老焦虑来自40%的养老金替代率。",
+        "source_span": {
+          "start": 728,
+          "end": 742,
+          "text": "你问焦虑从哪来？从这40%来",
+          "paragraph_index": 17
+        },
+        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "confidence": 1
+      },
+      {
+        "claim_id": "cl-21",
+        "proposition": "文章认为，养老金替代率并非被故意压低，而是两个因素共同作用的结果。",
+        "source_span": {
+          "start": 760,
+          "end": 790,
+          "text": "养老金替代率不是被“故意压低”的，而是两个因素共同作用的结果",
+          "paragraph_index": 18
+        },
+        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "confidence": 1
+      },
+      {
+        "claim_id": "cl-22",
+        "proposition": "文章称，养老金已经连续上涨二十多年。",
+        "source_span": {
+          "start": 796,
+          "end": 809,
+          "text": "养老金已经连续涨了二十多年",
+          "paragraph_index": 19
+        },
+        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "confidence": 1
+      },
+      {
+        "claim_id": "cl-23",
+        "proposition": "从2005年至今，企业退休人员基本养老金每年上调，但涨幅从约10%降至3%-4%。",
+        "source_span": {
+          "start": 811,
+          "end": 864,
+          "text": "从2005年到现在，企业退休人员的基本养老金年年上调，只是涨幅从早期的10%左右降到了近年的3%-4%左右",
+          "paragraph_index": 19
+        },
+        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "confidence": 1
+      },
+      {
+        "claim_id": "cl-24",
+        "proposition": "文章称，网上“2026年领不到养老金”的说法是谣言，人社部已辟谣。",
+        "source_span": {
+          "start": 882,
+          "end": 915,
+          "text": "网上那些“2026年领不到养老金”的说法，人社部早已辟谣，纯属谣言",
+          "paragraph_index": 19
+        },
+        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "confidence": 1
+      },
+      {
+        "claim_id": "cl-25",
+        "proposition": "文章称，养老金替代率下降的根本原因是工资增速超过养老金涨幅。",
+        "source_span": {
+          "start": 921,
+          "end": 944,
+          "text": "替代率下降的根本原因是工资增速跑赢了养老金涨幅",
+          "paragraph_index": 20
+        },
+        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "confidence": 1
+      },
+      {
+        "claim_id": "cl-26",
+        "proposition": "养老金每年上涨，但社会平均工资涨得更快，因此替代率下降。",
+        "source_span": {
+          "start": 946,
+          "end": 977,
+          "text": "养老金每年都在涨，但社会平均工资涨得更快，所以替代率反而下降了",
+          "paragraph_index": 20
+        },
+        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "confidence": 1
+      },
+      {
+        "claim_id": "cl-27",
+        "proposition": "文章认为，替代率下降是“水涨船不高”的问题，并非有人故意坑害。",
+        "source_span": {
+          "start": 978,
+          "end": 999,
+          "text": "这是一个“水涨船不高”的问题，不是有人坑你",
+          "paragraph_index": 20
+        },
+        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "confidence": 1
+      },
+      {
+        "claim_id": "cl-28",
+        "proposition": "文章认为，40%的养老金替代率不足以支撑体面的退休生活。",
+        "source_span": {
+          "start": 1014,
+          "end": 1038,
+          "text": "40%的替代率，确实不足以支撑一个体面的退休生活",
+          "paragraph_index": 21
+        },
+        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "confidence": 1
+      },
+      {
+        "claim_id": "cl-29",
+        "proposition": "文章称，自2025年1月1日起中国实施渐进式延迟退休，而非一步到位。",
+        "source_span": {
+          "start": 1084,
+          "end": 1115,
+          "text": "2025年1月1日起，中国开始实施渐进式延迟退休，不是一步到位",
+          "paragraph_index": 24
+        },
+        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "confidence": 1
+      },
+      {
+        "claim_id": "cl-30",
+        "proposition": "男性职工原法定退休年龄60岁，每4个月延迟1个月，最终延迟至63岁，过渡期15年。",
+        "source_span": {
+          "start": 1126,
+          "end": 1164,
+          "text": "男职工：原法定退休年龄60岁，每4个月延1个月，最终到63岁（过渡期15年）",
+          "paragraph_index": 25
+        },
+        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "confidence": 1
+      },
+      {
+        "claim_id": "cl-31",
+        "proposition": "原50岁退休的女职工每2个月延迟1个月，最终延迟至55岁。",
+        "source_span": {
+          "start": 1168,
+          "end": 1195,
+          "text": "女职工（原50岁退休）：每2个月延1个月，最终到55岁",
+          "paragraph_index": 26
+        },
+        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "confidence": 1
+      },
+      {
+        "claim_id": "cl-32",
+        "proposition": "原55岁退休的女干部每4个月延迟1个月，最终延迟至58岁。",
+        "source_span": {
+          "start": 1199,
+          "end": 1226,
+          "text": "女干部（原55岁退休）：每4个月延1个月，最终到58岁",
+          "paragraph_index": 27
+        },
+        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "confidence": 1
+      },
+      {
+        "claim_id": "cl-33",
+        "proposition": "文章举例，1966年出生的男性在2026年退休时年龄为60岁零3个月。",
+        "source_span": {
+          "start": 1233,
+          "end": 1272,
+          "text": "如果你是1966年出生的男性，你在2026年退休，你的退休年龄是60岁零3个月",
+          "paragraph_index": 28
+        },
+        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "confidence": 1
+      },
+      {
+        "claim_id": "cl-34",
+        "proposition": "文章称，网上“2026年直接63岁退休”等说法与实际方案完全不同。",
+        "source_span": {
+          "start": 1288,
+          "end": 1333,
+          "text": "网上那些“2026年直接63岁退休”“坏消息！退休人员苦日子来了”之类的说法，完全是两回事",
+          "paragraph_index": 29
+        },
+        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "confidence": 1
+      },
+      {
+        "claim_id": "cl-35",
+        "proposition": "文章称，弹性退休制度存在，且这一点很多人不知道。",
+        "source_span": {
+          "start": 1336,
+          "end": 1357,
+          "text": "还有一个很多人不知道的点：弹性退休是存在的",
+          "paragraph_index": 30
+        },
+        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "confidence": 1
+      },
+      {
+        "claim_id": "cl-36",
+        "proposition": "弹性退休允许提前最多3年退休且不低于原法定退休年龄，或与单位协商延迟最多3年退休。",
+        "source_span": {
+          "start": 1359,
+          "end": 1403,
+          "text": "你可以提前最多3年退休（但不能低于原来的法定退休年龄），也可以和单位协商延迟最多3年退休",
+          "paragraph_index": 30
+        },
+        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "confidence": 1
+      },
+      {
+        "claim_id": "cl-37",
+        "proposition": "文章称，2025年到2029年退休人员的最低养老保险缴费年限仍为15年且不变。",
+        "source_span": {
+          "start": 1433,
+          "end": 1464,
+          "text": "2025年到2029年退休的人，最低缴费年限仍然是15年，不变",
+          "paragraph_index": 31
+        },
+        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "confidence": 1
+      },
+      {
+        "claim_id": "cl-38",
+        "proposition": "从2030年起，最低缴费年限将用10年时间每年增加6个月，逐步从15年提高到20年。",
+        "source_span": {
+          "start": 1465,
+          "end": 1517,
+          "text": "从2030年开始，才会用10年时间每年增加6个月，逐步从15年提高到20年（到2039年才正式到20年）",
+          "paragraph_index": 31
+        },
+        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "confidence": 1
+      },
+      {
+        "claim_id": "cl-39",
+        "proposition": "文章引用国家卫健委数据称，居民人均预期寿命从建国初期的40多岁提高到78岁。",
+        "source_span": {
+          "start": 1574,
+          "end": 1611,
+          "text": "人均寿命从建国初期的40多岁提高到现在的78岁（2025年国家卫健委数据）",
+          "paragraph_index": 33
+        },
+        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "confidence": 1
+      },
+      {
+        "claim_id": "cl-40",
+        "proposition": "文章认为，延迟退休的本质不是让劳动者多干几年，而是在人均寿命延长的背景下对养老金制度进行结构性调整。",
+        "source_span": {
+          "start": 1552,
+          "end": 1629,
+          "text": "延迟退休的本质不是“让你多干几年”，而是：在人均寿命从建国初期的40多岁提高到现在的78岁（2025年国家卫健委数据）的大背景下，养老金制度在做结构性调整",
+          "paragraph_index": 33
+        },
+        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "confidence": 1
+      },
+      {
+        "claim_id": "cl-41",
+        "proposition": "文章认为，寿命越长者缴费时间越长、领取时间相对越短，这是数学问题而非道德问题。",
+        "source_span": {
+          "start": 1631,
+          "end": 1669,
+          "text": "你活得越久，交的时间就要越长，领的时间相对越短这是一个数学问题，不是道德问题",
+          "paragraph_index": 33
+        },
+        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "confidence": 1
+      },
+      {
+        "claim_id": "cl-42",
+        "proposition": "文章引用刷屏文章称，工资只够维持劳动力再生产，从未为衰老后的人生兜底。",
+        "source_span": {
+          "start": 1710,
+          "end": 1735,
+          "text": "工资只够维持劳动力的再生产，从未为衰老后的人生兜底",
+          "paragraph_index": 35
+        },
+        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "confidence": 1
+      },
+      {
+        "claim_id": "cl-43",
+        "proposition": "文章将上句翻译为：每月到手工资仅够维持到下次发工资，无法存下安心养老的钱。",
+        "source_span": {
+          "start": 1746,
+          "end": 1781,
+          "text": "你每个月到手的工资，刚好够你活到下一次发工资，存不下能让你安心养老的钱",
+          "paragraph_index": 36
+        },
+        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "confidence": 1
+      },
+      {
+        "claim_id": "cl-44",
+        "proposition": "文章称，过去二十年普通人的财富增长主要依靠工资增长和以房产为主的资产升值。",
+        "source_span": {
+          "start": 1792,
+          "end": 1829,
+          "text": "过去二十年，普通人的财富增长主要靠两样东西工资增长+资产升值（主要是房子）",
+          "paragraph_index": 38
+        },
+        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "confidence": 1
+      },
+      {
+        "claim_id": "cl-45",
+        "proposition": "文章称，工资增速放缓，宏观经济换挡，GDP增速从10%降至5%左右。",
+        "source_span": {
+          "start": 1838,
+          "end": 1867,
+          "text": "工资增速在放缓（宏观经济换挡，GDP从10%到了5%左右）",
+          "paragraph_index": 39
+        },
+        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "confidence": 1
+      },
+      {
+        "claim_id": "cl-46",
+        "proposition": "文章称，房价不再普遍上涨，部分地区仍在下跌。",
+        "source_span": {
+          "start": 1871,
+          "end": 1886,
+          "text": "房价不再普涨（有些地方还在跌）",
+          "paragraph_index": 40
+        },
+        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "confidence": 1
+      },
+      {
+        "claim_id": "cl-47",
+        "proposition": "文章称，生活成本在上涨，包括食品、教育、医疗和房租。",
+        "source_span": {
+          "start": 1890,
+          "end": 1909,
+          "text": "生活成本在涨（食品、教育、医疗、房租）",
+          "paragraph_index": 41
+        },
+        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "confidence": 1
+      },
+      {
+        "claim_id": "cl-48",
+        "proposition": "文章描述了一种尴尬局面：每月工资在支付房贷、学费和买菜后余钱存入银行，却自认为是在积攒养老金。",
+        "source_span": {
+          "start": 1926,
+          "end": 1978,
+          "text": "每个月工资到手，还完房贷、交完孩子的学费、买了一家人的菜，剩下的钱存进银行，然后告诉自己“我在攒养老钱”",
+          "paragraph_index": 42
+        },
+        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "confidence": 1
+      },
+      {
+        "claim_id": "cl-49",
+        "proposition": "文章提醒，当前低利率环境下，10万元存款20年后的购买力会显著缩水，这是必须面对的问题。",
+        "source_span": {
+          "start": 1982,
+          "end": 2031,
+          "text": "10万块钱存银行，在当前的低利率环境下，20年后的购买力能剩下多少？这是一个你不想算、但必须算的账",
+          "paragraph_index": 43
+        },
+        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "confidence": 1
+      },
+      {
+        "claim_id": "cl-50",
+        "proposition": "文章称，到2026年，中国养老保障体系正从单一支柱走向三支柱体系。",
+        "source_span": {
+          "start": 2053,
+          "end": 2085,
+          "text": "2026年，中国的养老保障体系正在从“单腿跳”走向“三条腿走路”",
+          "paragraph_index": 45
+        },
+        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "confidence": 1
+      },
+      {
+        "claim_id": "cl-51",
+        "proposition": "基本养老保险覆盖超过10亿人，是全球最大的养老保障网。",
+        "source_span": {
+          "start": 2112,
+          "end": 2132,
+          "text": "覆盖超过10亿人，是全球最大的养老保障网",
+          "paragraph_index": 47
+        },
+        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "confidence": 1
+      },
+      {
+        "claim_id": "cl-52",
+        "proposition": "基本养老保险的作用是保基本，而非保体面。",
+        "source_span": {
+          "start": 2133,
+          "end": 2149,
+          "text": "作用是“保基本”，不是“保体面”",
+          "paragraph_index": 47
+        },
+        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "confidence": 1
+      },
+      {
+        "claim_id": "cl-53",
+        "proposition": "企业/职业年金并非所有单位都有，主要集中在国企、事业单位和少数效益好的民企。",
+        "source_span": {
+          "start": 2168,
+          "end": 2196,
+          "text": "不是所有单位都有。主要是国企、事业单位和少数效益好的民企",
+          "paragraph_index": 49
+        },
+        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "confidence": 1
+      },
+      {
+        "claim_id": "cl-54",
+        "proposition": "企业/职业年金覆盖率约为7000万人。",
+        "source_span": {
+          "start": 2197,
+          "end": 2208,
+          "text": "覆盖率大约7000万人",
+          "paragraph_index": 49
+        },
+        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "confidence": 1
+      },
+      {
+        "claim_id": "cl-55",
+        "proposition": "个人养老金于2022年开始试点，2024年推广至全国。",
+        "source_span": {
+          "start": 2223,
+          "end": 2242,
+          "text": "2022年开始试点，2024年推向全国",
+          "paragraph_index": 51
+        },
+        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "confidence": 1
+      },
+      {
+        "claim_id": "cl-56",
+        "proposition": "每个人可开设个人养老金账户，每年最高缴存12000元，并享受税收优惠。",
+        "source_span": {
+          "start": 2243,
+          "end": 2278,
+          "text": "每个人可以开一个个人养老金账户，每年最高缴存12000元，享受税收优惠",
+          "paragraph_index": 51
+        },
+        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "confidence": 1
+      },
+      {
+        "claim_id": "cl-57",
+        "proposition": "文章称，第一支柱基本养老保险不会崩溃，国家会兜底。",
+        "source_span": {
+          "start": 2286,
+          "end": 2298,
+          "text": "第一支柱不会崩，国家兜底",
+          "paragraph_index": 52
+        },
+        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "confidence": 1
+      },
+      {
+        "claim_id": "cl-58",
+        "proposition": "文章认为，想过体面退休生活，仅靠第一支柱是不够的。",
+        "source_span": {
+          "start": 2300,
+          "end": 2322,
+          "text": "如果你想退休后过得体面，只靠第一支柱是不够的",
+          "paragraph_index": 52
+        },
+        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "confidence": 1
+      },
+      {
+        "claim_id": "cl-59",
+        "proposition": "文章称，个人对自己养老的责任在增加。",
+        "source_span": {
+          "start": 2345,
+          "end": 2358,
+          "text": "个人对自己养老的责任在增加",
+          "paragraph_index": 54
+        },
+        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "confidence": 1
+      },
+      {
+        "claim_id": "cl-60",
+        "proposition": "文章指出，养老模式从“国家兜底”转向“国家兜底+个人努力”。",
+        "source_span": {
+          "start": 2360,
+          "end": 2384,
+          "text": "以前是“国家兜底”，以后是“国家兜底+个人努力”",
+          "paragraph_index": 54
+        },
+        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "confidence": 1
+      },
+      {
+        "claim_id": "cl-61",
+        "proposition": "文章认为，个人养老责任增加是全球趋势，并非中国独有。",
+        "source_span": {
+          "start": 2385,
+          "end": 2398,
+          "text": "这是全球趋势，不独中国如此",
+          "paragraph_index": 54
+        },
+        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "confidence": 1
+      },
+      {
+        "claim_id": "cl-62",
+        "proposition": "文章称，大量自媒体使用“坏消息！！”“紧急通知！！！”等标题来收割流量。",
+        "source_span": {
+          "start": 2431,
+          "end": 2461,
+          "text": "大量自媒体用“坏消息！！”“紧急通知！！！”做标题，收割流量",
+          "paragraph_index": 56
+        },
+        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "confidence": 1
+      },
+      {
+        "claim_id": "cl-63",
+        "proposition": "文章称，自媒体的套路是截取真实政策的一小部分，进行放大和扭曲以制造恐慌。",
+        "source_span": {
+          "start": 2474,
+          "end": 2496,
+          "text": "拿真实政策中的一小部分，放大、扭曲、制造恐慌",
+          "paragraph_index": 57
+        },
+        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "confidence": 1
+      },
+      {
+        "claim_id": "cl-64",
+        "proposition": "例如，把渐进式延迟退休歪曲为一步到位，把缴费年限逐步延长歪曲为突然变为20年。",
+        "source_span": {
+          "start": 2499,
+          "end": 2537,
+          "text": "把“渐进式延迟”说成“一步到位”，把“缴费年限逐步延长”说成“突然变20年”",
+          "paragraph_index": 57
+        },
+        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "confidence": 1
+      },
+      {
+        "claim_id": "cl-65",
+        "proposition": "文章认为，养老焦虑是真实的，但焦虑被商业定价和利用。",
+        "source_span": {
+          "start": 2550,
+          "end": 2570,
+          "text": "焦虑是真实的。但焦虑被定价了，被人利用了",
+          "paragraph_index": 58
+        },
+        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "confidence": 1
+      },
+      {
+        "claim_id": "cl-66",
+        "proposition": "文章建议登录国家社会保险公共服务平台或电子社保卡APP，查询累计缴费年限和个人账户金额。",
+        "source_span": {
+          "start": 2601,
+          "end": 2648,
+          "text": "登录“国家社会保险公共服务平台”或者电子社保卡APP，看看你累计缴了多少年、个人账户里有多少钱",
+          "paragraph_index": 61
+        },
+        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "confidence": 1
+      },
+      {
+        "claim_id": "cl-67",
+        "proposition": "文章称，很多人缴纳社保十几年从未查看过自己的账户。",
+        "source_span": {
+          "start": 2649,
+          "end": 2674,
+          "text": "很多人交了十几年社保，从来没看过自己的账户长什么样",
+          "paragraph_index": 61
+        },
+        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "confidence": 1
+      },
+      {
+        "claim_id": "cl-68",
+        "proposition": "文章认为，养老金并非只需缴满15年即可。",
+        "source_span": {
+          "start": 2720,
+          "end": 2735,
+          "text": "养老金不是“交够15年就行了”",
+          "paragraph_index": 63
+        },
+        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "confidence": 1
+      },
+      {
+        "claim_id": "cl-69",
+        "proposition": "缴费时间越长、缴费基数越高，退休后领取的养老金越多。",
+        "source_span": {
+          "start": 2736,
+          "end": 2756,
+          "text": "交的时间越长、基数越高，退休后拿到的越多",
+          "paragraph_index": 63
+        },
+        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "confidence": 1
+      },
+      {
+        "claim_id": "cl-70",
+        "proposition": "文章建议，有条件者不要按最低基数缴费，也不要缴满15年就停止。",
+        "source_span": {
+          "start": 2757,
+          "end": 2779,
+          "text": "有条件的，不要按最低基数交，不要卡着15年停",
+          "paragraph_index": 63
+        },
+        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "confidence": 1
+      },
+      {
+        "claim_id": "cl-71",
+        "proposition": "个人养老金每年缴费12000元可享受个税优惠。",
+        "source_span": {
+          "start": 2801,
+          "end": 2816,
+          "text": "每年12000元，享受个税优惠",
+          "paragraph_index": 65
+        },
+        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "confidence": 1
+      },
+      {
+        "claim_id": "cl-72",
+        "proposition": "个人养老金账户中的资金可以用于购买理财产品。",
+        "source_span": {
+          "start": 2825,
+          "end": 2837,
+          "text": "账户里的钱可以买理财产品",
+          "paragraph_index": 65
+        },
+        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "confidence": 1
+      },
+      {
+        "claim_id": "cl-73",
+        "proposition": "文章认为个人养老金是实实在在的税收优惠，不使用会吃亏。",
+        "source_span": {
+          "start": 2848,
+          "end": 2868,
+          "text": "这是一个实实在在的税收优惠，你不用就亏了",
+          "paragraph_index": 65
+        },
+        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "confidence": 1
+      },
+      {
+        "claim_id": "cl-74",
+        "proposition": "文章认为，房产并非养老的唯一依靠，尤其对于仅有一套自住房的人。",
+        "source_span": {
+          "start": 2895,
+          "end": 2920,
+          "text": "房子不是养老的唯一依靠（尤其是只有一套自住房的人）",
+          "paragraph_index": 67
+        },
+        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "confidence": 1
+      },
+      {
+        "claim_id": "cl-75",
+        "proposition": "文章认为，孩子不能充当养老保险，因为他们自身压力已很大。",
+        "source_span": {
+          "start": 2921,
+          "end": 2945,
+          "text": "孩子不是“养老保险”（ta们自己压力已经够大了）",
+          "paragraph_index": 67
+        },
+        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "confidence": 1
+      },
+      {
+        "claim_id": "cl-76",
+        "proposition": "文章认为，养老金不能覆盖所有开销。",
+        "source_span": {
+          "start": 2946,
+          "end": 2958,
+          "text": "养老金也不能覆盖所有开销",
+          "paragraph_index": 67
+        },
+        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "confidence": 1
+      },
+      {
+        "claim_id": "cl-77",
+        "proposition": "文章认为，真正的养老规划应多元，包括社保打底、存款保底、投资增厚，健康是最大本钱。",
+        "source_span": {
+          "start": 2961,
+          "end": 2997,
+          "text": "真正的养老规划，是多元的：社保打底，存款保底，投资增厚，健康是最大的本钱",
+          "paragraph_index": 68
+        },
+        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "confidence": 1
+      },
+      {
+        "claim_id": "cl-78",
+        "proposition": "文章作者表示不完全同意“等退休是场骗局”这一说法。",
+        "source_span": {
+          "start": 3000,
+          "end": 3020,
+          "text": "“等退休是场骗局”这个说法，我不完全同意",
+          "paragraph_index": 69
+        },
+        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "confidence": 1
+      },
+      {
+        "claim_id": "cl-79",
+        "proposition": "文章认为，“等退休是场骗局”的说法让许多人开始正视养老问题，这是积极的一面。",
+        "source_span": {
+          "start": 3023,
+          "end": 3044,
+          "text": "它让很多人开始正视自己的养老问题，这是好事",
+          "paragraph_index": 70
+        },
+        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "confidence": 1
+      },
+      {
+        "claim_id": "cl-80",
+        "proposition": "文章指出，该说法隐含了一个前提，即“我曾经以为只要等退休就好了”。",
+        "source_span": {
+          "start": 3045,
+          "end": 3070,
+          "text": "但它也隐含了一个前提“我曾经以为只要等退休就好了”",
+          "paragraph_index": 70
+        },
+        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "confidence": 1
+      },
+      {
+        "claim_id": "cl-81",
+        "proposition": "文章认为，问题所在是“曾经以为只要等退休就好了”的想法。",
+        "source_span": {
+          "start": 3073,
+          "end": 3088,
+          "text": "这个“曾经以为”，才是问题所在",
+          "paragraph_index": 71
+        },
+        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "confidence": 1
+      },
+      {
+        "claim_id": "cl-82",
+        "proposition": "文章称，没有任何国家的任何一代人能够仅仅依靠等待就过好晚年。",
+        "source_span": {
+          "start": 3091,
+          "end": 3120,
+          "text": "从来没有任何一个国家的任何一代人，是靠“等着”把晚年过好的",
+          "paragraph_index": 72
+        },
+        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "confidence": 1
+      },
+      {
+        "claim_id": "cl-83",
+        "proposition": "文章认为，养老金从来都只是生活的一部分。",
+        "source_span": {
+          "start": 3121,
+          "end": 3135,
+          "text": "养老金从来都只是生活的一部分",
+          "paragraph_index": 72
+        },
+        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "confidence": 1
+      },
+      {
+        "claim_id": "cl-84",
+        "proposition": "文章认为，个人当前的每一个决定都在影响其60岁以后的生活。",
+        "source_span": {
+          "start": 3162,
+          "end": 3186,
+          "text": "你现在的每一个决定，都在为你60岁以后的生活投票",
+          "paragraph_index": 72
+        },
+        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "confidence": 1
+      },
+      {
+        "claim_id": "cl-85",
+        "proposition": "文章称，个人对自己晚年生活的“投票权”若不使用即会作废，无人能够代替。",
+        "source_span": {
+          "start": 3189,
+          "end": 3208,
+          "text": "你的投票权，不用就作废了，没人能替你投",
+          "paragraph_index": 73
+        },
+        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "confidence": 1
+      }
+    ],
+    "relations": [
+      {
+        "relation_id": "rel-1",
+        "from_claim_id": "cl-2",
+        "to_claim_id": "cl-1",
+        "type": "supports"
+      },
+      {
+        "relation_id": "rel-2",
+        "from_claim_id": "cl-9",
+        "to_claim_id": "cl-8",
+        "type": "supports"
+      },
+      {
+        "relation_id": "rel-3",
+        "from_claim_id": "cl-10",
+        "to_claim_id": "cl-8",
+        "type": "supports"
+      },
+      {
+        "relation_id": "rel-4",
+        "from_claim_id": "cl-11",
+        "to_claim_id": "cl-8",
+        "type": "supports"
+      },
+      {
+        "relation_id": "rel-5",
+        "from_claim_id": "cl-13",
+        "to_claim_id": "cl-12",
+        "type": "supports"
+      },
+      {
+        "relation_id": "rel-6",
+        "from_claim_id": "cl-18",
+        "to_claim_id": "cl-28",
+        "type": "supports"
+      },
+      {
+        "relation_id": "rel-7",
+        "from_claim_id": "cl-19",
+        "to_claim_id": "cl-28",
+        "type": "supports"
+      },
+      {
+        "relation_id": "rel-8",
+        "from_claim_id": "cl-25",
+        "to_claim_id": "cl-21",
+        "type": "supports"
+      },
+      {
+        "relation_id": "rel-9",
+        "from_claim_id": "cl-26",
+        "to_claim_id": "cl-25",
+        "type": "supports"
+      },
+      {
+        "relation_id": "rel-10",
+        "from_claim_id": "cl-30",
+        "to_claim_id": "cl-29",
+        "type": "supports"
+      },
+      {
+        "relation_id": "rel-11",
+        "from_claim_id": "cl-31",
+        "to_claim_id": "cl-29",
+        "type": "supports"
+      },
+      {
+        "relation_id": "rel-12",
+        "from_claim_id": "cl-32",
+        "to_claim_id": "cl-29",
+        "type": "supports"
+      },
+      {
+        "relation_id": "rel-13",
+        "from_claim_id": "cl-33",
+        "to_claim_id": "cl-30",
+        "type": "supports"
+      },
+      {
+        "relation_id": "rel-14",
+        "from_claim_id": "cl-34",
+        "to_claim_id": "cl-29",
+        "type": "supports"
+      },
+      {
+        "relation_id": "rel-15",
+        "from_claim_id": "cl-36",
+        "to_claim_id": "cl-29",
+        "type": "qualifies"
+      },
+      {
+        "relation_id": "rel-16",
+        "from_claim_id": "cl-39",
+        "to_claim_id": "cl-40",
+        "type": "causal"
+      },
+      {
+        "relation_id": "rel-17",
+        "from_claim_id": "cl-40",
+        "to_claim_id": "cl-29",
+        "type": "supports"
+      },
+      {
+        "relation_id": "rel-18",
+        "from_claim_id": "cl-45",
+        "to_claim_id": "cl-48",
+        "type": "causal"
+      },
+      {
+        "relation_id": "rel-19",
+        "from_claim_id": "cl-46",
+        "to_claim_id": "cl-48",
+        "type": "causal"
+      },
+      {
+        "relation_id": "rel-20",
+        "from_claim_id": "cl-47",
+        "to_claim_id": "cl-48",
+        "type": "causal"
+      },
+      {
+        "relation_id": "rel-21",
+        "from_claim_id": "cl-48",
+        "to_claim_id": "cl-49",
+        "type": "causal"
+      },
+      {
+        "relation_id": "rel-22",
+        "from_claim_id": "cl-51",
+        "to_claim_id": "cl-57",
+        "type": "supports"
+      },
+      {
+        "relation_id": "rel-23",
+        "from_claim_id": "cl-52",
+        "to_claim_id": "cl-58",
+        "type": "supports"
+      },
+      {
+        "relation_id": "rel-24",
+        "from_claim_id": "cl-59",
+        "to_claim_id": "cl-60",
+        "type": "supports"
+      },
+      {
+        "relation_id": "rel-25",
+        "from_claim_id": "cl-61",
+        "to_claim_id": "cl-59",
+        "type": "supports"
+      },
+      {
+        "relation_id": "rel-26",
+        "from_claim_id": "cl-63",
+        "to_claim_id": "cl-65",
+        "type": "supports"
+      },
+      {
+        "relation_id": "rel-27",
+        "from_claim_id": "cl-64",
+        "to_claim_id": "cl-63",
+        "type": "supports"
+      },
+      {
+        "relation_id": "rel-28",
+        "from_claim_id": "cl-69",
+        "to_claim_id": "cl-68",
+        "type": "supports"
+      },
+      {
+        "relation_id": "rel-29",
+        "from_claim_id": "cl-70",
+        "to_claim_id": "cl-69",
+        "type": "supports"
+      },
+      {
+        "relation_id": "rel-30",
+        "from_claim_id": "cl-74",
+        "to_claim_id": "cl-77",
+        "type": "supports"
+      },
+      {
+        "relation_id": "rel-31",
+        "from_claim_id": "cl-75",
+        "to_claim_id": "cl-77",
+        "type": "supports"
+      },
+      {
+        "relation_id": "rel-32",
+        "from_claim_id": "cl-76",
+        "to_claim_id": "cl-77",
+        "type": "supports"
+      },
+      {
+        "relation_id": "rel-33",
+        "from_claim_id": "cl-82",
+        "to_claim_id": "cl-81",
+        "type": "supports"
+      },
+      {
+        "relation_id": "rel-34",
+        "from_claim_id": "cl-79",
+        "to_claim_id": "cl-78",
+        "type": "qualifies"
+      },
+      {
+        "relation_id": "rel-35",
+        "from_claim_id": "cl-80",
+        "to_claim_id": "cl-81",
+        "type": "supports"
+      },
+      {
+        "relation_id": "rel-36",
+        "from_claim_id": "cl-71",
+        "to_claim_id": "cl-56",
+        "type": "supports"
+      },
+      {
+        "relation_id": "rel-37",
+        "from_claim_id": "cl-72",
+        "to_claim_id": "cl-56",
+        "type": "supports"
+      },
+      {
+        "relation_id": "rel-38",
+        "from_claim_id": "cl-73",
+        "to_claim_id": "cl-56",
+        "type": "supports"
+      },
+      {
+        "relation_id": "rel-39",
+        "from_claim_id": "cl-17",
+        "to_claim_id": "cl-16",
+        "type": "supports"
+      },
+      {
+        "relation_id": "rel-40",
+        "from_claim_id": "cl-20",
+        "to_claim_id": "cl-16",
+        "type": "supports"
+      },
+      {
+        "relation_id": "rel-41",
+        "from_claim_id": "cl-37",
+        "to_claim_id": "cl-38",
+        "type": "temporal_before"
+      },
+      {
+        "relation_id": "rel-42",
+        "from_claim_id": "cl-29",
+        "to_claim_id": "cl-33",
+        "type": "temporal_before"
+      }
+    ]
+  },
+  "role_policies": [
+    {
+      "role_id": "role-1",
+      "fidelity": "faithful",
+      "visible_claim_ids": [
+        "cl-1",
+        "cl-2",
+        "cl-4",
+        "cl-5",
+        "cl-6",
+        "cl-7",
+        "cl-8",
+        "cl-9",
+        "cl-10",
+        "cl-11",
+        "cl-12",
+        "cl-13",
+        "cl-14",
+        "cl-15",
+        "cl-16",
+        "cl-17",
+        "cl-18",
+        "cl-19",
+        "cl-20",
+        "cl-21",
+        "cl-22",
+        "cl-23",
+        "cl-24",
+        "cl-25",
+        "cl-26",
+        "cl-27",
+        "cl-28",
+        "cl-29",
+        "cl-30",
+        "cl-31",
+        "cl-32",
+        "cl-33",
+        "cl-34",
+        "cl-37",
+        "cl-38",
+        "cl-39",
+        "cl-40",
+        "cl-41",
+        "cl-50",
+        "cl-51",
+        "cl-52",
+        "cl-55",
+        "cl-56",
+        "cl-57",
+        "cl-58",
+        "cl-60",
+        "cl-61",
+        "cl-68",
+        "cl-69",
+        "cl-70",
+        "cl-71",
+        "cl-72",
+        "cl-73",
+        "cl-77"
+      ],
+      "goal": "只依据可见事实与原文原意如实陈述，不改变事实关系。",
+      "allowed_distortion_types": []
+    },
+    {
+      "role_id": "role-2",
+      "fidelity": "faithful",
+      "visible_claim_ids": [
+        "cl-3",
+        "cl-20",
+        "cl-28",
+        "cl-42",
+        "cl-43",
+        "cl-44",
+        "cl-45",
+        "cl-46",
+        "cl-47",
+        "cl-48",
+        "cl-49",
+        "cl-66",
+        "cl-67",
+        "cl-74",
+        "cl-75",
+        "cl-76",
+        "cl-78",
+        "cl-79",
+        "cl-80",
+        "cl-81",
+        "cl-82",
+        "cl-83",
+        "cl-84",
+        "cl-85"
+      ],
+      "goal": "只依据可见事实与原文原意如实陈述，不改变事实关系。",
+      "allowed_distortion_types": []
+    },
+    {
+      "role_id": "role-3",
+      "fidelity": "faithful",
+      "visible_claim_ids": [
+        "cl-14",
+        "cl-15",
+        "cl-16",
+        "cl-17",
+        "cl-18",
+        "cl-19",
+        "cl-20",
+        "cl-28",
+        "cl-55",
+        "cl-56",
+        "cl-58",
+        "cl-59",
+        "cl-60",
+        "cl-61",
+        "cl-68",
+        "cl-69",
+        "cl-70",
+        "cl-71",
+        "cl-72",
+        "cl-73",
+        "cl-77"
+      ],
+      "goal": "只依据可见事实与原文原意如实陈述，不改变事实关系。",
+      "allowed_distortion_types": []
+    },
+    {
+      "role_id": "role-4",
+      "fidelity": "faithful",
+      "visible_claim_ids": [
+        "cl-62",
+        "cl-63",
+        "cl-64",
+        "cl-65",
+        "cl-78",
+        "cl-79",
+        "cl-80",
+        "cl-81",
+        "cl-82",
+        "cl-20",
+        "cl-28"
+      ],
+      "goal": "只依据可见事实与原文原意如实陈述，不改变事实关系。",
+      "allowed_distortion_types": []
+    },
+    {
+      "role_id": "role-5",
+      "fidelity": "distorted",
+      "visible_claim_ids": [
+        "cl-24",
+        "cl-29",
+        "cl-30",
+        "cl-31",
+        "cl-32",
+        "cl-33",
+        "cl-34",
+        "cl-37",
+        "cl-38",
+        "cl-62",
+        "cl-63",
+        "cl-64",
+        "cl-65",
+        "cl-20",
+        "cl-28"
+      ],
+      "goal": "通过截取部分政策细节、省略渐进条件，制造“养老金将断崖式崩溃”的恐慌情绪，以收割流量",
+      "allowed_distortion_types": [
+        "cherry_pick",
+        "context_omit",
+        "scope_expand",
+        "degree_strengthen"
+      ]
+    }
+  ],
+  "golden_answer": {
+    "distortion_owner_role_id": "role-5",
+    "answer_distortion_types": [
+      "cherry_pick",
+      "context_omit"
+    ],
+    "truth_claim_ids": [
+      "cl-1",
+      "cl-2",
+      "cl-4",
+      "cl-5",
+      "cl-6",
+      "cl-7",
+      "cl-8",
+      "cl-9",
+      "cl-10",
+      "cl-11",
+      "cl-12",
+      "cl-13",
+      "cl-14",
+      "cl-15",
+      "cl-16",
+      "cl-17",
+      "cl-18",
+      "cl-19",
+      "cl-20",
+      "cl-21",
+      "cl-22",
+      "cl-23",
+      "cl-24",
+      "cl-25",
+      "cl-26",
+      "cl-27",
+      "cl-28",
+      "cl-29",
+      "cl-30",
+      "cl-31",
+      "cl-32",
+      "cl-33",
+      "cl-34",
+      "cl-37",
+      "cl-38",
+      "cl-39",
+      "cl-40",
+      "cl-41",
+      "cl-50",
+      "cl-51",
+      "cl-52",
+      "cl-55",
+      "cl-56",
+      "cl-57",
+      "cl-58",
+      "cl-60",
+      "cl-61",
+      "cl-68",
+      "cl-69",
+      "cl-70",
+      "cl-71",
+      "cl-72",
+      "cl-73",
+      "cl-77",
+      "cl-78",
+      "cl-79",
+      "cl-80",
+      "cl-81",
+      "cl-82",
+      "cl-83",
+      "cl-84",
+      "cl-85"
+    ]
+  },
+  "evidence_catalog": [
+    {
+      "evidence_id": "ev-1",
+      "type": "quote",
+      "title": "现收现付制说明",
+      "body": "中国现在的养老金制度是“现收现付制”。你现在交的钱，正在发给现在已经退休的人。等你退休了，那时候还在工作的年轻人交的钱，才会发给你。",
+      "public_claim_refs": [
+        "cl-4",
+        "cl-5",
+        "cl-6"
+      ],
+      "conflicts_with": []
+    },
+    {
+      "evidence_id": "ev-2",
+      "type": "source",
+      "title": "人口结构数据",
+      "body": "中国60岁及以上人口已经超过3亿。劳动年龄人口（16-59岁）从2012年开始就在持续下降。",
+      "public_claim_refs": [
+        "cl-9",
+        "cl-10"
+      ],
+      "conflicts_with": []
+    },
+    {
+      "evidence_id": "ev-3",
+      "type": "claim",
+      "title": "替代率定义与现状",
+      "body": "养老金替代率 = 退休后每月领的养老金 ÷ 退休前的月工资。你退休前月薪1万，退休后每个月领4000，替代率就是40%。2026年，中国养老金的平均替代率大概在40%左右。",
+      "public_claim_refs": [
+        "cl-14",
+        "cl-15",
+        "cl-16"
+      ],
+      "conflicts_with": []
+    },
+    {
+      "evidence_id": "ev-4",
+      "type": "contradiction",
+      "title": "关于2026年领不到养老金的谣言",
+      "body": "网上那些“2026年领不到养老金”的说法，人社部早已辟谣，纯属谣言。",
+      "public_claim_refs": [
+        "cl-24"
+      ],
+      "conflicts_with": []
+    },
+    {
+      "evidence_id": "ev-5",
+      "type": "timeline",
+      "title": "延迟退休实施时间表",
+      "body": "2025年1月1日起，中国开始实施渐进式延迟退休，不是一步到位。男职工：原法定退休年龄60岁，每4个月延1个月，最终到63岁（过渡期15年）。女职工（原50岁退休）：每2个月延1个月，最终到55岁。女干部（原55岁退休）：每4个月延1个月，最终到58岁。如果你是1966年出生的男性，你在2026年退休，你的退休年龄是60岁零3个月。网上那些“2026年直接63岁退休”“坏消息！退休人员苦日子来了”之类的说法，完全是两回事。",
+      "public_claim_refs": [
+        "cl-29",
+        "cl-30",
+        "cl-31",
+        "cl-32",
+        "cl-33",
+        "cl-34"
+      ],
+      "conflicts_with": []
+    },
+    {
+      "evidence_id": "ev-6",
+      "type": "claim",
+      "title": "三支柱养老体系",
+      "body": "2026年，中国的养老保障体系正在从“单腿跳”走向“三条腿走路”。覆盖超过10亿人，是全球最大的养老保障网。作用是“保基本”，不是“保体面”。2022年开始试点，2024年推向全国。每个人可以开一个个人养老金账户，每年最高缴存12000元，享受税收优惠。",
+      "public_claim_refs": [
+        "cl-50",
+        "cl-51",
+        "cl-52",
+        "cl-55",
+        "cl-56"
+      ],
+      "conflicts_with": []
+    },
+    {
+      "evidence_id": "ev-7",
+      "type": "quote",
+      "title": "自媒体套路警示",
+      "body": "大量自媒体用“坏消息！！”“紧急通知！！！”做标题，收割流量。拿真实政策中的一小部分，放大、扭曲、制造恐慌。把“渐进式延迟”说成“一步到位”，把“缴费年限逐步延长”说成“突然变20年”。",
+      "public_claim_refs": [
+        "cl-62",
+        "cl-63",
+        "cl-64"
+      ],
+      "conflicts_with": []
+    },
+    {
+      "evidence_id": "ev-8",
+      "type": "contradiction",
+      "title": "养老金缴费年限的谣传与事实",
+      "body": "2025年到2029年退休的人，最低缴费年限仍然是15年，不变。从2030年开始，才会用10年时间每年增加6个月，逐步从15年提高到20年（到2039年才正式到20年）。养老金不是“交够15年就行了”。",
+      "public_claim_refs": [
+        "cl-37",
+        "cl-38",
+        "cl-68"
+      ],
+      "conflicts_with": []
+    },
+    {
+      "evidence_id": "ev-9",
+      "type": "claim",
+      "title": "个人养老责任与规划",
+      "body": "以前是“国家兜底”，以后是“国家兜底+个人努力”。真正的养老规划，是多元的：社保打底，存款保底，投资增厚，健康是最大的本钱。",
+      "public_claim_refs": [
+        "cl-60",
+        "cl-77"
+      ],
+      "conflicts_with": []
+    },
+    {
+      "evidence_id": "ev-10",
+      "type": "quote",
+      "title": "养老焦虑的来源",
+      "body": "你问焦虑从哪来？从这40%来。40%的替代率，确实不足以支撑一个体面的退休生活。",
+      "public_claim_refs": [
+        "cl-20",
+        "cl-28"
+      ],
+      "conflicts_with": []
+    },
+    {
+      "evidence_id": "ev-11",
+      "type": "claim",
+      "title": "焦虑的商机与反思",
+      "body": "焦虑是真实的。但焦虑被定价了，被人利用了。“等退休是场骗局”这个说法，我不完全同意。它让很多人开始正视自己的养老问题，这是好事。",
+      "public_claim_refs": [
+        "cl-65",
+        "cl-78",
+        "cl-79"
+      ],
+      "conflicts_with": []
+    }
+  ],
+  "evidence_unlock_rules": [
+    {
+      "rule_id": "ul-1",
+      "evidence_id": "ev-1",
+      "required_claim_ids": [
+        "cl-4",
+        "cl-5",
+        "cl-6"
+      ],
+      "allowed_role_ids": [
+        "role-1"
+      ]
+    },
+    {
+      "rule_id": "ul-2",
+      "evidence_id": "ev-2",
+      "required_claim_ids": [
+        "cl-9",
+        "cl-10"
+      ],
+      "allowed_role_ids": [
+        "role-1"
+      ]
+    },
+    {
+      "rule_id": "ul-3",
+      "evidence_id": "ev-3",
+      "required_claim_ids": [
+        "cl-14",
+        "cl-15",
+        "cl-16"
+      ],
+      "allowed_role_ids": [
+        "role-1",
+        "role-3"
+      ]
+    },
+    {
+      "rule_id": "ul-4",
+      "evidence_id": "ev-4",
+      "required_claim_ids": [
+        "cl-24"
+      ],
+      "allowed_role_ids": [
+        "role-1",
+        "role-5"
+      ]
+    },
+    {
+      "rule_id": "ul-5",
+      "evidence_id": "ev-5",
+      "required_claim_ids": [
+        "cl-29",
+        "cl-30",
+        "cl-31",
+        "cl-32",
+        "cl-33",
+        "cl-34"
+      ],
+      "allowed_role_ids": [
+        "role-1",
+        "role-5"
+      ]
+    },
+    {
+      "rule_id": "ul-6",
+      "evidence_id": "ev-6",
+      "required_claim_ids": [
+        "cl-50",
+        "cl-51",
+        "cl-52",
+        "cl-55",
+        "cl-56"
+      ],
+      "allowed_role_ids": [
+        "role-1"
+      ]
+    },
+    {
+      "rule_id": "ul-7",
+      "evidence_id": "ev-7",
+      "required_claim_ids": [
+        "cl-62",
+        "cl-63",
+        "cl-64"
+      ],
+      "allowed_role_ids": [
+        "role-4",
+        "role-5"
+      ]
+    },
+    {
+      "rule_id": "ul-8",
+      "evidence_id": "ev-8",
+      "required_claim_ids": [
+        "cl-37",
+        "cl-38",
+        "cl-68"
+      ],
+      "allowed_role_ids": [
+        "role-1"
+      ]
+    },
+    {
+      "rule_id": "ul-9",
+      "evidence_id": "ev-9",
+      "required_claim_ids": [
+        "cl-60",
+        "cl-77"
+      ],
+      "allowed_role_ids": [
+        "role-1",
+        "role-3"
+      ]
+    },
+    {
+      "rule_id": "ul-10",
+      "evidence_id": "ev-10",
+      "required_claim_ids": [
+        "cl-20",
+        "cl-28"
+      ],
+      "allowed_role_ids": [
+        "role-1",
+        "role-2",
+        "role-3",
+        "role-4",
+        "role-5"
+      ]
+    },
+    {
+      "rule_id": "ul-11",
+      "evidence_id": "ev-11",
+      "required_claim_ids": [
+        "cl-65",
+        "cl-78",
+        "cl-79"
+      ],
+      "allowed_role_ids": [
+        "role-4"
+      ]
+    }
+  ]
+}

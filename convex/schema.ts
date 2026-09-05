@@ -38,6 +38,11 @@ export default defineSchema({
       v.literal("failed"),
     ),
     error_json: v.optional(v.string()), // PublicError payload，仅 failed 时存在
+    // 编译 lease（同 TB10 角色回合 lease 的机制）：accepted/working 票据持有
+    // lease 至终态或过期；worker 存活时续期。action 进程死亡后，过期票据在
+    // 该身份下一次 createFromSource 事务中被显式判失败（并发 1 次限制自愈），
+    // 不自动重试模型。缺省（旧数据）视为未过期。
+    lease_expires_at_ms: v.optional(v.number()),
     created_at_ms: v.number(),
     updated_at_ms: v.number(),
   }).index("by_case_key", ["case_key"]),

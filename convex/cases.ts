@@ -84,6 +84,9 @@ import {
 
 const uuidSchema = z.uuid();
 const httpsUrlSchema = z.url({ protocol: /^https$/ });
+// 编译 lease：覆盖观测到的最长编译（claim 240-360s + case 100-120s）留足余量；
+// worker 存活时在 markTicketWorking 续期，进程死亡后由下一次建案事务显式清账。
+const COMPILE_LEASE_MS = 15 * 60_000;
 
 // ---------------------------------------------------------------------------
 // 公开 Interface
@@ -267,6 +270,52 @@ export const getSource = query({
 // ---------------------------------------------------------------------------
 // 内部：建案初始化（幂等 → 邀请码 → 额度 → 消耗与建 Ticket，单事务）
 
+
+/**
+ * 编译 lease 清账：把本身份 lease 已过期的 accepted/working 编译票据
+ * 显式判失败（MODEL_REQUEST_FAILED → CASE_COMPILE_FAILED，CONTRACTS 13.3
+ * 编译列），释放「同一身份同时最多 1 次进行中编译」的占用；不自动重试模型。
+ */
+async function expireStaleCompilations(
+  ctx: import("./_generated/server").MutationCtx,
+  identityToken: string,
+  nowMs: number,
+): Promise<void> {
+  const compiling = await ctx.db
+    .query("cases")
+    .withIndex("by_owner_status", (q) =>
+      q.eq("owner_identity", identityToken).eq("status", "compiling"),
+    )
+    .collect();
+  for (const caseDoc of compiling) {
+    const ticket = await ctx.db
+      .query("compilation_tickets")
+      .withIndex("by_case_key", (q) => q.eq("case_key", caseDoc.case_key))
+      .unique();
+    if (!ticket) continue;
+    if (
+      (ticket.status !== "accepted" && ticket.status !== "working") ||
+      ticket.lease_expires_at_ms === undefined ||
+      ticket.lease_expires_at_ms > nowMs
+    ) {
+      continue;
+    }
+    await ctx.runMutation(internal.cases.finalizeCompilationFailure, {
+      case_key: caseDoc.case_key,
+      failure_json: JSON.stringify({
+        code: "MODEL_REQUEST_FAILED",
+        incident_id: `compile-lease:${caseDoc.case_key}`,
+        detail: "编译 worker 租约过期（进程死亡），按显式失败处理",
+      }),
+    });
+    await ctx.runMutation(internal.audit.recordInternal, {
+      event: "case_compile_lease_expired",
+      case_id: caseDoc.case_key,
+      detail_code: "TURN_LEASE_EXPIRED",
+    });
+  }
+}
+
 export const initializeCreation = internalMutation({
   args: {
     identity_token: v.string(),
@@ -304,6 +353,12 @@ export const initializeCreation = internalMutation({
       }
       return { receipt: JSON.parse(existing.result_json) as CaseCompileReceipt };
     }
+
+    // 1b) 编译 lease 自愈（SPEC 8：worker/lease 异常必须明确失败，不自动重调）：
+    // 把本身份已过期的 accepted/working 编译票据显式判失败。action 进程死亡会
+    // 遗留 compiling 案件 + working 票据；不清账会令「同一身份同时最多 1 次
+    // 进行中编译」永久拒绝新请求（并发计数只看案件 status）。
+    await expireStaleCompilations(ctx, args.identity_token, nowMs);
 
     // 2) 邀请码（只比对哈希；拒绝原因不外泄）
     const codeHash = await sha256Hex(args.invite_code);
@@ -381,6 +436,7 @@ export const initializeCreation = internalMutation({
     await ctx.db.insert("compilation_tickets", {
       case_key: args.case_key,
       status: "accepted",
+      lease_expires_at_ms: nowMs + COMPILE_LEASE_MS,
       created_at_ms: nowMs,
       updated_at_ms: nowMs,
     });
@@ -681,6 +737,7 @@ export const markTicketWorking = internalMutation({
     }
     await ctx.db.patch(ticket._id, {
       status: "working",
+      lease_expires_at_ms: Date.now() + COMPILE_LEASE_MS,
       updated_at_ms: Date.now(),
     });
   },
@@ -778,7 +835,13 @@ export const finalizeCompilationSuccess = internalMutation({
         message: "服务内部错误",
       });
     }
-    if (ticket.status === "succeeded") return; // 幂等：重复 finalize 不重写
+    if (
+      ticket.status === "succeeded" ||
+      // 已被 lease 清账判失败的票据不再接受迟到的成功写入（防复活）。
+      ticket.status === "failed"
+    ) {
+      return; // 幂等：重复 finalize 不重写
+    }
 
     await ctx.db.insert("source_documents", {
       case_key: args.case_key,

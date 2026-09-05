@@ -1,0 +1,44 @@
+{
+  "case_id": "1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+  "title": "养老金改革迷局",
+  "summary": "围绕中国养老金制度转型、延迟退休政策与个人养老责任，五名角色基于各自立场展开讨论。证据目录呈现制度现状、人口数据、替代率变化、政策时间表及自媒体炒作等关键材料。",
+  "source_url": "https://zhuanlan.zhihu.com/p/2059729146037777729",
+  "theme": "延迟退休与养老困境",
+  "roles": [
+    {
+      "role_id": "role-1",
+      "display_name": "李明 · 养老金政策研究员",
+      "public_bio": "长期研究中国养老保障制度，擅长数据解读与政策分析。",
+      "persona_key": "理性、客观、数据驱动",
+      "voice_id": "voice-zh-01"
+    },
+    {
+      "role_id": "role-2",
+      "display_name": "王芳 · 企业职工",
+      "public_bio": "普通上班族，面临房贷与抚养压力，对退休生活感到焦虑。",
+      "persona_key": "焦虑、切身、关注个人账户",
+      "voice_id": "voice-zh-02"
+    },
+    {
+      "role_id": "role-3",
+      "display_name": "刘强 · 理财规划师",
+      "public_bio": "专注于个人养老金与家庭资产配置，倡导长期规划。",
+      "persona_key": "规划导向、强调个人责任",
+      "voice_id": "voice-zh-03"
+    },
+    {
+      "role_id": "role-4",
+      "display_name": "陈静 · 社会评论员",
+      "public_bio": "关注公共议题与媒体生态，批评贩卖焦虑的行为。",
+      "persona_key": "批判性、反思媒体",
+      "voice_id": "voice-zh-04"
+    },
+    {
+      "role_id": "role-5",
+      "display_name": "赵鹏 · 自媒体编辑",
+      "public_bio": "运营多个流量号，善于捕捉热点话题。",
+      "persona_key": "逐利、追求流量、选择性传播",
+      "voice_id": "voice-zh-05"
+    }
+  ]
+}

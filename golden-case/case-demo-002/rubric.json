@@ -1,0 +1,146 @@
+{
+  "case_id": "1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+  "scoring_rule": "对最终指控所附的已解锁 Evidence 逐条判定：一条 Evidence 满足某 criterion 的类型与 Claim 条件时，该 criterion 授予其权重；每个 criterion 至多授予一次；未满足的 criterion 不得计分。总分封顶 100。",
+  "criteria": [
+    {
+      "criterion_id": "crit-ev-1",
+      "weight": 10,
+      "allowed_types": [
+        "quote"
+      ],
+      "claim_match_mode": "any_of",
+      "claim_ids": [
+        "cl-4",
+        "cl-5",
+        "cl-6"
+      ],
+      "description": "证据「现收现付制说明」：类型 quote 且公开 Claim 引用命中其登记 Claim。"
+    },
+    {
+      "criterion_id": "crit-ev-2",
+      "weight": 10,
+      "allowed_types": [
+        "source"
+      ],
+      "claim_match_mode": "any_of",
+      "claim_ids": [
+        "cl-9",
+        "cl-10"
+      ],
+      "description": "证据「人口结构数据」：类型 source 且公开 Claim 引用命中其登记 Claim。"
+    },
+    {
+      "criterion_id": "crit-ev-3",
+      "weight": 10,
+      "allowed_types": [
+        "claim"
+      ],
+      "claim_match_mode": "any_of",
+      "claim_ids": [
+        "cl-14",
+        "cl-15",
+        "cl-16"
+      ],
+      "description": "证据「替代率定义与现状」：类型 claim 且公开 Claim 引用命中其登记 Claim。"
+    },
+    {
+      "criterion_id": "crit-ev-4",
+      "weight": 10,
+      "allowed_types": [
+        "contradiction"
+      ],
+      "claim_match_mode": "any_of",
+      "claim_ids": [
+        "cl-24"
+      ],
+      "description": "证据「关于2026年领不到养老金的谣言」：类型 contradiction 且公开 Claim 引用命中其登记 Claim。"
+    },
+    {
+      "criterion_id": "crit-ev-5",
+      "weight": 10,
+      "allowed_types": [
+        "timeline"
+      ],
+      "claim_match_mode": "any_of",
+      "claim_ids": [
+        "cl-29",
+        "cl-30",
+        "cl-31",
+        "cl-32",
+        "cl-33",
+        "cl-34"
+      ],
+      "description": "证据「延迟退休实施时间表」：类型 timeline 且公开 Claim 引用命中其登记 Claim。"
+    },
+    {
+      "criterion_id": "crit-ev-6",
+      "weight": 10,
+      "allowed_types": [
+        "claim"
+      ],
+      "claim_match_mode": "any_of",
+      "claim_ids": [
+        "cl-50",
+        "cl-51",
+        "cl-52",
+        "cl-55",
+        "cl-56"
+      ],
+      "description": "证据「三支柱养老体系」：类型 claim 且公开 Claim 引用命中其登记 Claim。"
+    },
+    {
+      "criterion_id": "crit-ev-8",
+      "weight": 10,
+      "allowed_types": [
+        "contradiction"
+      ],
+      "claim_match_mode": "any_of",
+      "claim_ids": [
+        "cl-37",
+        "cl-38",
+        "cl-68"
+      ],
+      "description": "证据「养老金缴费年限的谣传与事实」：类型 contradiction 且公开 Claim 引用命中其登记 Claim。"
+    },
+    {
+      "criterion_id": "crit-ev-9",
+      "weight": 10,
+      "allowed_types": [
+        "claim"
+      ],
+      "claim_match_mode": "any_of",
+      "claim_ids": [
+        "cl-60",
+        "cl-77"
+      ],
+      "description": "证据「个人养老责任与规划」：类型 claim 且公开 Claim 引用命中其登记 Claim。"
+    },
+    {
+      "criterion_id": "crit-ev-10",
+      "weight": 10,
+      "allowed_types": [
+        "quote"
+      ],
+      "claim_match_mode": "any_of",
+      "claim_ids": [
+        "cl-20",
+        "cl-28"
+      ],
+      "description": "证据「养老焦虑的来源」：类型 quote 且公开 Claim 引用命中其登记 Claim。"
+    },
+    {
+      "criterion_id": "crit-ev-11",
+      "weight": 10,
+      "allowed_types": [
+        "claim"
+      ],
+      "claim_match_mode": "any_of",
+      "claim_ids": [
+        "cl-65",
+        "cl-78",
+        "cl-79"
+      ],
+      "description": "证据「焦虑的商机与反思」：类型 claim 且公开 Claim 引用命中其登记 Claim。"
+    }
+  ]
+}

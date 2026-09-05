@@ -257,6 +257,39 @@ export const seedUnlockedEvidence = internalMutation({
   },
 });
 
+/** 测试工具：构造一个处于 compiling 的孤儿案件 + 可带过期 lease 的编译票据。 */
+export const seedStaleCompilation = internalMutation({
+  args: {
+    identity_token: v.string(),
+    case_key: v.string(),
+    lease_expires_at_ms: v.optional(v.number()),
+    ticket_status: v.optional(
+      v.union(v.literal("accepted"), v.literal("working")),
+    ),
+  },
+  handler: async (ctx, args) => {
+    const nowMs = Date.now();
+    await ctx.db.insert("cases", {
+      case_key: args.case_key,
+      visibility: "user",
+      owner_identity: args.identity_token,
+      status: "compiling",
+      created_at_ms: nowMs,
+      updated_at_ms: nowMs,
+    });
+    await ctx.db.insert("compilation_tickets", {
+      case_key: args.case_key,
+      status: args.ticket_status ?? "working",
+      ...(args.lease_expires_at_ms !== undefined && {
+        lease_expires_at_ms: args.lease_expires_at_ms,
+      }),
+      created_at_ms: nowMs,
+      updated_at_ms: nowMs,
+    });
+    return { case_key: args.case_key };
+  },
+});
+
 /** 测试工具：插入一个 accepted 的活动 Ticket 以制造排他锁占用（可带已过期 lease）。 */
 export const seedActiveTicket = internalMutation({
   args: {
