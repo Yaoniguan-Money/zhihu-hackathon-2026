@@ -242,6 +242,14 @@ export const seedActiveTicket = internalMutation({
   args: {
     session_id: v.string(),
     lease_expires_at_ms: v.optional(v.number()),
+    // P1-1：可种子对质 Ticket 以验证对质与 ask 共用排他锁。
+    kind: v.optional(
+      v.union(
+        v.literal("ask"),
+        v.literal("present_recording"),
+        v.literal("opening_statement"),
+      ),
+    ),
   },
   handler: async (ctx, args) => {
     const nowMs = Date.now();
@@ -250,7 +258,7 @@ export const seedActiveTicket = internalMutation({
       request_id: requestId,
       session_id: args.session_id,
       role_id: "role-observer",
-      kind: "ask",
+      kind: args.kind ?? "ask",
       status: "accepted",
       ...(args.lease_expires_at_ms !== undefined && {
         lease_expires_at_ms: args.lease_expires_at_ms,
@@ -259,6 +267,60 @@ export const seedActiveTicket = internalMutation({
       updated_at_ms: nowMs,
     });
     return { request_id: requestId };
+  },
+});
+
+/**
+ * 测试工具（P1-1）：插入一条已批准角色消息及其 succeeded Ticket，
+ * 复刻 finalizeTurnSuccess 的持久化形状（message_json + validation_json
+ * 含 support_claim_ids），供 saveRecording 无模型构造来源消息。
+ * 绝不进入生产调用链：生产唯一路径是 TB4/TB7 的回合 worker。
+ */
+export const seedRoleMessage = internalMutation({
+  args: {
+    session_id: v.string(),
+    role_id: v.string(),
+    text: v.string(),
+    support_claim_ids: v.array(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const nowMs = Date.now();
+    const messageId = `msg-${crypto.randomUUID()}`;
+    const request_id = `seed-req-${crypto.randomUUID()}`;
+    const roleMessage = {
+      message_id: messageId,
+      session_id: args.session_id,
+      speaker_type: "role",
+      speaker_id: args.role_id,
+      exact_text: args.text,
+      stance: "answer",
+      emotion: "calm",
+      created_at: new Date(nowMs).toISOString(),
+    };
+    await ctx.db.insert("messages", {
+      session_id: args.session_id,
+      message_id: messageId,
+      payload_json: JSON.stringify(roleMessage),
+      created_at_ms: nowMs,
+    });
+    await ctx.db.insert("role_turn_tickets", {
+      request_id,
+      session_id: args.session_id,
+      role_id: args.role_id,
+      kind: "ask",
+      status: "succeeded",
+      message_json: JSON.stringify(roleMessage),
+      validation_json: JSON.stringify({
+        status: "entailed",
+        detected_distortion_types: [],
+        unsupported_spans: [],
+        referenced_claim_ids: args.support_claim_ids,
+        support_claim_ids: args.support_claim_ids,
+      }),
+      created_at_ms: nowMs,
+      updated_at_ms: nowMs,
+    });
+    return { message_id: messageId };
   },
 });
 

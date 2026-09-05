@@ -47,7 +47,16 @@ export function roleGeneratorUserPrompt(input: {
   history: string[];
   question: string;
   questionMode: string;
+  confrontation?: { speakerName: string; recordingText: string };
 }): string {
+  const subject = input.confrontation
+    ? [
+        `玩家向你出示一段录音证据（来源角色：${input.confrontation.speakerName}）：`,
+        `「${input.confrontation.recordingText}」`,
+        "请以你的角色身份回应这段录音：确认、否认或澄清。",
+        "回应必须引用具体可见事实（support_claim_ids 非空），不得空泛作答。",
+      ].join("\n")
+    : `玩家的问题（mode=${input.questionMode}）：${input.question}`;
   return [
     "可见事实（support_claim_ids 只能从中选择）：",
     ...input.visibleClaims.map(
@@ -57,7 +66,7 @@ export function roleGeneratorUserPrompt(input: {
     "近期对话：",
     ...(input.history.length > 0 ? input.history : ["（尚无对话）"]),
     "",
-    `玩家的问题（mode=${input.questionMode}）：${input.question}`,
+    subject,
     "",
     "请以该角色的身份给出回应。",
   ].join("\n");

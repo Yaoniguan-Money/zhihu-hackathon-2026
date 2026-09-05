@@ -93,3 +93,4 @@ docs/handoffs/<ticket-or-stage-id>.md
 | TB2b 用户案件完整编译器 | complete | [2026-09-05-tb2b-user-case-compiler](./2026-09-05-tb2b-user-case-compiler.md) |
 | TB10 P0 全链证明 | complete | [2026-09-05-tb10-full-chain](./2026-09-05-tb10-full-chain.md) |
 | REL0 P0 公网部署 | complete | [2026-09-05-rel0-convex-cloud](./2026-09-05-rel0-convex-cloud.md) |
+| P1-1 Recording 与对质 | complete | [2026-09-05-p11-1-recording-confrontation](./2026-09-05-p11-1-recording-confrontation.md) |

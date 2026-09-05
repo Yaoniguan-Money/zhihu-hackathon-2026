@@ -164,10 +164,29 @@ export const getPublic = query({
         ? JSON.parse(session.submitted_accusation_json)
         : undefined;
     // 资源前置条件（CONTRACTS 7.1）：至少一条已解锁 Evidence 才开放
-    // update_board / accuse；活动 Ticket 存在时公开其 request_id。
-    const unlockedCount = await ctx.db
+    // update_board / accuse；P1-1 起已有 Approved Role Message 开放
+    // save_recording、已有已解锁 Recording Evidence 开放 present_recording；
+    // 活动 Ticket 存在时公开其 request_id。
+    const unlockedRows = await ctx.db
       .query("session_evidence_unlocked")
       .withIndex("by_session", (q) => q.eq("session_id", args.session_id))
+      .collect();
+    const messageDocs = await ctx.db
+      .query("messages")
+      .withIndex("by_session_created", (q) =>
+        q.eq("session_id", args.session_id),
+      )
+      .collect();
+    const hasRoleMessage = messageDocs.some(
+      (doc) =>
+        (JSON.parse(doc.payload_json) as { speaker_type?: string })
+          .speaker_type === "role",
+    );
+    const recordingDocs = await ctx.db
+      .query("recordings")
+      .withIndex("by_session_evidence", (q) =>
+        q.eq("session_id", args.session_id),
+      )
       .collect();
     const activeTicket =
       (
@@ -194,7 +213,9 @@ export const getPublic = query({
       phase: session.phase,
       allowed_actions: allowedActionsFor(
         session.phase,
-        unlockedCount.length > 0,
+        unlockedRows.length > 0,
+        hasRoleMessage,
+        recordingDocs.length > 0,
       ),
       ...(activeTicket && {
         active_role_turn_request_id: activeTicket.request_id,
@@ -210,15 +231,27 @@ export const getPublic = query({
   },
 });
 
-/** 阶段 + 资源前置条件 → 玩家可执行动作（CONTRACTS 7.1；save/present_recording 属 P1）。 */
-function allowedActionsFor(phase: string, hasUnlockedEvidence: boolean): string[] {
+/**
+ * 阶段 + 资源前置条件 → 玩家可执行动作（CONTRACTS 7.1）。
+ * P1-1：investigation 中已有已发布 Approved Role Message 开放 save_recording；
+ * 已有已解锁 Recording Evidence 开放 present_recording。
+ */
+function allowedActionsFor(
+  phase: string,
+  hasUnlockedEvidence: boolean,
+  hasRoleMessage: boolean,
+  hasRecording: boolean,
+): string[] {
   switch (phase) {
     case "briefing":
       return ["start"];
-    case "investigation":
-      return hasUnlockedEvidence
-        ? ["ask", "update_board", "accuse"]
-        : ["ask"];
+    case "investigation": {
+      const actions = ["ask"];
+      if (hasRoleMessage) actions.push("save_recording");
+      if (hasRecording) actions.push("present_recording");
+      if (hasUnlockedEvidence) actions.push("update_board", "accuse");
+      return actions;
+    }
     case "opening_statements":
     case "judging":
     case "revealed":

@@ -40,6 +40,10 @@ export interface TurnAttemptContext {
   question: string;
   mode: string;
   incidentRef: string;
+  /** P1-1 对质回合：要求候选引用非空且可见的 support_claim_ids（服务器硬约束）。 */
+  requireSupportClaims?: boolean;
+  /** P1-1 对质回合：生成 prompt 以录音对质块替代玩家问题块。 */
+  confrontation?: { speakerName: string; recordingText: string };
 }
 
 export type TurnAttemptOutcome =
@@ -54,6 +58,7 @@ export type TurnAttemptOutcome =
       reason:
         | "VALIDATION_EXHAUSTED"
         | "DISTORTION_POLICY_VIOLATION"
+        | "NEW_FACT_INTRODUCED"
         | "PROTOCOL_FAILURE";
       failure: PrivateFailure;
       attempts: number;
@@ -128,6 +133,9 @@ export async function runGenerationAttempts(
               history: context.history,
               question: context.question,
               questionMode: context.mode,
+              ...(context.confrontation && {
+                confrontation: context.confrontation,
+              }),
             }) +
             (lastFeedback
               ? `\n\n上一次候选未通过校验，请修正后重新输出：${lastFeedback}`
@@ -169,9 +177,26 @@ export async function runGenerationAttempts(
     });
 
     // 服务器前置检查：支持 Claim 必须存在且属于可见集合。
+    // 对质回合额外要求非空且可见（CONTRACTS 8.2）：违反即 NEW_FACT_INTRODUCED
+    // 立即终止，不属于语义重写机会。
     const supportVisible = candidate.support_claim_ids.every((id) =>
       visibleIds.has(id),
     );
+    if (
+      context.requireSupportClaims &&
+      (candidate.support_claim_ids.length === 0 || !supportVisible)
+    ) {
+      return {
+        ok: false,
+        reason: "NEW_FACT_INTRODUCED",
+        failure: {
+          code: "NEW_FACT_INTRODUCED",
+          incident_id: `turn:${context.incidentRef}`,
+          detail: "对质回应未引用具体可见事实",
+        },
+        attempts: attemptIndex,
+      };
+    }
 
     let validation;
     const validatorCallStart = Date.now();

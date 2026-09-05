@@ -11,6 +11,7 @@ import { internal } from "./_generated/api";
 import {
   askRoleArgsSchema,
   gameEventPayloadSchema,
+  presentRecordingArgsSchema,
   publicRoleTurnSchema,
   roleMessagePublicSchema,
   type PublicRoleTurn,
@@ -44,9 +45,12 @@ import { throwPublicError, convexErrorCode } from "./publicErrors.js";
  * 忠实角色只发布 Validator 判为 entailed 的完整消息；最多两次语义重写。
  * TB10：Ticket 持有 lease；过期锁在下一个写操作事务中被显式判失败
  * （TURN_LEASE_EXPIRED），不自动重新调用模型。
+ * P1-1：presentRecording 触发对质回合（CONTRACTS 8.2），与 ask 共用
+ * 排他锁/幂等键规则；回应消息由服务器设置 rebuttal_to_message_id。
  */
 
 const OPERATION_ASK = "roleTurns.ask";
+const OPERATION_PRESENT_RECORDING = "roleTurns.presentRecording";
 const uuidSchema = z.uuid();
 const TICKET_LEASE_MS = 10 * 60_000;
 
@@ -126,7 +130,62 @@ export const ask = action({
       throw error;
     }
   },
-});export const observe = query({
+});
+
+/**
+ * P1-1：对质回合（CONTRACTS 8.2 / ENGINEERING_SPEC 5.3）。
+ * 与 ask 相同的薄 action 模式：auth/schema → initializePresentRecordingTurn
+ * 单事务权威判定（阶段、Recording 解锁、Role、排他锁、幂等）→ worker。
+ */
+export const presentRecording = action({
+  args: {
+    session_id: v.string(),
+    evidence_id: v.string(),
+    target_role_id: v.string(),
+    client_action_id: v.string(),
+  },
+  handler: async (ctx, args): Promise<RoleTurnReceipt> => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throwPublicError("AUTH_REQUIRED", "需要先建立会话身份");
+    }
+    if (!uuidSchema.safeParse(args.client_action_id).success) {
+      throwPublicError("INVALID_ARGUMENT", "client_action_id 必须是 UUID");
+    }
+    const parsed = presentRecordingArgsSchema.safeParse(args);
+    if (!parsed.success) {
+      throwPublicError("INVALID_ARGUMENT", "请求参数不合法");
+    }
+    try {
+      const { receipt } = await ctx.runMutation(
+        internal.roleTurns.initializePresentRecordingTurn,
+        {
+          identity_token: identity.tokenIdentifier,
+          session_id: args.session_id,
+          evidence_id: args.evidence_id,
+          target_role_id: args.target_role_id,
+          client_action_id: args.client_action_id,
+        },
+      );
+      return receipt;
+    } catch (error) {
+      const code = convexErrorCode(error);
+      if (code === "ROLE_TURN_BUSY" || code === "IDEMPOTENCY_CONFLICT") {
+        await ctx.runMutation(internal.audit.recordInternal, {
+          event:
+            code === "ROLE_TURN_BUSY"
+              ? "role_turn_busy"
+              : "idempotency_conflict",
+          session_id: args.session_id,
+          client_action_id: args.client_action_id,
+          detail_code: code,
+        });
+      }
+      throw error;
+    }
+  },
+});
+export const observe = query({
   args: { request_id: v.string() },
   handler: async (ctx, args): Promise<PublicRoleTurn | null> => {
     const identity = await ctx.auth.getUserIdentity();
@@ -334,6 +393,144 @@ export const initializeAskTurn = internalMutation({
   },
 });
 
+// ---------------------------------------------------------------------------
+// 内部：对质回合初始化（幂等 → 阶段/Recording/Role/锁 → 原子写 Ticket+事件）
+
+export const initializePresentRecordingTurn = internalMutation({
+  args: {
+    identity_token: v.string(),
+    session_id: v.string(),
+    evidence_id: v.string(),
+    target_role_id: v.string(),
+    client_action_id: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const session = await ctx.db
+      .query("sessions")
+      .withIndex("by_session_key", (q) => q.eq("session_key", args.session_id))
+      .unique();
+    // Owner 隔离：他人 Session 与不存在返回同一公开结果。
+    if (!session || session.owner_identity !== args.identity_token) {
+      throwPublicError("SESSION_NOT_FOUND", "对局不存在或不可访问");
+    }
+
+    const payloadHash = await sha256Hex(
+      canonicalJson({
+        session_id: args.session_id,
+        evidence_id: args.evidence_id,
+        target_role_id: args.target_role_id,
+      }),
+    );
+
+    // 幂等命中先于阶段校验（CONTRACTS 12）。
+    const existing = await ctx.db
+      .query("idempotency_records")
+      .withIndex("by_key", (q) =>
+        q
+          .eq("identity_token", args.identity_token)
+          .eq("operation_name", OPERATION_PRESENT_RECORDING)
+          .eq("scope_id", args.session_id)
+          .eq("client_action_id", args.client_action_id),
+      )
+      .unique();
+    if (existing) {
+      if (existing.payload_hash !== payloadHash) {
+        throwPublicError("IDEMPOTENCY_CONFLICT", "同一操作 ID 已被不同内容使用");
+      }
+      return { receipt: JSON.parse(existing.result_json) as RoleTurnReceipt };
+    }
+
+    // 阶段与动态动作（CONTRACTS 7.1）：仅 investigation 允许 present_recording。
+    if (session.phase !== "investigation") {
+      throwPublicError("SESSION_PHASE_CONFLICT", "当前阶段不能投递录音");
+    }
+
+    // 只能引用当前 Session 已解锁的 Recording Evidence（CONTRACTS 8.2）。
+    const recording = await ctx.db
+      .query("recordings")
+      .withIndex("by_session_evidence", (q) =>
+        q.eq("session_id", args.session_id).eq("evidence_id", args.evidence_id),
+      )
+      .unique();
+    if (!recording) {
+      throwPublicError("EVIDENCE_UNAVAILABLE", "引用的录音不存在或未解锁");
+    }
+
+    // 目标 Role 必须属于案件（ROLE_NOT_FOUND）。
+    const caseDoc = await ctx.db
+      .query("cases")
+      .withIndex("by_case_key", (q) => q.eq("case_key", session.case_id))
+      .unique();
+    const casePublic = caseDoc?.public_json
+      ? (JSON.parse(caseDoc.public_json) as { roles: { role_id: string }[] })
+      : null;
+    if (
+      !casePublic ||
+      !casePublic.roles.some((role) => role.role_id === args.target_role_id)
+    ) {
+      throwPublicError("ROLE_NOT_FOUND", "角色不存在");
+    }
+
+    // 排他锁与 ask / 开场共用（CONTRACTS 8.2 / SPEC 8）。
+    await expireStaleTickets(ctx, args.session_id);
+    const active = await ctx.db
+      .query("role_turn_tickets")
+      .withIndex("by_session_status", (q) =>
+        q.eq("session_id", args.session_id).eq("status", "accepted"),
+      )
+      .collect();
+    const working = await ctx.db
+      .query("role_turn_tickets")
+      .withIndex("by_session_status", (q) =>
+        q.eq("session_id", args.session_id).eq("status", "working"),
+      )
+      .collect();
+    if (active.length + working.length > 0) {
+      await ctx.runMutation(internalApi.audit.recordInternal, {
+        event: "role_turn_busy",
+        case_id: session.case_id,
+        session_id: args.session_id,
+        client_action_id: args.client_action_id,
+      });
+      throwPublicError("ROLE_TURN_BUSY", "已有角色回合正在进行");
+    }
+
+    const nowMs = Date.now();
+    const requestId = newOpaqueId("req-");
+    await ctx.db.insert("role_turn_tickets", {
+      request_id: requestId,
+      session_id: args.session_id,
+      role_id: args.target_role_id,
+      kind: "present_recording",
+      status: "accepted",
+      confront_message_id: recording.message_id,
+      lease_expires_at_ms: nowMs + TICKET_LEASE_MS,
+      created_at_ms: nowMs,
+      updated_at_ms: nowMs,
+    });
+    await insertEvent(ctx, args.session_id, {
+      type: "recording_presented",
+      evidence_id: args.evidence_id,
+      target_role_id: args.target_role_id,
+      request_id: requestId,
+    });
+    const receipt: RoleTurnReceipt = { request_id: requestId };
+    await ctx.db.insert("idempotency_records", {
+      identity_token: args.identity_token,
+      operation_name: OPERATION_PRESENT_RECORDING,
+      scope_id: args.session_id,
+      client_action_id: args.client_action_id,
+      payload_hash: payloadHash,
+      result_json: JSON.stringify(receipt),
+      created_at_ms: nowMs,
+    });
+    await ctx.scheduler.runAfter(0, internal.roleTurns.roleTurnWorker, {
+      request_id: requestId,
+    });
+    return { receipt };
+  },
+});
+
 async function insertEvent(
   ctx: { db: import("./_generated/server").MutationCtx["db"] },
   sessionId: string,
@@ -426,6 +623,11 @@ interface TurnContext {
   history: string[];
   question: string;
   mode: string;
+  kind: "ask" | "present_recording";
+  /** P1-1：对质回合的录音上下文（生成 prompt 用）。 */
+  confrontation?: { speakerName: string; recordingText: string };
+  /** P1-1：对质回应消息的 rebuttal_to_message_id（服务器权威）。 */
+  rebuttalMessageId?: string;
 }
 
 export const roleTurnWorker = internalAction({
@@ -455,7 +657,7 @@ export const roleTurnWorker = internalAction({
       request_id: args.request_id,
     });
 
-    const context = loaded as TurnContext & { kind: string };
+    const context = loaded as TurnContext;
     const emitTurnAudit = async (event: TurnAuditEvent): Promise<void> => {
       await ctx.runMutation(internalApi.audit.recordInternal, {
         event: event.type,
@@ -489,6 +691,11 @@ export const roleTurnWorker = internalAction({
           history: context.history,
           question: context.question,
           mode: context.mode,
+          // P1-1：对质回合要求候选引用非空且可见的 Claim（CONTRACTS 8.2）。
+          requireSupportClaims: context.kind === "present_recording",
+          ...(context.confrontation && {
+            confrontation: context.confrontation,
+          }),
           incidentRef: args.request_id,
         },
         emitTurnAudit,
@@ -522,11 +729,16 @@ export const roleTurnWorker = internalAction({
         emotion: approved.candidate.emotion,
         support_claim_ids: approved.candidate.support_claim_ids,
         unlocked_ids: unlocked,
+        ...(context.kind === "present_recording" &&
+          context.rebuttalMessageId && {
+            rebuttal_to_message_id: context.rebuttalMessageId,
+          }),
         validation_json: JSON.stringify({
           status: approved.validation.status,
           detected_distortion_types: approved.validation.detected_distortion_types,
           unsupported_spans: approved.validation.unsupported_spans,
           referenced_claim_ids: approved.validation.referenced_claim_ids,
+          support_claim_ids: approved.candidate.support_claim_ids,
         }),
       });
     } catch (error) {
@@ -619,6 +831,42 @@ export const turnContextInternal = internalQuery({
     const displayName =
       casePublic?.roles.find((role) => role.role_id === ticket.role_id)
         ?.display_name ?? ticket.role_id;
+
+    // P1-1：对质回合以录音内容构造生成上下文（CONTRACTS 8.2）。
+    if (ticket.kind === "present_recording") {
+      if (!ticket.confront_message_id) return null;
+      const recording = await ctx.db
+        .query("recordings")
+        .withIndex("by_session_message", (q) =>
+          q
+            .eq("session_id", ticket.session_id)
+            .eq("message_id", ticket.confront_message_id ?? ""),
+        )
+        .unique();
+      if (!recording) return null;
+      const speakerName =
+        casePublic?.roles.find(
+          (role) => role.role_id === recording.speaker_role_id,
+        )?.display_name ?? recording.speaker_role_id;
+      return {
+        session_id: ticket.session_id,
+        case_id: session.case_id,
+        role_id: ticket.role_id,
+        displayName,
+        visibleClaims,
+        policy,
+        history,
+        question: "",
+        mode: "confrontation",
+        kind: "present_recording",
+        confrontation: {
+          speakerName,
+          recordingText: recording.body,
+        },
+        rebuttalMessageId: recording.message_id,
+      } satisfies TurnContext;
+    }
+
     return {
       session_id: ticket.session_id,
       case_id: session.case_id,
@@ -629,6 +877,7 @@ export const turnContextInternal = internalQuery({
       history,
       question,
       mode,
+      kind: "ask",
     } satisfies TurnContext;
   },
 });
@@ -722,6 +971,8 @@ export const finalizeTurnSuccess = internalMutation({
     ),
     support_claim_ids: v.array(v.string()),
     unlocked_ids: v.array(v.string()),
+    // P1-1：对质回应消息指向被对质录音的来源 Message（服务器权威，CONTRACTS 8.2）。
+    rebuttal_to_message_id: v.optional(v.string()),
     validation_json: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
@@ -741,6 +992,9 @@ export const finalizeTurnSuccess = internalMutation({
       exact_text: args.speech,
       stance: args.stance,
       emotion: args.emotion,
+      ...(args.rebuttal_to_message_id !== undefined && {
+        rebuttal_to_message_id: args.rebuttal_to_message_id,
+      }),
       created_at: new Date(nowMs).toISOString(),
     });
     await ctx.db.insert("messages", {

@@ -379,6 +379,7 @@ export const openingWorker = internalAction({
           detected_distortion_types: outcome.validation.detected_distortion_types,
           unsupported_spans: outcome.validation.unsupported_spans,
           referenced_claim_ids: outcome.validation.referenced_claim_ids,
+          support_claim_ids: outcome.candidate.support_claim_ids,
         }),
       });
 

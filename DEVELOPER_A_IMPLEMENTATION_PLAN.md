@@ -38,9 +38,9 @@
 | PF0 工具链骨架 | COMPLETE | Bun 1.4.1、Next.js 16.3.4、React 19.2.8、Convex 1.45.0、TypeScript 5.9.3 已固定；typecheck/test/build 验证通过。未实现公开 schema、产品页面或 XState。见 [PF0 handoff](./docs/handoffs/2026-09-04-pf0-toolchain-skeleton.md)。 |
 | D0 契约修复与 B 评审 | COMPLETE | A 侧修复包 + B 侧签署均已完成：用户于 2026-09-04 会话中明确决定「D0 同意签署意见」，Public 类型、错误、认证与 P0 Cut 视为通过评审。见 [D0 A 侧 handoff](./docs/handoffs/2026-09-04-d0-contract-repair-a-side.md) 与 [D0 签署记录](./docs/handoffs/2026-09-04-d0-signoff.md)。 |
 | G0 Golden Case 输入 | COMPLETE | 用户已提供真实知乎 URL（红歌会网专栏文章），完整正文经渲染抓取获得并冻结于 `golden-case/case-demo-001/`（含哈希与来源元数据）。见 [G0 handoff](./docs/handoffs/2026-09-04-g0-golden-case-source.md)。 |
-| GC0 Golden Case 标注 | IN PROGRESS | 标注草案已产出（23 claims / 22 relations / 4+1 policies / golden answer / 8 catalog / rubric 100 / 代表性 fixtures），全部经脚本程序化验证；待 A/B 与用户按确认清单逐项确认后冻结。见 [GC0 草案 handoff](./docs/handoffs/2026-09-05-gc0-annotation-draft.md)。 |
+| GC0 Golden Case 标注 | COMPLETE | 用户于 2026-09-05 签署确认九项清单；冻结流程已执行（标注移至 `golden-case/case-demo-001/`，构建复验全绿、JSON 零漂移）。见 [GC0 handoff](./docs/handoffs/2026-09-05-gc0-annotation-draft.md)。 |
 | G1 第二案件输入 | BLOCKED | 第一案件闭环后，由用户提供第二篇真实 URL 和完整正文。 |
-| REL0 公网 P0 | BLOCKED | 依赖 TB10、P0 发布验收和已签署 Golden 系统案件。 |
+| REL0 公网 P0 | COMPLETE | Convex Cloud（`agile-turtle-860`）与 Vercel Web（https://zhihu-hackathon-2026.vercel.app ）均部署并验证；生产 build 通过。见 [REL0 handoff](./docs/handoffs/2026-09-05-rel0-convex-cloud.md)。 |
 | AUTH1 知乎 OAuth | BLOCKED | 是 P0 后的独立外部 Gate；不以 OAuth 阻塞游客 P0。 |
 
 ## 3. D0：契约修复包与共同评审 Gate
@@ -121,7 +121,7 @@ AUTH0 + REL0 → AUTH1 知乎 OAuth（独立后续阶段）
 | TB9 Final Accusation 与 Reveal | COMPLETE | accuse（幂等、阶段/证据门控、服务器判定与两项评分、judging 瞬态）+ Reveal 模型解释候选严格校验 + 原子持久化 revealed；getReveal 提前读取 null；真实模型完整 golden 闭环 293s 通过。见 [TB9 handoff](./docs/handoffs/2026-09-05-tb9-accuse-reveal.md)。 |
 | TB10 P0 全链证明 | COMPLETE | 已完成：私有审计事件与聚合指标（CONTRACTS 15 / SPEC 11）、Ticket lease（过期显式失败不重调）、并发 CAS/排他锁/幂等/泄漏扫描/恢复全链测试；发布 Gate 完整套件 + 全部真实供应商 smoke 通过（含 TB9 完整 golden 闭环 297.6s）。见 [TB10 handoff](./docs/handoffs/2026-09-05-tb10-full-chain.md)。 |
 | REL0 公网 P0 | COMPLETE | Convex Cloud（`agile-turtle-860`：functions、AI_*/JWT/JWKS、Golden 案件种子、8 项验证）与 Vercel Web（https://zhihu-hackathon-2026.vercel.app ：production env、部署、线上冒烟）均完成；生产 build 通过。线上页面为 PF0 骨架（产品 UI 属 B）。见 [REL0 handoff](./docs/handoffs/2026-09-05-rel0-convex-cloud.md)。 |
-| P1-1 Recording / 对质 | BLOCKED | 实现 <code>saveRecording/presentRecording</code>；只能保存 Approved Role Message，投递回应引用具体 Message/Claim，并与 <code>ask</code> 共用锁。 |
+| P1-1 Recording / 对质 | COMPLETE | 已完成：`evidence.saveRecording`（Approved Role Message → type=quote 录音证据，公开 Claim 引用按「支持 ∩ 已公开可见」推导，创建即解锁、内容级去重）与 `roleTurns.presentRecording`（与 ask 共用排他锁，对质候选须引用非空可见 Claim，回应由服务器设置 `rebuttal_to_message_id`）；allowed_actions 动态开放、录音参与 evidence_score 命中、不计入 questioning_score；Scripted 8 项 + 集成 7 项 + 真实模型对质闭环通过。见 [P1-1 handoff](./docs/handoffs/2026-09-05-p11-1-recording-confrontation.md)。 |
 | P1-2 本地 Voice | BLOCKED | Windows/Python 3.11 CPU 基线，一个只绑定 <code>127.0.0.1</code> 的常驻 Python Worker 同时加载 SenseVoice/FSMN-VAD 与 Kokoro；Next 同源 Route 是 Browser 唯一入口。模型、voice pack 和 Python wheel 固定 revision/hash，五音色经 A/B 真人试听后锁定；ASR/TTS 幂等结果持久化，原始音频及时删除。当前 AMD 显卡不作为发布路径，不设 GPU 或浏览器朗读 fallback。 |
 | P1-3 第二案件 | BLOCKED | 用第二篇真实 URL 与全文证明没有写死 Golden Claims、角色、答案、Policy 或 Evidence；不得以合成内容替代。 |
 | REL1 P1 验收 | BLOCKED | Recording、对质、本地 Voice 和第二案件分别验收；P1 失败绝不回写为 P0 已完成。 |

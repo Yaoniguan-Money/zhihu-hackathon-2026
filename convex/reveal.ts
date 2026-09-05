@@ -408,6 +408,24 @@ export const computeScoresInternal = internalQuery({
       }[];
     };
     const byId = new Map(catalog.map((item) => [item.evidence_id, item]));
+    // P1-1：Recording Evidence 按其 type 与推导后的 public_claim_refs 参与命中
+    //（CONTRACTS 6.1 / 10.1）。
+    const recordings = await ctx.db
+      .query("recordings")
+      .withIndex("by_session_evidence", (q) =>
+        q.eq("session_id", args.session_id),
+      )
+      .collect();
+    for (const recording of recordings) {
+      byId.set(recording.evidence_id, {
+        evidence_id: recording.evidence_id,
+        type: "quote",
+        title: recording.title,
+        body: recording.body,
+        public_claim_refs: JSON.parse(recording.public_claim_refs_json),
+        conflicts_with: [],
+      });
+    }
     let evidenceScore = 0;
     for (const criterion of rubric.criteria ?? []) {
       const hit = args.evidence_ids.some((id) => {

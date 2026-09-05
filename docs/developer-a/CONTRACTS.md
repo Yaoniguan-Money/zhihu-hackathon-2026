@@ -408,6 +408,14 @@ export interface BoardState {
 
 模型候选不得包含 `evidence_unlock_ids`。服务端根据 Approved Role Message 的私有支持 Claim、案件 unlock rule 与 Session 状态计算 `EvidenceUnlockDecisionPrivate`。
 
+### 6.1 Recording Evidence（P1-1）
+
+- `evidence.saveRecording` 只能引用当前 Session 中已发布的 Approved Role Message（`speaker_type="role"` 的公开消息）。引用玩家消息、GM 消息、跨 Session 消息或不存在的消息一律返回 `EVIDENCE_UNAVAILABLE`；客户端不能提交标题、正文或 Claim 引用。
+- Recording Evidence 由服务器以 `type="quote"` 创建：`body` 逐字复制来源消息 `exact_text`；`title` 由服务器从角色公开名生成；`source_message_id` 指向来源消息；`conflicts_with` 为空；创建即视为已解锁（写入 Session 解锁集合），公开事件为 `recording_saved`。
+- `public_claim_refs` 由服务器推导：来源消息私有支持 Claim 与“当时已对玩家公开可见的 Claim”（已解锁 Evidence Fragment 的公开 Claim 引用并集）的交集。不公开来源消息的私有 `support_claim_ids`，也不借录音引入未解锁 Claim。
+- 同一 Session 内重复保存同一条消息返回首次创建的同一 Recording Evidence（内容级确定性，不产生重复证据）。幂等键与重放规则同第 12 节。
+- Recording Evidence 参与 `evidence_score` 命中判定时，按其 `type` 与推导后的 `public_claim_refs` 参与加权 criteria（10.1）；录音投递不改变 `questioning_score`。
+
 Board 规则：revision 从 0 开始；每个 Evidence 最多一个 placement；Link 两端不同且都已解锁、已放置；`updateBoard` 是带 `expected_revision` 的全量替换。版本不一致返回 `BOARD_REVISION_CONFLICT`，不得自动合并、使用 last-write-wins 或丢弃客户端内容。
 
 ## 7. SessionView 与公开事件
@@ -465,7 +473,7 @@ export interface SessionView {
 |---|---|
 | `briefing` | `start` |
 | `opening_statements` | 无 |
-| `investigation` | `ask`、`update_board`、`accuse` 按资源前置条件动态开放；`save_recording` / `present_recording` 属 P1，P0 恒不开放 |
+| `investigation` | `ask`、`save_recording`（P1：已有已发布 Approved Role Message）、`present_recording`（P1：已有已解锁 Recording Evidence）、`update_board`、`accuse` 按资源前置条件动态开放 |
 | `judging` | 无 |
 | `revealed` | 无 |
 | `failed` | 无 |
@@ -629,6 +637,13 @@ export type TurnIntentPrivate =
 
 Browser 没有通用 execute Interface。`opening_statement`（P0）与 `recording_presented`（P1）只能由服务端事件创建。首版“角色互咬”归入 P1：仅由 `presentRecording` 触发，回应必须引用该 Recording 的来源 Message 或允许的 Claim；不存在独立的 server-only `role_confrontation` 回合。
 
+对质回合的具体规则（P1-1）：
+
+- `presentRecording` 只能引用当前 Session 已解锁的 Recording Evidence；引用未知、未解锁、非录音或跨 Session 的 Evidence 一律返回 `EVIDENCE_UNAVAILABLE`。目标 Role 必须属于案件，否则 `ROLE_NOT_FOUND`。
+- 对质回应消息由服务器在发布时设置 `rebuttal_to_message_id` 指向被对质录音的来源 Message；模型候选中的任何 ID 字段不具权威性。
+- 对质候选必须引用具体可见 Claim：`support_claim_ids` 非空且全部属于该 Role 可见集合；泛化空引、未解锁或不可见引用按 `NEW_FACT_INTRODUCED` 终止（→ `ROLE_TURN_FAILED`），不属于语义重写机会。除此之外，对质回合的生成、Validator、批准与重写规则与普通角色回合完全一致（按角色 Fidelity）。
+- 对质回合与 `ask` / 开场共用同一 Session 排他锁与幂等键规则；公开事件为 `recording_presented`。
+
 同一 Session 的全部角色生成共享一个排他锁：没有活动 Ticket 时原子创建 Ticket、相关玩家消息/事件和锁；已有 `accepted` 或 `working` Ticket 时立即返回 `ROLE_TURN_BUSY`。不排队、不延迟执行。Ticket 终止后释放锁；lease 异常显式失败且不自动再次调用模型。
 
 ## 9. 候选、Validator 与批准信封
@@ -735,7 +750,7 @@ RevealResult 必须完整持久化后才公开。`truth_chain.order` 从 1 开�
 
 ### 10.1 正确性与评分
 
-- `evidence_score` 使用 Golden Case 冻结的加权 Evidence criteria：权重均为整数且总和恰为 100；选中的 Evidence 仅在类型允许、命中允许 Claim，且要求时来自指定 Role Quote 时获得该项权重。
+- `evidence_score` 使用 Golden Case 冻结的加权 Evidence criteria：权重均为整数且总和恰为 100；选中的 Evidence 仅在类型允许、命中允许 Claim，且要求时来自指定 Role Quote 时获得该项权重。Recording Evidence 按其 `type` 与推导后的 `public_claim_refs` 参与命中判定（见 6.1）。
 - `questioning_score` 固定为：成功审讯覆盖每个不同 Role 计 8 分、最多 40；同一 Role 首问后每次成功追问计 10 分、最多 30；成功审讯产生新 Evidence 每次计 10 分、最多 30。开场与录音投递不计入该分数。
 - 正确性、两项分数、truth chain 与 altered links 全部由服务器确定；Reveal 模型只产生带 Claim 引用的解释与 Reality Mapping 候选，候选校验失败时整个 Reveal 失败，不公开部分结果。
 

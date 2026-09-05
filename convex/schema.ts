@@ -156,6 +156,9 @@ export default defineSchema({
     unlocked_ids_json: v.optional(v.string()), // succeeded：新解锁 EvidenceId[]
     validation_json: v.optional(v.string()), // succeeded：Validator 结果摘要（Reveal 构建用）
     error_json: v.optional(v.string()), // failed：PublicError
+    // P1-1：kind=present_recording 时被对质录音的来源 Message（服务器权威，
+    // 回应消息的 rebuttal_to_message_id 由此设置）。
+    confront_message_id: v.optional(v.string()),
     // TB10：lease。accepted/working Ticket 持有 Session 排他锁直至终态或过期；
     // 过期锁在下一个写操作的事务中被显式判失败（TURN_LEASE_EXPIRED），
     // 不自动重新调用模型。缺省（旧数据/seed）视为未过期。
@@ -202,4 +205,20 @@ export default defineSchema({
     reveal_json: v.string(), // RevealResult，zod 校验后序列化
     created_at_ms: v.number(),
   }).index("by_session", ["session_id"]),
+
+  // P1-1：Recording Evidence（CONTRACTS 6.1 / 11 evidence.saveRecording）。
+  // 内容全部由服务器从已批准数据复制/推导；客户端不能提交标题、正文或 Claim。
+  // 解锁状态同时写入 session_evidence_unlocked（via_kind=recording_saved）。
+  recordings: defineTable({
+    session_id: v.string(),
+    evidence_id: v.string(), // 服务端生成（ev-rec- 前缀）
+    message_id: v.string(), // 来源 Approved Role Message
+    speaker_role_id: v.string(),
+    title: v.string(), // 服务器从角色公开名生成
+    body: v.string(), // = 来源消息 exact_text（逐字复制）
+    public_claim_refs_json: v.string(), // ClaimId[]：支持 Claim ∩ 已公开可见 Claim
+    created_at_ms: v.number(),
+  })
+    .index("by_session_message", ["session_id", "message_id"])
+    .index("by_session_evidence", ["session_id", "evidence_id"]),
 });
