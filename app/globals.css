@@ -1,19 +1,37 @@
 @import "tailwindcss";
 
-@theme inline {
-  --color-primary: #6366f1;
-  --color-primary-light: #818cf8;
-  --color-primary-dark: #4f46e5;
-  --color-danger: #ef4444;
-  --color-warning: #f59e0b;
-  --color-success: #10b981;
-  --color-accent: #a855f7;
-  --font-sans: 'PingFang SC', 'Microsoft YaHei', system-ui, -apple-system, sans-serif;
+/*
+ * 设计方向：「夜色侦探事务所」——深夜蓝房间 + 暖黄台灯 + 米纸档案。
+ * 卡片是桌游贴纸感：米纸底、墨线描边、硬偏移投影；动效曲线圆润。
+ */
+
+@theme {
+  --color-night: #191631;
+  --color-night-deep: #100e1e;
+  --color-night-soft: #232046;
+  --color-paper: #f7f1e3;
+  --color-paper-dim: #e9dfc8;
+  --color-ink: #2b2338;
+  --color-ink-soft: #5c5470;
+  --color-amber: #f2b04c;
+  --color-amber-deep: #d98f2b;
+  --color-coral: #e4685d;
+  --color-coral-deep: #c94f45;
+  --color-teal: #2ea79b;
+  --color-indigo-soft: #8f9bff;
+  --color-blush: #ffb4a8;
+
+  --font-sans: "PingFang SC", "Microsoft YaHei", "Hiragino Sans GB", system-ui, -apple-system, sans-serif;
+
+  --shadow-sticker: 4px 4px 0 0 rgba(26, 22, 38, 0.9);
+  --shadow-sticker-sm: 3px 3px 0 0 rgba(26, 22, 38, 0.85);
+  --shadow-glow-lamp: 0 0 24px rgba(242, 176, 76, 0.35);
+
+  --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 :root {
-  --background: #020617;
-  --foreground: #f1f5f9;
+  color-scheme: dark;
 }
 
 * {
@@ -23,89 +41,255 @@
 body {
   margin: 0;
   padding: 0;
-  background: linear-gradient(135deg, #020617 0%, #0f172a 50%, #1e1b4b 100%);
   min-height: 100vh;
-  color: #f1f5f9;
-  font-family: 'PingFang SC', 'Microsoft YaHei', system-ui, -apple-system, sans-serif;
+  background:
+    radial-gradient(1200px 500px at 50% -10%, rgba(242, 176, 76, 0.12), transparent 60%),
+    radial-gradient(900px 420px at 85% 110%, rgba(91, 91, 214, 0.14), transparent 65%),
+    linear-gradient(180deg, #191631 0%, #141126 55%, #100e1e 100%);
+  color: #f7f1e3;
+  font-family: var(--font-sans);
 }
 
-/* 滚动条样式 */
+::selection {
+  background: rgba(242, 176, 76, 0.45);
+  color: #191631;
+}
+
+/* ---------- 滚动条 ---------- */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 8px;
+  height: 8px;
 }
-
 ::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.04);
 }
-
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 3px;
+  background: rgba(242, 176, 76, 0.35);
+  border-radius: 8px;
 }
-
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.3);
+  background: rgba(242, 176, 76, 0.55);
 }
 
-/* 玻璃态效果 */
-.glass {
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+/* ---------- 桌游贴纸卡片 ---------- */
+.card {
+  background: var(--color-paper);
+  color: var(--color-ink);
+  border: 2px solid var(--color-ink);
+  border-radius: 1.1rem;
+  box-shadow: var(--shadow-sticker);
 }
 
-.glass-dark {
-  background: rgba(0, 0, 0, 0.3);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+.card-dark {
+  background: rgba(35, 32, 70, 0.72);
+  border: 1.5px solid rgba(247, 241, 227, 0.16);
+  border-radius: 1.1rem;
+  backdrop-filter: blur(10px);
 }
 
-/* 发光效果 */
-.glow-primary {
-  box-shadow: 0 0 20px rgba(99, 102, 241, 0.4);
+.card-amber {
+  background: linear-gradient(160deg, #ffd98a 0%, #f2b04c 100%);
+  color: var(--color-ink);
+  border: 2px solid var(--color-ink);
+  border-radius: 1.1rem;
+  box-shadow: var(--shadow-sticker);
 }
 
-.glow-danger {
-  box-shadow: 0 0 20px rgba(239, 68, 68, 0.4);
+/* ---------- 按钮 ---------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-weight: 800;
+  border-radius: 999px;
+  border: 2px solid var(--color-ink);
+  padding: 0.6rem 1.4rem;
+  cursor: pointer;
+  transition:
+    transform 0.16s var(--ease-bounce),
+    box-shadow 0.16s ease,
+    filter 0.16s ease;
+  user-select: none;
+}
+.btn:active {
+  transform: translateY(3px) scale(0.98);
+  box-shadow: 1px 1px 0 0 rgba(26, 22, 38, 0.9);
+}
+.btn:disabled {
+  cursor: not-allowed;
+  filter: grayscale(0.6) brightness(0.75);
+  transform: none;
 }
 
-.glow-success {
-  box-shadow: 0 0 20px rgba(16, 185, 129, 0.4);
+.btn-amber {
+  background: linear-gradient(160deg, #ffd98a, #f2b04c);
+  color: var(--color-ink);
+  box-shadow: var(--shadow-sticker);
+}
+.btn-amber:hover:not(:disabled) {
+  filter: brightness(1.06);
+  box-shadow: 5px 5px 0 0 rgba(26, 22, 38, 0.9);
 }
 
-/* 渐变文字 */
-.text-gradient {
-  background: linear-gradient(135deg, #6366f1, #a855f7);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+.btn-coral {
+  background: linear-gradient(160deg, #f08a7e, #e4685d);
+  color: #fff7ef;
+  box-shadow: var(--shadow-sticker);
+}
+.btn-coral:hover:not(:disabled) {
+  filter: brightness(1.06);
+  box-shadow: 5px 5px 0 0 rgba(26, 22, 38, 0.9);
 }
 
-/* 脉冲动画 */
-@keyframes pulse-glow {
-  0%, 100% {
-    box-shadow: 0 0 5px rgba(99, 102, 241, 0.5);
-  }
-  50% {
-    box-shadow: 0 0 20px rgba(99, 102, 241, 0.8);
-  }
+.btn-ghost {
+  background: rgba(247, 241, 227, 0.08);
+  color: var(--color-paper);
+  border-color: rgba(247, 241, 227, 0.35);
+}
+.btn-ghost:hover:not(:disabled) {
+  background: rgba(247, 241, 227, 0.16);
 }
 
-.animate-pulse-glow {
-  animation: pulse-glow 2s ease-in-out infinite;
+.btn-teal {
+  background: linear-gradient(160deg, #4fc3b6, #2ea79b);
+  color: #0d2c29;
+  box-shadow: var(--shadow-sticker);
+}
+.btn-teal:hover:not(:disabled) {
+  filter: brightness(1.06);
 }
 
-/* 浮动动画 */
-@keyframes float {
-  0%, 100% {
+/* ---------- 徽章 / 标签 ---------- */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  border-radius: 999px;
+  border: 1.5px solid var(--color-ink);
+  padding: 0.2rem 0.7rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  background: var(--color-paper);
+  color: var(--color-ink);
+}
+
+.chip-outline {
+  background: transparent;
+  color: var(--color-paper);
+  border-color: rgba(247, 241, 227, 0.4);
+}
+
+/* ---------- 纸张质感与分隔 ---------- */
+.paper-lines {
+  background-image: repeating-linear-gradient(
+    transparent,
+    transparent 26px,
+    rgba(43, 35, 56, 0.07) 27px
+  );
+}
+
+.tape {
+  position: absolute;
+  width: 74px;
+  height: 22px;
+  background: rgba(242, 176, 76, 0.75);
+  border-left: 2px dashed rgba(43, 35, 56, 0.25);
+  border-right: 2px dashed rgba(43, 35, 56, 0.25);
+  box-shadow: 0 2px 4px rgba(26, 22, 38, 0.25);
+}
+
+.dashed-divider {
+  border-top: 2px dashed rgba(43, 35, 56, 0.25);
+}
+
+/* ---------- 动画 ---------- */
+@keyframes float-y {
+  0%,
+  100% {
     transform: translateY(0);
   }
   50% {
-    transform: translateY(-10px);
+    transform: translateY(-8px);
+  }
+}
+.animate-float {
+  animation: float-y 3.2s ease-in-out infinite;
+}
+
+@keyframes lamp-flicker {
+  0%, 100% { opacity: 1; }
+  48% { opacity: 1; }
+  50% { opacity: 0.82; }
+  52% { opacity: 1; }
+  70% { opacity: 0.92; }
+  72% { opacity: 1; }
+}
+.animate-lamp {
+  animation: lamp-flicker 6s ease-in-out infinite;
+}
+
+@keyframes pop-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.8) translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+.animate-pop {
+  animation: pop-in 0.32s var(--ease-bounce) both;
+}
+
+@keyframes wiggle {
+  0%, 100% { transform: rotate(-1.6deg); }
+  50% { transform: rotate(1.6deg); }
+}
+.animate-wiggle {
+  animation: wiggle 2.4s ease-in-out infinite;
+  transform-origin: 50% 90%;
+}
+
+@keyframes caret-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+.typewriter-caret {
+  display: inline-block;
+  width: 2px;
+  height: 1em;
+  margin-left: 2px;
+  vertical-align: -0.12em;
+  background: currentColor;
+  animation: caret-blink 0.85s steps(1) infinite;
+}
+
+/* 打字机逐字浮现 */
+.type-char {
+  display: inline;
+  animation: char-in 0.18s ease-out both;
+}
+@keyframes char-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.2em);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
-.animate-float {
-  animation: float 3s ease-in-out infinite;
+@media (prefers-reduced-motion: reduce) {
+  .animate-float,
+  .animate-lamp,
+  .animate-wiggle,
+  .type-char {
+    animation: none;
+  }
+  .typewriter-caret {
+    animation: none;
+  }
 }

@@ -99,3 +99,4 @@ docs/handoffs/<ticket-or-stage-id>.md
 | developer-b 分支合并可行性研究 | complete | [2026-09-06-developer-b-merge-feasibility](./2026-09-06-developer-b-merge-feasibility.md) |
 | AI 供应商切换：智谱 GLM | complete | [2026-09-06-ai-provider-switch-glm](./2026-09-06-ai-provider-switch-glm.md) |
 | 2026-09-06 夜间开发中继 | complete | [2026-09-06-night-relay](./2026-09-06-night-relay.md) |
+| FE-B1 前端审美重制 + 真实数据重接 | complete | [2026-09-06-frontend-b-aesthetic-live-data](./2026-09-06-frontend-b-aesthetic-live-data.md) |

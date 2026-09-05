@@ -1,213 +1,249 @@
-'use client';
+"use client";
 
-import { useRef, useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { motion, AnimatePresence } from 'motion/react';
-import gsap from 'gsap';
-import { useGame } from '@/context/GameContext';
-import { mockRevealResult } from '@/mock/goldenCase';
-import { getRoleAvatar, getRoleName } from '@/lib/roleUtils';
-import type { DistortionType, RolePublic } from '@/contracts/types';
-
-const distortionTypeLabels: Record<DistortionType, { name: string; description: string }> = {
-  scope_expand: { name: '范围扩大', description: '将局部情况说成整体情况' },
-  degree_strengthen: { name: '程度加强', description: '将轻微影响说成严重后果' },
-  condition_delete: { name: '条件删除', description: '去掉前提条件，结论绝对化' },
-  causal_swap: { name: '因果倒置', description: '将原因和结果颠倒' },
-  time_montage: { name: '时间拼接', description: '将不同时间的事实拼成错误先后' },
-  source_splice: { name: '来源拼接', description: '拼接不同来源的信息形成新结论' },
-  context_omit: { name: '语境遗漏', description: '删除关键上下文，改变原意' },
-  subject_swap: { name: '主语替换', description: '偷换行为主体' },
-  concept_shift: { name: '概念偷换', description: '用相似但不同的概念替换' },
-  cherry_pick: { name: '选择性引用', description: '只引用有利部分，隐藏反例' },
-};
+import { useEffect, useRef } from "react";
+import Link from "next/link";
+import gsap from "gsap";
+import { useGame } from "@/context/GameContext";
+import Mascot from "@/components/ui/Mascot";
+import ErrorPanel from "@/components/ui/ErrorPanel";
+import { Icon } from "@/components/ui/Icons";
+import { personaForRole } from "@/components/three/characters/personas";
+import { DISTORTION_META } from "@/lib/distortions";
 
 export default function RevealPage() {
-  const router = useRouter();
-  const { casePublic, accusation, restart } = useGame();
-  const [revealStep, setRevealStep] = useState(0);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const originalRef = useRef<HTMLDivElement>(null);
-  const distortedRef = useRef<HTMLDivElement>(null);
-  const scoreRef = useRef<HTMLDivElement>(null);
+  const { casePublic, sessionView, reveal, actionError, phase, backToLobby } = useGame();
+  const rootRef = useRef<HTMLDivElement>(null);
+  const scoreEvidenceRef = useRef<HTMLSpanElement>(null);
+  const scoreQuestioningRef = useRef<HTMLSpanElement>(null);
 
-  const baseResult = mockRevealResult;
-  const isCorrect = accusation?.accused_role_id === baseResult.distorted_role_id;
-  const result = { ...baseResult, is_correct: isCorrect };
-  const distortedRole = casePublic?.roles.find((r: RolePublic) => r.role_id === result.distorted_role_id);
-  const accusedRole = casePublic?.roles.find((r: RolePublic) => r.role_id === accusation?.accused_role_id);
-
+  // 入场演出时间轴：标题 → 真相卡 → 对照卡 → 真相链 → 分数滚动。
   useEffect(() => {
-    if (!containerRef.current) return;
+    if (!reveal || !rootRef.current) return;
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduced) return;
 
     const ctx = gsap.context(() => {
-      const tl = gsap.timeline();
+      const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
+      tl.from(".rv-hero", { opacity: 0, y: -30, duration: 0.55 })
+        .from(".rv-culprit", { scale: 0.6, opacity: 0, rotate: -6, duration: 0.6, ease: "back.out(1.8)" })
+        .from(".rv-badges > *", { opacity: 0, y: 14, stagger: 0.07, duration: 0.35 })
+        .from(".rv-link", { opacity: 0, x: -36, stagger: 0.16, duration: 0.45 })
+        .from(".rv-chain > *", { opacity: 0, y: 18, stagger: 0.1, duration: 0.35 })
+        .from(".rv-note", { opacity: 0, y: 18, duration: 0.4 });
 
-      tl.from('.reveal-title', { opacity: 0, y: -30, duration: 0.6, onComplete: () => setRevealStep(1) })
-        .from('.reveal-avatar', { scale: 0, rotation: -180, duration: 0.8, ease: 'back.out(1.7)', onComplete: () => setRevealStep(2) })
-        .from('.reveal-distortion', { opacity: 0, x: -50, duration: 0.5, onComplete: () => setRevealStep(3) })
-        .from('.reveal-compare', { opacity: 0, y: 30, duration: 0.6, stagger: 0.3, onComplete: () => setRevealStep(4) })
-        .from('.reveal-analysis', { opacity: 0, y: 20, duration: 0.5, onComplete: () => setRevealStep(5) })
-        .from('.reveal-mapping', { opacity: 0, x: -30, duration: 0.4, stagger: 0.2 })
-        .from('.reveal-score', { opacity: 0, scale: 0.5, duration: 0.6, ease: 'back.out(2)' })
-        .from('.reveal-actions', { opacity: 0, y: 20, duration: 0.4 });
-
-      if (originalRef.current && distortedRef.current) {
-        tl.to(originalRef.current, { borderColor: '#10b981', boxShadow: '0 0 20px rgba(16,185,129,0.3)', duration: 0.5 }, '-=0.3')
-          .to(distortedRef.current, { borderColor: '#ef4444', boxShadow: '0 0 20px rgba(239,68,68,0.3)', duration: 0.5 }, '<');
+      const counters: Array<[HTMLSpanElement | null, number]> = [
+        [scoreEvidenceRef.current, reveal.evidence_score],
+        [scoreQuestioningRef.current, reveal.questioning_score],
+      ];
+      for (const [el, value] of counters) {
+        if (!el) continue;
+        const obj = { v: 0 };
+        tl.to(
+          obj,
+          {
+            v: value,
+            duration: 1.3,
+            ease: "power2.out",
+            onUpdate: () => {
+              el.textContent = String(Math.round(obj.v));
+            },
+          },
+          "-=0.4",
+        );
       }
-
-      if (scoreRef.current) {
-        tl.to(scoreRef.current, { textContent: result.score.total, duration: 1.5, ease: 'power2.out', snap: { textContent: 1 } }, '<');
-      }
-    }, containerRef);
-
+      tl.from(".rv-score", { opacity: 0, scale: 0.7, duration: 0.5, ease: "back.out(1.6)" }, "<");
+    }, rootRef);
     return () => ctx.revert();
-  }, []);
+  }, [reveal]);
 
-  const handleRestart = () => {
-    restart();
-    router.push('/');
-  };
-
-  if (!casePublic || !distortedRole) {
+  if (phase !== "revealed") {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="text-5xl mb-4 animate-bounce">🔍</div>
-          <p className="text-slate-400">正在加载揭晓结果...</p>
-          <button onClick={() => router.push('/')} className="mt-4 text-sm text-indigo-400 hover:underline">
-            返回首页
-          </button>
-        </div>
+      <div className="flex min-h-[70vh] flex-col items-center justify-center gap-4">
+        <Mascot motion="sleep" size={110} caption="判决还没有揭晓。" />
+        <Link href="/game/interrogation" className="btn btn-ghost text-sm">回到审讯桌</Link>
       </div>
     );
   }
 
+  if (!casePublic) {
+    return (
+      <div className="flex min-h-[70vh] flex-col items-center justify-center gap-4">
+        <Mascot motion="computer" size={110} caption="正在调取判决书…" />
+      </div>
+    );
+  }
+
+  if (actionError && !reveal) {
+    return (
+      <div className="flex min-h-[70vh] flex-col items-center justify-center gap-4">
+        <ErrorPanel error={actionError} />
+        <Link href="/game/interrogation" className="btn btn-ghost text-sm">回到审讯桌</Link>
+      </div>
+    );
+  }
+
+  if (!reveal) {
+    return (
+      <div className="flex min-h-[70vh] flex-col items-center justify-center gap-4">
+        <Mascot motion="sway" size={120} caption="合议庭正在宣读判决…" />
+      </div>
+    );
+  }
+
+  const culprit = casePublic.roles.find((r) => r.role_id === reveal.correct_role_id);
+  const accused = sessionView?.submitted_accusation
+    ? casePublic.roles.find((r) => r.role_id === sessionView.submitted_accusation?.suspect_role_id)
+    : null;
+  const correct = reveal.player_correct;
+
   return (
-    <div ref={containerRef} className="min-h-screen p-8 max-w-4xl mx-auto">
-      <div className="text-center mb-8">
-        <div className="reveal-title inline-block px-6 py-2 rounded-full text-sm font-bold mb-4 bg-gradient-to-r from-indigo-500/20 to-purple-500/20 text-indigo-400">
-          真相揭晓
-        </div>
-        <h1 className="reveal-title text-4xl font-bold text-white mb-2 text-gradient">
-          {result.is_correct ? '🎉 指控正确！' : '😔 指控错误'}
+    <div ref={rootRef} className="mx-auto max-w-4xl px-6 py-8">
+      {/* 判决时刻 */}
+      <div className="rv-hero text-center">
+        <p className="text-[10px] font-black uppercase tracking-[0.35em] text-paper/50">The Reveal</p>
+        <h1 className={`mt-2 text-5xl font-black ${correct ? "text-amber" : "text-coral"}`}>
+          {correct ? "指控成立！" : "指控未成立"}
         </h1>
+        <p className="mt-2 text-sm font-bold text-paper/60">
+          {accused ? `你指控了 ${accused.display_name.split(" · ")[0]} · ` : ""}
+          真正的篡改者是——
+        </p>
       </div>
 
-      <div className="reveal-avatar text-center mb-8">
-        <div className="text-7xl mb-4 animate-float">{getRoleAvatar(distortedRole)}</div>
-        <h2 className="text-2xl font-bold text-white mb-2">
-          篡改者是 <span className="text-red-400">{getRoleName(distortedRole)}</span>
-        </h2>
-        <p className="text-slate-400 mb-4">{distortedRole.public_bio}</p>
+      {/* 真凶卡 */}
+      {culprit && (
+        <div className="rv-culprit card mx-auto mt-5 max-w-lg px-7 py-6 text-center">
+          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full border-4 border-ink text-2xl font-black text-paper" style={{ background: personaForRole(culprit).outfit }}>
+            {culprit.display_name.slice(0, 1)}
+          </div>
+          <h2 className="mt-3 text-2xl font-black text-ink">{culprit.display_name}</h2>
+          <p className="mt-1 text-xs font-bold text-ink/60">{culprit.public_bio}</p>
+          <div className="rv-badges mt-4 flex flex-wrap justify-center gap-2">
+            {reveal.distortion_types.map((dt) => (
+              <span key={dt} className="chip !border-coral-deep !bg-coral/15 !text-coral-deep">
+                <Icon name="mask" size={12} />
+                {DISTORTION_META[dt]?.name ?? dt}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
 
-        {accusation && accusedRole && (
-          <p className="text-sm text-slate-500">
-            你指控的是：{getRoleName(accusedRole)}
-            {result.is_correct ? ' ✓ 正确' : ' ✗ 错误'}
-          </p>
+      {/* 正误氛围 */}
+      <div className="mt-4 flex justify-center">
+        {correct ? (
+          <Mascot motion="dribble" size={110} caption="证据链把真相钉死了。" />
+        ) : (
+          <Mascot motion="idle" size={110} caption="真相和你想的不一样，看看下面。" />
         )}
       </div>
 
-      <div className="reveal-distortion text-center mb-8">
-        <div className="flex flex-wrap justify-center gap-2">
-          {result.distortion_types.map((dt) => {
-            const info = distortionTypeLabels[dt];
-            return (
-              <span key={dt} className="px-4 py-2 rounded-full bg-red-500/20 text-red-400 text-sm border border-red-500/30">
-                {info.name} — {info.description}
-              </span>
-            );
-          })}
-        </div>
-      </div>
-
-      <div className="grid grid-cols-2 gap-6 mb-8">
-        <div ref={originalRef} className="reveal-compare glass rounded-xl p-6 border-2 border-white/10">
-          <div className="flex items-center gap-2 mb-3">
-            <span className="text-xl">✅</span>
-            <h3 className="font-bold text-green-400">原文事实</h3>
-          </div>
-          <p className="text-slate-300 leading-relaxed">{result.original_text}</p>
-        </div>
-        <div ref={distortedRef} className="reveal-compare glass rounded-xl p-6 border-2 border-white/10">
-          <div className="flex items-center gap-2 mb-3">
-            <span className="text-xl">⚠️</span>
-            <h3 className="font-bold text-red-400">被篡改后</h3>
-          </div>
-          <p className="text-slate-300 leading-relaxed">{result.distorted_text}</p>
-        </div>
-      </div>
-
-      <div className="reveal-analysis glass rounded-2xl p-6 mb-6">
-        <h3 className="font-bold text-white mb-4 flex items-center gap-2">
-          <span>🔍</span> 篡改分析
-        </h3>
-        <div className="bg-indigo-500/10 border border-indigo-500/20 rounded-xl p-4 mb-4 space-y-2">
-          {result.distortion_types.map((dt) => {
-            const info = distortionTypeLabels[dt];
-            return (
-              <div key={dt}>
-                <span className="text-indigo-400 font-bold">{info.name}</span>
-                <span className="text-xs text-slate-400 ml-2">— {info.description}</span>
+      {/* 被改变的关系 */}
+      {reveal.altered_links.length > 0 && (
+        <section className="mt-8">
+          <h3 className="mb-3 flex items-center gap-2 text-sm font-black text-paper">
+            <Icon name="bolt" size={16} className="text-coral" filled />
+            被改变的关系
+          </h3>
+          <div className="space-y-3">
+            {reveal.altered_links.map((link, i) => (
+              <div key={i} className="rv-link grid gap-2 md:grid-cols-[1fr_auto_1fr]">
+                <div className="rounded-2xl border-2 border-teal bg-teal/10 px-4 py-3">
+                  <p className="mb-1 text-[10px] font-black uppercase tracking-widest text-teal">原文事实</p>
+                  <p className="text-sm leading-relaxed text-paper/90">{link.original}</p>
+                </div>
+                <div className="flex items-center justify-center">
+                  <span className="chip !border-coral !bg-coral/20 !text-coral">
+                    <Icon name="next" size={12} />
+                    {DISTORTION_META[link.distortion_type]?.name ?? link.distortion_type}
+                  </span>
+                </div>
+                <div className="rounded-2xl border-2 border-coral bg-coral/10 px-4 py-3">
+                  <p className="mb-1 text-[10px] font-black uppercase tracking-widest text-coral">被篡改后</p>
+                  <p className="text-sm leading-relaxed text-paper/90">{link.distorted}</p>
+                </div>
               </div>
-            );
-          })}
-        </div>
-        <p className="text-slate-300 leading-relaxed text-sm">{result.explanation}</p>
-      </div>
+            ))}
+          </div>
+        </section>
+      )}
 
-      <div className="reveal-mapping glass rounded-2xl p-6 mb-8">
-        <h3 className="font-bold text-white mb-4 flex items-center gap-2">
-          <span>🌍</span> 现实映射 — 这个技能在现实中怎么用
+      {/* 真相链 */}
+      <section className="card-dark mt-8 p-5">
+        <h3 className="mb-4 flex items-center gap-2 text-sm font-black text-paper">
+          <Icon name="link" size={16} className="text-amber" />
+          完整真相链
         </h3>
-        <div className="space-y-3">
-          {result.reality_mapping.map((mapping, i) => (
-            <div key={i} className="reveal-mapping flex items-start gap-3 p-3 glass-dark rounded-lg">
-              <span className="text-lg flex-shrink-0">
-                {['🔄', '⚠️', '🤖'][i] || '💡'}
+        <div className="rv-chain space-y-0">
+          {reveal.truth_chain.map((step, i) => (
+            <div key={step.claim_id} className="relative flex gap-3 pb-4 last:pb-0">
+              {i < reveal.truth_chain.length - 1 && (
+                <span className="absolute left-[13px] top-7 h-full w-0.5 bg-amber/40" />
+              )}
+              <span className="z-[1] flex h-7 w-7 shrink-0 items-center justify-center rounded-full border-2 border-ink bg-amber text-xs font-black text-ink">
+                {step.order}
               </span>
-              <p className="text-slate-300 text-sm">{mapping}</p>
+              <p className="pt-1 text-sm leading-relaxed text-paper/85">{step.label}</p>
             </div>
           ))}
         </div>
-      </div>
+      </section>
 
-      <div className="reveal-score glass rounded-2xl p-6 mb-8 text-center">
-        <h3 className="font-bold text-white mb-4">本局得分</h3>
-        <div ref={scoreRef} className="text-6xl font-bold text-gradient mb-4">
-          0
-        </div>
-        <div className="grid grid-cols-3 gap-4 text-sm">
-          <div className="glass-dark rounded-lg p-3">
-            <div className="text-slate-400">证据质量</div>
-            <div className="text-2xl font-bold text-green-400">{result.score.evidence_score}</div>
-          </div>
-          <div className="glass-dark rounded-lg p-3">
-            <div className="text-slate-400">审讯质量</div>
-            <div className="text-2xl font-bold text-blue-400">{result.score.questioning_score}</div>
-          </div>
-          <div className="glass-dark rounded-lg p-3">
-            <div className="text-slate-400">总分</div>
-            <div className="text-2xl font-bold text-purple-400">{result.score.total}</div>
-          </div>
-        </div>
-      </div>
+      {/* 判词与现实映射 */}
+      <section className="card mt-8 px-7 py-6">
+        <h3 className="flex items-center gap-2 text-sm font-black text-ink">
+          <Icon name="scale" size={16} />
+          合议庭判词
+        </h3>
+        <p className="rv-note mt-3 text-sm leading-relaxed text-ink/80">{reveal.explanation}</p>
+        {reveal.reality_mapping.length > 0 && (
+          <>
+            <div className="dashed-divider my-4" />
+            <h4 className="text-xs font-black uppercase tracking-widest text-coral-deep">
+              现实映射 · 这套手法在信息流里长什么样
+            </h4>
+            <ul className="mt-2 space-y-2">
+              {reveal.reality_mapping.map((m, i) => (
+                <li key={i} className="flex gap-2 text-sm leading-relaxed text-ink/75">
+                  <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-amber-deep" />
+                  {m}
+                </li>
+              ))}
+            </ul>
+          </>
+        )}
+      </section>
 
-      <div className="reveal-actions flex justify-center gap-4">
-        <button
-          onClick={handleRestart}
-          className="px-8 py-3 glass rounded-full text-white hover:bg-white/10 transition-colors"
-        >
-          🔄 再来一局
+      {/* 双维评分 */}
+      <section className="rv-score card-dark mt-8 grid grid-cols-2 gap-4 p-6">
+        <div className="text-center">
+          <p className="text-xs font-black uppercase tracking-widest text-teal">Evidence Score</p>
+          <p className="mt-1 text-5xl font-black text-teal">
+            <span ref={scoreEvidenceRef}>{reveal.evidence_score}</span>
+            <span className="text-lg text-paper/40"> / 100</span>
+          </p>
+          <p className="mt-1 text-[11px] font-bold text-paper/50">证据质量：命中真相链的程度</p>
+        </div>
+        <div className="text-center">
+          <p className="text-xs font-black uppercase tracking-widest text-indigo-soft">Questioning Score</p>
+          <p className="mt-1 text-5xl font-black text-indigo-soft">
+            <span ref={scoreQuestioningRef}>{reveal.questioning_score}</span>
+            <span className="text-lg text-paper/40"> / 100</span>
+          </p>
+          <p className="mt-1 text-[11px] font-bold text-paper/50">审讯质量：覆盖角色与追问深度</p>
+        </div>
+      </section>
+
+      {/* 行动 */}
+      <div className="mt-8 flex justify-center gap-3 pb-10">
+        <button onClick={backToLobby} className="btn btn-amber px-8">
+          <Icon name="refresh" size={16} />
+          再来一局
         </button>
-        <button
-          onClick={() => router.push('/')}
-          className="px-8 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-full hover:from-indigo-500 hover:to-purple-500 transition-all glow-primary"
-        >
-          🏠 返回首页
-        </button>
+        <Link href="/" className="btn btn-ghost px-8">
+          <Icon name="home" size={16} />
+          回到事务所
+        </Link>
       </div>
     </div>
   );

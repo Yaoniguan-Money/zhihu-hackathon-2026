@@ -1,320 +1,449 @@
-'use client';
+"use client";
 
-import { useState, useEffect, useCallback, useRef } from 'react';
-import dynamic from 'next/dynamic';
-import { useRouter } from 'next/navigation';
-import { useGame } from '@/context/GameContext';
-import PressureBar from '@/components/PressureBar';
-import DialogueList from '@/components/DialogueList';
-import RecordButton from '@/components/RecordButton';
-import { mockReplies } from '@/mock/goldenCase';
-import { getRoleAvatar, getRoleName } from '@/lib/roleUtils';
-import type { RolePublic, DialogueTurn } from '@/contracts/types';
+import { useEffect, useMemo, useRef, useState } from "react";
+import dynamic from "next/dynamic";
+import Link from "next/link";
+import { AnimatePresence, motion } from "motion/react";
+import { useGame } from "@/context/GameContext";
+import DialogueList from "@/components/DialogueList";
+import RecordButton from "@/components/ui/RecordButton";
+import Typewriter from "@/components/ui/Typewriter";
+import ErrorPanel from "@/components/ui/ErrorPanel";
+import Mascot from "@/components/ui/Mascot";
+import { Icon } from "@/components/ui/Icons";
+import { personaForRole } from "@/components/three/characters/personas";
+import { EMOTION_META } from "@/lib/distortions";
+import type { MessagePublic, QuestionMode, RoleEmotion } from "@/contracts/public";
 
-const RoundTable = dynamic(
-  () => import('@/components/three/RoundTable'),
-  { ssr: false, loading: () => <div className="w-full h-full flex items-center justify-center text-slate-400">加载3D场景中...</div> }
-);
+const InterrogationStage = dynamic(() => import("@/components/three/InterrogationStage"), {
+  ssr: false,
+  loading: () => (
+    <div className="flex h-full items-center justify-center">
+      <Mascot motion="computer" size={110} caption="正在点亮审讯室…" />
+    </div>
+  ),
+});
 
-let replyIndex = 0;
+const EMOTION_PRESSURE: Record<RoleEmotion, number> = {
+  calm: 22,
+  uneasy: 48,
+  defensive: 68,
+  agitated: 88,
+};
+
+const MODES: Array<{ id: QuestionMode; label: string; desc: string }> = [
+  { id: "gentle", label: "温和", desc: "婉转询问" },
+  { id: "direct", label: "直接", desc: "单刀直入" },
+  { id: "pressure", label: "施压", desc: "步步紧逼" },
+];
 
 export default function InterrogationPage() {
-  const router = useRouter();
-  const { casePublic, gameConfig, dialogues, addDialogue, currentRound, nextRound, unlockEvidenceByRole } = useGame();
-  const [inputText, setInputText] = useState('');
+  const game = useGame();
+  const {
+    casePublic,
+    sessionView,
+    messages,
+    thinking,
+    busyTurn,
+    allowedActions,
+    phase,
+    ask,
+    actionError,
+    clearActionError,
+  } = game;
+
   const [selectedRoleId, setSelectedRoleId] = useState<string | null>(null);
-  const [timeLeft, setTimeLeft] = useState(90);
-  const [isRecording, setIsRecording] = useState(false);
-  const [isThinking, setIsThinking] = useState(false);
-  const [showTimeUp, setShowTimeUp] = useState(false);
-  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const [mode, setMode] = useState<QuestionMode>("direct");
+  const [input, setInput] = useState("");
+  const [speakingMessageId, setSpeakingMessageId] = useState<string | null>(null);
+  const [voiceError, setVoiceError] = useState<{ code: string; message: string } | null>(null);
+  const speakTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  const roleMessages = useMemo(() => messages.filter((m) => m.speaker_type === "role"), [messages]);
+  const latestRole = roleMessages[roleMessages.length - 1] as
+    | Extract<MessagePublic, { speaker_type: "role" }>
+    | undefined;
+
+  const openings = roleMessages.slice(0, 5);
+  const inOpening = phase === "opening_statements";
+
+  // 最新角色消息 → 打字机口型同步；超时兜底关闭。
   useEffect(() => {
-    setTimeLeft(gameConfig.interrogation_time_limit);
-    timerRef.current = setInterval(() => {
-      setTimeLeft((prev) => {
-        if (prev <= 1) {
-          setShowTimeUp(true);
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
+    if (!latestRole) return;
+    if (speakTimer.current) clearTimeout(speakTimer.current);
+    setSpeakingMessageId(latestRole.message_id);
+    const cap = Math.min(Math.max(latestRole.exact_text.length * 140, 3500), 20000);
+    speakTimer.current = setTimeout(() => setSpeakingMessageId(null), cap);
     return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
+      if (speakTimer.current) clearTimeout(speakTimer.current);
     };
-  }, [gameConfig.interrogation_time_limit]);
+  }, [latestRole?.message_id]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const handleSend = useCallback(() => {
-    if (!inputText.trim() || !casePublic) return;
-
-    const playerTurn: DialogueTurn = {
-      turn_id: `t-player-${Date.now()}`,
-      role_id: 'player',
-      content: inputText,
-      timestamp: Date.now(),
-      pressure_level: 0,
-      is_interrupted: false,
-    };
-
-    addDialogue(playerTurn);
-    setInputText('');
-    setIsThinking(true);
-
-    setTimeout(() => {
-      const reply = selectedRoleId
-        ? mockReplies.find((r) => r.roleId === selectedRoleId) || mockReplies[replyIndex % mockReplies.length]
-        : mockReplies[replyIndex % mockReplies.length];
-      replyIndex++;
-      const roleTurn: DialogueTurn = {
-        turn_id: `t-${Date.now()}`,
-        role_id: reply.roleId,
-        content: reply.content,
-        timestamp: Date.now(),
-        pressure_level: reply.pressure,
-        is_interrupted: false,
-        metadata: {
-          related_claim_ids: reply.claims,
-        },
-      };
-      addDialogue(roleTurn);
-      unlockEvidenceByRole(reply.roleId);
-      setIsThinking(false);
-    }, 1500);
-  }, [inputText, casePublic, addDialogue, selectedRoleId, unlockEvidenceByRole]);
-
-  const handleRoleClick = (roleId: string) => {
-    setSelectedRoleId(roleId);
-  };
-
-  const handleNextRound = () => {
-    setShowTimeUp(false);
-    nextRound();
-    setTimeLeft(gameConfig.interrogation_time_limit);
-  };
-
-  if (!casePublic) {
+  if (!casePublic || !sessionView) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="text-5xl mb-4 animate-bounce">🔍</div>
-          <p className="text-slate-400">正在加载...</p>
-          <button onClick={() => router.push('/')} className="mt-4 text-sm text-indigo-400 hover:underline">
-            返回首页
-          </button>
-        </div>
+      <div className="flex min-h-[70vh] flex-col items-center justify-center gap-4">
+        <Mascot motion="computer" size={110} caption="正在进入审讯室…" />
+        <Link href="/" className="btn btn-ghost text-sm">
+          <Icon name="back" size={14} /> 返回大厅
+        </Link>
       </div>
     );
   }
 
-  const selectedRole = casePublic.roles.find((r: RolePublic) => r.role_id === selectedRoleId);
-  const maxRounds = gameConfig.max_rounds;
+  const roles = casePublic.roles;
+  const latestByRole = new Map<string, Extract<MessagePublic, { speaker_type: "role" }>>();
+  for (const m of roleMessages) {
+    if (m.speaker_type === "role") latestByRole.set(m.speaker_id, m);
+  }
+
+  const emotionOf = (roleId: string): RoleEmotion => latestByRole.get(roleId)?.emotion ?? "calm";
+  const selectedRole = roles.find((r) => r.role_id === selectedRoleId) ?? null;
+
+  const send = () => {
+    const text = input.trim();
+    if (!text || !selectedRoleId || busyTurn) return;
+    ask(selectedRoleId, mode, text, "keyboard");
+    setInput("");
+  };
+
+  const canAsk = allowedActions.has("ask") && Boolean(selectedRoleId) && !busyTurn;
 
   return (
-    <div className="h-[calc(100vh-57px)] flex flex-col">
-      {/* 主区域：3D桌 + 对话面板 */}
-      <div className="flex-1 flex">
-        {/* 左侧：3D审讯桌 */}
-        <div className="flex-1 relative">
-          <RoundTable
-            roles={casePublic.roles}
-            dialogues={dialogues}
-            onRoleClick={handleRoleClick}
-          />
+    <div className="relative h-[calc(100vh-49px)] overflow-hidden">
+      {/* 3D 舞台 */}
+      <InterrogationStage
+        className="!absolute inset-0"
+        roles={roles.map((role) => {
+          const latest = latestByRole.get(role.role_id);
+          return {
+            role,
+            emotion: emotionOf(role.role_id),
+            stance: latest?.stance ?? "answer",
+            speaking: speakingMessageId !== null && latest?.message_id === speakingMessageId,
+            pressure: EMOTION_PRESSURE[emotionOf(role.role_id)],
+            gestureSeed: latest?.message_id,
+            selected: selectedRoleId === role.role_id,
+            onClick: () => setSelectedRoleId(role.role_id),
+          };
+        })}
+        focusRoleId={selectedRoleId ?? thinking?.roleId ?? null}
+        bubble={
+          thinking
+            ? {
+                roleId: thinking.roleId,
+                name: roles.find((r) => r.role_id === thinking.roleId)?.display_name ?? "",
+                color: personaForRole(roles.find((r) => r.role_id === thinking.roleId)!).outfit,
+                text: "让我想想…",
+                key: `thinking-${thinking.requestId}`,
+                thinking: true,
+              }
+            : latestRole && speakingMessageId === latestRole.message_id
+              ? {
+                  roleId: latestRole.speaker_id,
+                  name: roles.find((r) => r.role_id === latestRole.speaker_id)?.display_name ?? "",
+                  color: personaForRole(roles.find((r) => r.role_id === latestRole.speaker_id)!).outfit,
+                  text: latestRole.exact_text.slice(0, 60),
+                  key: latestRole.message_id,
+                }
+              : null
+        }
+      />
 
-          {/* 顶部信息条 */}
-          <div className="absolute top-4 left-4 right-4 flex justify-between items-center">
-            <div className="glass rounded-full px-4 py-2 text-sm">
-              <span className="text-slate-400">第 </span>
-              <span className="text-white font-bold">{currentRound}</span>
-              <span className="text-slate-400"> / {maxRounds} 轮</span>
-            </div>
-            <div className="glass rounded-full px-4 py-2 text-sm">
-              <span className="text-slate-400">剩余 </span>
-              <span className={`font-bold ${timeLeft < 30 ? 'text-red-400' : 'text-white'}`}>
-                {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}
-              </span>
-            </div>
-          </div>
-
-          {/* 操作提示 */}
-          {dialogues.length <= 5 && !selectedRoleId && !isThinking && (
-            <div className="absolute top-16 left-1/2 -translate-x-1/2 glass rounded-xl px-4 py-2 text-sm text-slate-300 animate-pulse">
-              👆 点击角色头像选择审讯对象，在底部输入框提问
-            </div>
-          )}
-
-          {/* 被选中角色信息 */}
+      {/* 顶部信息 */}
+      <div className="pointer-events-none absolute left-4 right-4 top-4 z-10 flex items-start justify-between gap-3">
+        <div className="card-dark pointer-events-auto flex items-center gap-2 px-4 py-2">
+          <Icon name="scale" size={16} className="text-amber" />
+          <span className="text-xs font-black text-paper">
+            {casePublic.title.slice(0, 18)}…
+          </span>
+        </div>
+        <AnimatePresence>
           {selectedRole && (
-            <div className="absolute top-16 left-4 glass rounded-xl p-3 max-w-xs">
-              <div className="flex items-center gap-3">
-                <span className="text-3xl">{getRoleAvatar(selectedRole)}</span>
-                <div>
-                  <div className="font-bold text-white">{getRoleName(selectedRole)}</div>
-                  <div className="text-xs text-slate-400">{selectedRole.public_bio}</div>
-                </div>
+            <motion.div
+              initial={{ opacity: 0, y: -14 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -14 }}
+              className="card pointer-events-auto max-w-[280px] px-4 py-3"
+            >
+              <div className="flex items-center gap-2">
+                <span
+                  className="h-3.5 w-3.5 rounded-full border-2 border-ink"
+                  style={{ background: personaForRole(selectedRole).outfit }}
+                />
+                <p className="text-sm font-black text-ink">{selectedRole.display_name}</p>
+                <span className="ml-auto text-[10px] font-black text-ink/50">{selectedRole.public_bio.slice(0, 14)}</span>
               </div>
-              <div className="mt-2">
-                <PressureBar
-                  value={dialogues.find((d: DialogueTurn) => d.role_id === selectedRoleId)?.pressure_level || 30}
-                  label="当前压力"
+              <div className="mt-2 h-2 overflow-hidden rounded-full border border-ink/30 bg-paper-dim">
+                <motion.div
+                  className="h-full rounded-full"
+                  animate={{
+                    width: `${EMOTION_PRESSURE[emotionOf(selectedRole.role_id)]}%`,
+                    background:
+                      EMOTION_META[emotionOf(selectedRole.role_id)].color,
+                  }}
+                  transition={{ type: "spring", stiffness: 120, damping: 18 }}
                 />
               </div>
-            </div>
+              <p className="mt-1 text-[10px] font-bold text-ink/50">当前情绪：{EMOTION_META[emotionOf(selectedRole.role_id)].label}</p>
+            </motion.div>
           )}
+        </AnimatePresence>
+      </div>
 
-          {/* AI 思考中提示 */}
-          {isThinking && (
-            <div className="absolute bottom-32 left-1/2 -translate-x-1/2 glass rounded-full px-4 py-2 text-sm text-slate-300 animate-pulse">
-              角色正在思考...
-            </div>
-          )}
-
-          {/* 时间到弹窗 */}
-          {showTimeUp && (
-            <div className="absolute inset-0 bg-black/60 flex items-center justify-center z-50">
-              <div className="glass rounded-2xl p-8 text-center max-w-sm">
-                <div className="text-5xl mb-4">⏰</div>
-                <h3 className="text-xl font-bold text-white mb-2">时间到！</h3>
-                <p className="text-slate-400 mb-6 text-sm">
-                  {currentRound < maxRounds
-                    ? `本轮审讯结束，进入第 ${currentRound + 1} 轮`
-                    : '所有轮次结束，请提交指控'}
-                </p>
-                <div className="flex gap-3 justify-center">
-                  {currentRound < maxRounds && (
-                    <button
-                      onClick={handleNextRound}
-                      className="px-6 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-full hover:from-indigo-500 hover:to-purple-500 transition-all"
-                    >
-                      进入下一轮 →
-                    </button>
-                  )}
-                  <button
-                    onClick={() => router.push('/game/accusation')}
-                    className="px-6 py-2 bg-gradient-to-r from-red-600 to-orange-600 text-white rounded-full hover:from-red-500 hover:to-orange-500 transition-all"
-                  >
-                    ⚡ 提交指控
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
+      {/* 右侧对话面板 */}
+      <div className="absolute bottom-[150px] right-4 top-[70px] z-10 w-[350px] max-w-[86vw] overflow-hidden rounded-2xl border-2 border-paper/10 bg-night-deep/75 backdrop-blur-md">
+        <div className="flex items-center gap-2 border-b border-paper/10 px-4 py-2.5">
+          <Icon name="eye" size={15} className="text-amber" />
+          <span className="text-sm font-black text-paper">审讯记录</span>
+          <span className="ml-auto chip !border-paper/30 !bg-transparent !text-[10px] !text-paper/60">
+            {messages.length} 条
+          </span>
         </div>
-
-        {/* 右侧：对话列表面板 */}
-        <div className="w-80 border-l border-white/5 glass-dark flex flex-col">
-          <div className="px-4 py-3 border-b border-white/5">
-            <h3 className="font-bold text-white text-sm">对话记录</h3>
-            <p className="text-xs text-slate-500 mt-0.5">
-              共 {dialogues.length} 条 · 点击右侧证据板对比矛盾
-            </p>
-          </div>
-          <div className="flex-1 overflow-hidden">
-            <DialogueList dialogues={dialogues} roles={casePublic.roles} />
-          </div>
+        <div className="h-[calc(100%-42px)]">
+          <DialogueList
+            messages={messages}
+            roles={roles}
+            speakingMessageId={inOpening ? null : speakingMessageId}
+            onSpeakDone={() => setSpeakingMessageId(null)}
+          />
         </div>
       </div>
 
-      {/* 底部操作栏 */}
-      <div className="glass-dark border-t border-white/5 p-4">
-        <div className="max-w-4xl mx-auto space-y-3">
-          {/* 压力条 */}
-          <div className="grid grid-cols-5 gap-2">
-            {casePublic.roles.map((role: RolePublic) => {
-              const pressure = dialogues.find((d: DialogueTurn) => d.role_id === role.role_id)?.pressure_level || 20;
-              return (
-                <div
-                  key={role.role_id}
-                  onClick={() => handleRoleClick(role.role_id)}
-                  className={`glass rounded-lg p-2 cursor-pointer transition-all ${
-                    selectedRoleId === role.role_id
-                      ? 'border-indigo-500'
-                      : 'hover:border-white/20'
+      {/* 底部输入区 */}
+      {phase === "investigation" && (
+        <div className="absolute bottom-4 left-4 right-4 z-10">
+          <div className="mx-auto max-w-3xl rounded-2xl border-2 border-paper/15 bg-night-deep/85 p-3 backdrop-blur-md">
+            {/* 角色选择 + 问法 */}
+            <div className="mb-2.5 flex flex-wrap items-center gap-1.5">
+              {roles.map((role) => {
+                const look = personaForRole(role);
+                const emotion = emotionOf(role.role_id);
+                const active = selectedRoleId === role.role_id;
+                return (
+                  <motion.button
+                    key={role.role_id}
+                    whileTap={{ scale: 0.94 }}
+                    onClick={() => setSelectedRoleId(role.role_id)}
+                    className={`flex items-center gap-1.5 rounded-full border-2 px-2.5 py-1 text-xs font-black transition-all ${
+                      active ? "border-ink bg-amber text-ink shadow-[var(--shadow-sticker-sm)]" : "border-paper/20 bg-night-soft/70 text-paper/80 hover:border-paper/50"
+                    }`}
+                  >
+                    <span className="h-2 w-2 rounded-full border border-ink/50" style={{ background: look.outfit }} />
+                    {role.display_name.split(" · ")[0]}
+                    <span className="h-1.5 w-1.5 rounded-full" style={{ background: EMOTION_META[emotion].color }} />
+                  </motion.button>
+                );
+              })}
+              <span className="mx-1 h-4 w-px bg-paper/20" />
+              {MODES.map((m) => (
+                <button
+                  key={m.id}
+                  onClick={() => setMode(m.id)}
+                  title={m.desc}
+                  className={`rounded-full border-2 px-2.5 py-1 text-xs font-black transition-all ${
+                    mode === m.id ? "border-ink bg-coral text-paper shadow-[var(--shadow-sticker-sm)]" : "border-paper/20 text-paper/70 hover:border-paper/50"
                   }`}
                 >
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="text-lg">{getRoleAvatar(role)}</span>
-                    <span className="text-xs text-white font-medium truncate">{getRoleName(role)}</span>
-                  </div>
-                  <div className="h-1 bg-slate-700 rounded-full overflow-hidden">
-                    <div
-                      className={`h-full rounded-full transition-all duration-500 ${
-                        pressure > 60
-                          ? 'bg-red-500'
-                          : pressure > 30
-                          ? 'bg-yellow-500'
-                          : 'bg-green-500'
-                      }`}
-                      style={{ width: `${pressure}%` }}
-                    />
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-
-          {/* 输入区 */}
-          <div className="flex gap-3 items-center">
-            <RecordButton
-              isRecording={isRecording}
-              onStart={() => setIsRecording(true)}
-              onStop={() => {
-                setIsRecording(false);
-                handleSend();
-              }}
-            />
-
-            <input
-              type="text"
-              value={inputText}
-              onChange={(e) => setInputText(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-              placeholder={selectedRole ? `向 ${getRoleName(selectedRole)} 提问...` : '先点选一个角色，再提问...'}
-              className="flex-1 bg-slate-800/50 border border-white/10 rounded-full px-5 py-2 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500/50 transition-colors"
-            />
-
-            <button
-              onClick={handleSend}
-              disabled={!inputText.trim()}
-              className={`px-6 py-2 rounded-full transition-all ${
-                inputText.trim()
-                  ? 'bg-indigo-600 hover:bg-indigo-500 text-white'
-                  : 'bg-slate-700 text-slate-500 cursor-not-allowed'
-              }`}
-            >
-              发送
-            </button>
-          </div>
-
-          {/* 快捷操作 */}
-          <div className="flex justify-between items-center">
-            <div className="flex gap-2">
-              <button
-                onClick={() => router.push('/game/evidence')}
-                className="px-4 py-2 glass rounded-lg text-sm text-slate-300 hover:text-white hover:bg-white/10 transition-colors"
-              >
-                📋 证据板
-              </button>
-              <button
-                onClick={() => {
-                  setShowTimeUp(false);
-                  handleNextRound();
-                }}
-                className="px-4 py-2 glass rounded-lg text-sm text-slate-300 hover:text-white hover:bg-white/10 transition-colors"
-              >
-                ⏭ 跳过本轮
-              </button>
+                  {m.label}
+                </button>
+              ))}
             </div>
-            <button
-              onClick={() => router.push('/game/accusation')}
-              className="px-5 py-2 bg-gradient-to-r from-red-600 to-orange-600 text-white rounded-lg text-sm font-medium hover:from-red-500 hover:to-orange-500 transition-all"
-            >
-              ⚡ 提交指控
-            </button>
+
+            <div className="flex items-center gap-2.5">
+              <RecordButton
+                disabled={!canAsk}
+                onTranscript={(t) => setInput((prev) => (prev ? `${prev} ${t.text}` : t.text))}
+                onError={(e) => setVoiceError(e)}
+              />
+              <input
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && !e.nativeEvent.isComposing && send()}
+                placeholder={
+                  selectedRole
+                    ? `向 ${selectedRole.display_name.split(" · ")[0]} ${MODES.find((m) => m.id === mode)?.desc}地提问…`
+                    : "先点圆桌上的角色，再提问"
+                }
+                disabled={!allowedActions.has("ask")}
+                className="min-w-0 flex-1 rounded-full border-2 border-paper/20 bg-night-deep/70 px-5 py-2.5 text-sm text-paper placeholder:text-paper/35 focus:border-amber focus:outline-none disabled:opacity-50"
+              />
+              <motion.button
+                whileTap={{ scale: 0.92 }}
+                onClick={send}
+                disabled={!canAsk || !input.trim()}
+                className="btn btn-amber !px-5 disabled:opacity-40"
+              >
+                <Icon name="send" size={16} />
+                发问
+              </motion.button>
+            </div>
           </div>
         </div>
-      </div>
+      )}
+
+      {/* 开场剧场 */}
+      <AnimatePresence>
+        {inOpening && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0, scale: 1.06, filter: "blur(6px)" }}
+            className="absolute inset-0 z-30 flex items-end justify-center bg-night-deep/45 pb-24"
+          >
+            <OpeningTheater
+              openings={openings}
+              roles={roles}
+              done={openings.length >= 5}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* judging 等待 */}
+      {phase === "judging" && (
+        <div className="absolute inset-0 z-30 flex flex-col items-center justify-center gap-4 bg-night-deep/70">
+          <Mascot motion="sway" size={130} caption="合议庭正在核对证据与答案…" />
+        </div>
+      )}
+
+      {/* revealed 引导 */}
+      {phase === "revealed" && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="absolute bottom-6 left-1/2 z-30 -translate-x-1/2"
+        >
+          <Link href="/game/reveal" className="btn btn-coral px-10 py-4 text-lg shadow-[var(--shadow-glow-lamp)]">
+            <Icon name="magnifier" size={20} />
+            真相揭晓 →
+          </Link>
+        </motion.div>
+      )}
+
+      {/* failed 终局 */}
+      {phase === "failed" && sessionView.terminal_error && (
+        <div className="absolute inset-0 z-30 flex flex-col items-center justify-center gap-5 bg-night-deep/85 px-6">
+          <Mascot motion="sleep" size={120} caption="这一局没能走到揭晓…" />
+          <ErrorPanel error={sessionView.terminal_error} className="max-w-md" />
+          <button onClick={game.backToLobby} className="btn btn-amber">
+            <Icon name="home" size={15} /> 回大厅开新局
+          </button>
+        </div>
+      )}
+
+      {/* briefing 引导 */}
+      {phase === "briefing" && (
+        <div className="absolute inset-0 z-30 flex flex-col items-center justify-center gap-4 bg-night-deep/60">
+          <Mascot motion="idle" size={110} caption="先读案情，再开庭" />
+          <Link href="/game/briefing" className="btn btn-amber">
+            <Icon name="file" size={15} /> 去看案情简报
+          </Link>
+        </div>
+      )}
+
+      {/* 提问失败显式呈现 */}
+      <AnimatePresence>
+        {actionError && phase === "investigation" && (
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+            className="absolute bottom-[132px] left-1/2 z-20 w-[420px] max-w-[90vw] -translate-x-1/2"
+          >
+            <ErrorPanel error={actionError} onDismiss={clearActionError} />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* 语音失败：显式呈现并保留键盘输入路径 */}
+      <AnimatePresence>
+        {voiceError && (
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+            className="absolute bottom-[132px] left-1/2 z-20 w-[420px] max-w-[90vw] -translate-x-1/2"
+          >
+            <ErrorPanel
+              error={{ code: voiceError.code as never, message: voiceError.message }}
+              onDismiss={() => setVoiceError(null)}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+
+function OpeningTheater({
+  openings,
+  roles,
+  done,
+}: {
+  openings: Extract<MessagePublic, { speaker_type: "role" }>[];
+  roles: import("@/contracts/public").RolePublic[];
+  done: boolean;
+}) {
+  const current = openings[openings.length - 1];
+  const role = roles.find((r) => r.role_id === current?.speaker_id);
+  const look = role ? personaForRole(role) : null;
+
+  return (
+    <motion.div
+      key={current?.message_id ?? "empty"}
+      initial={{ opacity: 0, y: 40, rotate: -0.5 }}
+      animate={{ opacity: 1, y: 0, rotate: 0 }}
+      transition={{ type: "spring", stiffness: 160, damping: 20 }}
+      className="card relative w-[640px] max-w-[92vw] px-8 py-6"
+    >
+      <div className="tape" style={{ top: -10, left: 40, transform: "rotate(-5deg)" }} />
+      <div className="flex items-center gap-3">
+        <span
+          className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-ink text-lg text-paper"
+          style={{ background: look?.outfit ?? "#888" }}
+        >
+          {openings.length}
+        </span>
+        <div>
+          <p className="text-[10px] font-black uppercase tracking-[0.25em] text-coral-deep">
+            Opening Statement {openings.length} / 5
+          </p>
+          <h3 className="text-lg font-black text-ink">{role?.display_name ?? "…"}</h3>
+        </div>
+        <div className="ml-auto flex gap-1.5">
+          {roles.map((r, i) => (
+            <span
+              key={r.role_id}
+              className={`h-2.5 w-2.5 rounded-full border border-ink/60 ${
+                openings.length > i ? "bg-teal" : "bg-paper-dim"
+              }`}
+            />
+          ))}
+        </div>
+      </div>
+      <div className="dashed-divider paper-lines mt-4 min-h-[110px] pt-3">
+        {current ? (
+          <Typewriter
+            key={current.message_id}
+            text={current.exact_text}
+            prosody={current.prosody}
+            className="text-[15px] leading-relaxed text-ink/90"
+          />
+        ) : (
+          <p className="animate-pulse text-sm font-bold text-ink/50">第一位角色正在起身…</p>
+        )}
+      </div>
+      {done && (
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="mt-3 text-right text-xs font-black text-teal"
+        >
+          五条开场已呈堂 · 进入自由审讯…
+        </motion.p>
+      )}
+    </motion.div>
   );
 }

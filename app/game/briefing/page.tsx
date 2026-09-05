@@ -1,94 +1,149 @@
-'use client';
+"use client";
 
-import { useRouter } from 'next/navigation';
-import { useGame } from '@/context/GameContext';
-import RoleCard from '@/components/RoleCard';
-import type { RolePublic } from '@/contracts/types';
+import dynamic from "next/dynamic";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { motion } from "motion/react";
+import Link from "next/link";
+import { useGame } from "@/context/GameContext";
+import Mascot from "@/components/ui/Mascot";
+import ErrorPanel from "@/components/ui/ErrorPanel";
+import { Icon } from "@/components/ui/Icons";
+import { personaForRole } from "@/components/three/characters/personas";
+
+const PortraitRow = dynamic(() => import("@/components/three/PortraitRow"), {
+  ssr: false,
+  loading: () => <div className="h-56 animate-pulse rounded-2xl bg-night-soft/60" />,
+});
 
 export default function BriefingPage() {
+  const { casePublic, sourceDoc, sessionView, startGame, actionError, clearActionError, phase } = useGame();
   const router = useRouter();
-  const { casePublic, sourceDoc, goToInterrogation } = useGame();
 
-  if (!casePublic) {
+  // 开庭成功后跟随阶段自动进入审讯桌（阶段事实来自 SessionView，不做本地推断）。
+  useEffect(() => {
+    if (phase === "opening_statements" || phase === "investigation") {
+      router.replace("/game/interrogation");
+    }
+  }, [phase, router]);
+
+  if (!casePublic || !sessionView) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="text-5xl mb-4 animate-bounce">🔍</div>
-          <p className="text-slate-400">正在加载案件资料...</p>
-          <button onClick={() => router.push('/')} className="mt-4 text-sm text-indigo-400 hover:underline">
-            返回首页重新开始
-          </button>
-        </div>
+      <div className="flex min-h-[70vh] flex-col items-center justify-center gap-4">
+        <Mascot motion="computer" size={110} caption="正在调出案件档案…" />
+        <Link href="/" className="btn btn-ghost text-sm">
+          <Icon name="back" size={14} /> 返回大厅
+        </Link>
       </div>
     );
   }
 
-  const startInterrogation = () => {
-    goToInterrogation();
-    router.push('/game/interrogation');
-  };
+  const canStart = phase === "briefing" && sessionView.allowed_actions.includes("start");
+  const alreadyPlaying = phase !== "briefing";
+
+  // 案情摘要取来源正文的前几段（完整正文可展开）。
+  const paragraphs = (sourceDoc?.canonical_text ?? casePublic.summary)
+    .split(/\n{2,}/)
+    .filter((p) => p.trim() && !p.trimStart().startsWith("#"));
 
   return (
-    <div className="min-h-screen p-8 max-w-4xl mx-auto">
-      {/* 案件标题 */}
-      <div className="text-center mb-10">
-        <div className="inline-block px-4 py-1 rounded-full bg-indigo-500/20 text-indigo-400 text-sm mb-4">
-          案件档案
+    <div className="mx-auto max-w-5xl px-6 py-8">
+      {/* 档案头 */}
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="relative">
+        <div className="tape" style={{ top: -10, left: "42%", transform: "rotate(-2deg)" }} />
+        <div className="card relative px-8 py-7">
+          <p className="text-[11px] font-black uppercase tracking-[0.3em] text-coral-deep">Case File</p>
+          <h1 className="mt-2 text-3xl font-black leading-tight text-ink">{casePublic.title}</h1>
+          <p className="mt-2 text-sm font-bold text-ink/60">{casePublic.summary}</p>
+          <div className="mt-4 flex flex-wrap items-center gap-2">
+            <span className="chip">{casePublic.theme}</span>
+            <a
+              href={casePublic.source_url}
+              target="_blank"
+              rel="noreferrer"
+              className="chip cursor-pointer !bg-paper-dim hover:!bg-amber/40"
+            >
+              <Icon name="link" size={12} /> 来源知乎文章
+            </a>
+          </div>
         </div>
-        <h1 className="text-3xl font-bold text-white mb-2">
-          {casePublic.title}
-        </h1>
-        <p className="text-slate-400 text-sm">
-          来源：{casePublic.source_url}
-        </p>
-      </div>
+      </motion.div>
 
-      {/* 案件简介 */}
-      <div className="glass rounded-2xl p-6 mb-8">
-        <h2 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-          <span>📄</span> 案情摘要
+      {/* 角色立绘 */}
+      <motion.section
+        initial={{ opacity: 0, y: 24 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.12 }}
+        className="card-dark mt-6 p-4"
+      >
+        <h2 className="mb-1 flex items-center gap-2 px-2 text-sm font-black text-paper">
+          <Icon name="mask" size={16} className="text-amber" />
+          涉案角色 · 五人
+          <span className="ml-2 chip !border-coral !bg-coral/15 !text-[10px] !text-coral">其中一位篡改了原文</span>
         </h2>
-        <div className="text-slate-300 leading-relaxed whitespace-pre-line text-sm">
-          {sourceDoc?.canonical_text
-            .replace(/^# .+$/m, '')
-            .replace(/\n{3,}/g, '\n\n')
-            .trim() || casePublic.summary}
+        <div className="h-64">
+          <PortraitRow roles={casePublic.roles} className="h-full w-full" />
         </div>
-      </div>
-
-      {/* 角色列表 */}
-      <div className="mb-8">
-        <h2 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-          <span>👥</span> 涉案角色
-        </h2>
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-          {casePublic.roles.map((role: RolePublic) => (
-            <RoleCard key={role.role_id} role={role} />
+        <div className="grid grid-cols-2 gap-2 px-2 pb-2 md:grid-cols-5">
+          {casePublic.roles.map((role) => (
+            <div key={role.role_id} className="rounded-xl border border-paper/10 bg-night-deep/50 p-2.5">
+              <div className="flex items-center gap-1.5">
+                <span
+                  className="h-2.5 w-2.5 rounded-full border border-ink/60"
+                  style={{ background: personaForRole(role).outfit }}
+                />
+                <p className="truncate text-xs font-black text-paper">{role.display_name}</p>
+              </div>
+              <p className="mt-1 line-clamp-2 text-[11px] leading-snug text-paper/55">{role.public_bio}</p>
+            </div>
           ))}
         </div>
-      </div>
+      </motion.section>
 
-      {/* 游戏规则提示 */}
-      <div className="glass-dark rounded-xl p-5 mb-8">
-        <h3 className="font-bold text-white mb-3 flex items-center gap-2">
-          <span>🎯</span> 你的任务
-        </h3>
-        <ul className="text-sm text-slate-400 space-y-2">
-          <li>• 5个角色中有1位篡改者，其余为忠实角色</li>
-          <li>• 通过审讯提问，收集角色发言并保存为证据</li>
-          <li>• 在证据板上对比事实，发现篡改痕迹</li>
-          <li>• 最终提交指控：篡改者身份 + 证据链</li>
-        </ul>
-      </div>
+      {/* 案情正文 */}
+      <motion.section
+        initial={{ opacity: 0, y: 24 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2 }}
+        className="card mt-6 px-7 py-6"
+      >
+        <h2 className="flex items-center gap-2 text-sm font-black text-ink">
+          <Icon name="file" size={16} /> 案情来源（原文节选）
+        </h2>
+        <div className="paper-lines dashed-divider mt-3 space-y-3 pt-3">
+          {paragraphs.slice(0, 6).map((p, i) => (
+            <p key={i} className="line-clamp-4 text-sm leading-relaxed text-ink/80">
+              {p.trim()}
+            </p>
+          ))}
+          {paragraphs.length > 6 && (
+            <p className="text-xs font-bold text-ink/45">… 完整正文已冻结在案件来源中（共 {paragraphs.length} 段）</p>
+          )}
+        </div>
+      </motion.section>
 
-      {/* 开始按钮 */}
-      <div className="text-center">
-        <button
-          onClick={startInterrogation}
-          className="px-10 py-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold rounded-full text-lg hover:from-indigo-500 hover:to-purple-500 transition-all duration-300 glow-primary hover:scale-105"
-        >
-          开始审讯 →
-        </button>
+      {/* 行动区 */}
+      <div className="mt-7 flex flex-col items-center gap-3 pb-10">
+        {actionError && <ErrorPanel error={actionError} onDismiss={clearActionError} />}
+        {alreadyPlaying ? (
+          <Link href="/game/interrogation" className="btn btn-amber px-10 text-base">
+            对局进行中 · 回到审讯桌 <Icon name="next" size={16} />
+          </Link>
+        ) : (
+          <motion.button
+            whileHover={{ scale: 1.04 }}
+            whileTap={{ scale: 0.96 }}
+            onClick={startGame}
+            disabled={!canStart}
+            className="btn btn-amber px-12 py-4 text-lg disabled:opacity-40"
+          >
+            <Icon name="play" size={20} filled />
+            开庭 · 听五条开场陈述
+          </motion.button>
+        )}
+        <p className="text-xs text-paper/50">
+          开庭后 AI 将依次呈上五条开场陈述，其中已经藏好了篡改。
+        </p>
       </div>
     </div>
   );

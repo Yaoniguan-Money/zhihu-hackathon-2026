@@ -1,156 +1,102 @@
-'use client';
+"use client";
 
-import { createContext, useContext, useState, ReactNode, useCallback } from 'react';
-import type {
-  CasePublic,
-  SourceDocumentPublic,
-  EvidenceFragmentPublic,
-  DialogueTurn,
-  Accusation,
-  GameConfig,
-  GameState,
-} from '@/contracts/types';
+import { createContext, useContext, useEffect, useMemo, type ReactNode } from "react";
+import { useMachine } from "@xstate/react";
+import { useConvexAuth, useAuthActions } from "@convex-dev/auth/react";
 import {
-  mockGetPublic,
-  mockGetSource,
-  mockGameConfig,
-  mockDialogues,
-  mockEvidences,
-} from '@/mock/goldenCase';
+  gameMachine,
+  SESSION_STORAGE_KEY,
+  type GameContextData,
+  type Notif,
+} from "./gameMachine";
+import type {
+  BoardLink,
+  BoardPlacement,
+  FinalAccusation,
+  QuestionMode,
+  QuestionSource,
+} from "@/contracts/public";
+import type { RoleId } from "@/contracts/shared";
 
-interface GameContextType {
-  state: GameState;
-  casePublic: CasePublic | null;
-  sourceDoc: SourceDocumentPublic | null;
-  gameConfig: GameConfig;
-  dialogues: DialogueTurn[];
-  evidences: EvidenceFragmentPublic[];
-  selectedRoleId: string | null;
-  currentRound: number;
-  timeRemaining: number;
-  accusation: Accusation | null;
+/**
+ * GameProvider：匿名登录门控 + gameMachine 的 React 适配层。
+ * 页面只通过 useGame() 消费镜像状态与显式动作，不直接触达 Convex。
+ */
+
+interface GameApi extends GameContextData {
+  booted: boolean;
+  allowedActions: Set<string>;
+  phase: string | null;
+  notifList: Notif[];
+  /** 角色回合（ask/对质）是否在途。 */
+  busyTurn: boolean;
+  selectCase: (caseId: string) => void;
   startGame: () => void;
-  goToBriefing: () => void;
-  goToInterrogation: () => void;
-  goToEvidence: () => void;
-  goToAccusation: () => void;
-  goToReveal: () => void;
-  addDialogue: (d: DialogueTurn) => void;
-  setSelectedRoleId: (id: string | null) => void;
-  nextRound: () => void;
-  submitAccusation: (a: Accusation) => void;
-  unlockEvidenceByRole: (roleId: string) => void;
-  restart: () => void;
+  ask: (roleId: RoleId, mode: QuestionMode, text: string, source: QuestionSource) => void;
+  saveRecording: (messageId: string) => void;
+  presentRecording: (evidenceId: string, targetRoleId: RoleId) => void;
+  saveBoard: (placements: BoardPlacement[], links: BoardLink[]) => void;
+  accuse: (accusation: FinalAccusation) => void;
+  dismissNotif: (id: string) => void;
+  clearActionError: () => void;
+  backToLobby: () => void;
+  retryCatalog: () => void;
 }
 
-const GameContext = createContext<GameContextType | null>(null);
+const GameContext = createContext<GameApi | null>(null);
 
 export function GameProvider({ children }: { children: ReactNode }) {
-  const [gameState, setGameState] = useState<GameState>('lobby');
-  const [casePublic, setCasePublic] = useState<CasePublic | null>(null);
-  const [sourceDoc, setSourceDoc] = useState<SourceDocumentPublic | null>(null);
-  const [dialogues, setDialogues] = useState<DialogueTurn[]>([]);
-  const [evidences, setEvidences] = useState<EvidenceFragmentPublic[]>([]);
-  const [selectedRoleId, setSelectedRoleId] = useState<string | null>(null);
-  const [currentRound, setCurrentRound] = useState(1);
-  const [timeRemaining, setTimeRemaining] = useState(90);
-  const [accusation, setAccusation] = useState<Accusation | null>(null);
+  const { isLoading, isAuthenticated } = useConvexAuth();
+  const authActions = useAuthActions();
+  const [snapshot, send] = useMachine(gameMachine, {
+    input: {
+      storedSessionId:
+        typeof window !== "undefined" ? localStorage.getItem(SESSION_STORAGE_KEY) : null,
+    },
+  });
 
-  const startGame = useCallback(() => {
-    const caseData = mockGetPublic('case-demo-001');
-    const source = mockGetSource('case-demo-001');
-    setCasePublic(caseData);
-    setSourceDoc(source);
-    setDialogues(mockDialogues);
-    setEvidences(mockEvidences.filter((e) => e.type === 'claim'));
-    setCurrentRound(1);
-    setTimeRemaining(mockGameConfig.interrogation_time_limit);
-    setGameState('briefing');
-  }, []);
+  // P0 匿名身份：进入页面后建立 Convex Auth 会话（ADR 0004）。
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      void authActions.signIn("anonymous");
+    }
+  }, [isLoading, isAuthenticated, authActions]);
 
-  const unlockEvidence = useCallback((evidenceId: string) => {
-    setEvidences((prev) => {
-      if (prev.some((e) => e.evidence_id === evidenceId)) return prev;
-      const newEvidence = mockEvidences.find((e) => e.evidence_id === evidenceId);
-      return newEvidence ? [...prev, newEvidence] : prev;
-    });
-  }, []);
+  useEffect(() => {
+    if (!isLoading && isAuthenticated) {
+      send({ type: "AUTH_READY" });
+    }
+  }, [isLoading, isAuthenticated, send]);
 
-  const unlockEvidenceByRole = useCallback((roleId: string) => {
-    setEvidences((prev) => {
-      const locked = mockEvidences.filter(
-        (e) => !prev.some((p) => p.evidence_id === e.evidence_id) && e.related_role_ids.includes(roleId)
-      );
-      return locked.length > 0 ? [...prev, ...locked] : prev;
-    });
-  }, []);
+  const api = useMemo<GameApi>(() => {
+    const ctx = snapshot.context;
+    return {
+      ...ctx,
+      booted: !isLoading && isAuthenticated,
+      allowedActions: new Set(ctx.sessionView?.allowed_actions ?? []),
+      phase: ctx.sessionView?.phase ?? null,
+      notifList: ctx.notifs,
+      busyTurn: ctx.turnBusy,
+      selectCase: (caseId) => send({ type: "SELECT_CASE", caseId }),
+      startGame: () => send({ type: "START_GAME" }),
+      ask: (roleId, mode, text, source) => send({ type: "ASK", roleId, mode, text, source }),
+      saveRecording: (messageId) => send({ type: "SAVE_RECORDING", messageId }),
+      presentRecording: (evidenceId, targetRoleId) =>
+        send({ type: "PRESENT_RECORDING", evidenceId, targetRoleId }),
+      saveBoard: (placements, links) => send({ type: "BOARD_SAVE", placements, links }),
+      accuse: (accusation) => send({ type: "ACCUSE", accusation }),
+      dismissNotif: (id) => send({ type: "DISMISS_NOTIF", id }),
+      clearActionError: () => send({ type: "CLEAR_ACTION_ERROR" }),
+      backToLobby: () => send({ type: "BACK_TO_LOBBY" }),
+      retryCatalog: () => send({ type: "RETRY_CATALOG" }),
+    };
+  }, [snapshot, isLoading, isAuthenticated, send]);
 
-  const goToBriefing = useCallback(() => setGameState('briefing'), []);
-  const goToInterrogation = useCallback(() => setGameState('interrogation'), []);
-  const goToEvidence = useCallback(() => setGameState('evidence_review'), []);
-  const goToAccusation = useCallback(() => setGameState('accusation'), []);
-  const goToReveal = useCallback(() => setGameState('reveal'), []);
-
-  const addDialogue = useCallback((d: DialogueTurn) => {
-    setDialogues((prev) => [...prev, d]);
-  }, []);
-
-  const nextRound = useCallback(() => {
-    setCurrentRound((r) => r + 1);
-    setTimeRemaining(mockGameConfig.interrogation_time_limit);
-  }, []);
-
-  const submitAccusation = useCallback((a: Accusation) => {
-    setAccusation(a);
-    setGameState('reveal');
-  }, []);
-
-  const restart = useCallback(() => {
-    setCasePublic(null);
-    setSourceDoc(null);
-    setDialogues([]);
-    setEvidences([]);
-    setSelectedRoleId(null);
-    setCurrentRound(1);
-    setTimeRemaining(90);
-    setAccusation(null);
-    setGameState('lobby');
-  }, []);
-
-  return (
-    <GameContext.Provider value={{
-      state: gameState,
-      casePublic,
-      sourceDoc,
-      gameConfig: mockGameConfig,
-      dialogues,
-      evidences,
-      selectedRoleId,
-      currentRound,
-      timeRemaining,
-      accusation,
-      startGame,
-      goToBriefing,
-      goToInterrogation,
-      goToEvidence,
-      goToAccusation,
-      goToReveal,
-      addDialogue,
-      setSelectedRoleId,
-      nextRound,
-      submitAccusation,
-      unlockEvidenceByRole,
-      restart,
-    }}>
-      {children}
-    </GameContext.Provider>
-  );
+  return <GameContext.Provider value={api}>{children}</GameContext.Provider>;
 }
 
-export function useGame() {
+export function useGame(): GameApi {
   const ctx = useContext(GameContext);
-  if (!ctx) {
-    throw new Error('useGame must be used within GameProvider');
-  }
+  if (!ctx) throw new Error("useGame 必须在 GameProvider 内使用");
   return ctx;
 }

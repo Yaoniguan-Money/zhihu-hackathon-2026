@@ -1,225 +1,227 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { motion, AnimatePresence } from 'motion/react';
-import { useGame } from '@/context/GameContext';
-import EvidenceChip from '@/components/EvidenceChip';
-import AccusationSlot from '@/components/AccusationSlot';
-import { getRoleAvatar, getRoleName, getRoleBio } from '@/lib/roleUtils';
-import type { EvidenceFragmentPublic, RolePublic } from '@/contracts/types';
+import { useState } from "react";
+import dynamic from "next/dynamic";
+import Link from "next/link";
+import { motion } from "motion/react";
+import { useGame } from "@/context/GameContext";
+import Mascot from "@/components/ui/Mascot";
+import ErrorPanel from "@/components/ui/ErrorPanel";
+import { Icon } from "@/components/ui/Icons";
+import { personaForRole } from "@/components/three/characters/personas";
+import { DISTORTION_META, DISTORTION_ORDER } from "@/lib/distortions";
+import type { DistortionType } from "@/contracts/shared";
+
+const PortraitRow = dynamic(() => import("@/components/three/PortraitRow"), {
+  ssr: false,
+  loading: () => <div className="h-52 animate-pulse rounded-2xl bg-night-soft/60" />,
+});
 
 export default function AccusationPage() {
-  const router = useRouter();
-  const { casePublic, gameConfig, evidences, submitAccusation } = useGame();
-  const [selectedRoleId, setSelectedRoleId] = useState<string | null>(null);
-  const [selectedEvidences, setSelectedEvidences] = useState<string[]>([]);
-  const [reasoning, setReasoning] = useState('');
-  const [showConfirm, setShowConfirm] = useState(false);
+  const {
+    casePublic,
+    sessionView,
+    evidences,
+    accuse,
+    allowedActions,
+    phase,
+    busyTurn,
+    actionError,
+    clearActionError,
+    backToLobby,
+  } = useGame();
 
-  const maxSlots = gameConfig.evidence_slots;
+  const [suspect, setSuspect] = useState<string | null>(null);
+  const [types, setTypes] = useState<DistortionType[]>([]);
+  const [evidenceIds, setEvidenceIds] = useState<string[]>([]);
+  const [note, setNote] = useState("");
 
-  if (!casePublic) {
+  if (!casePublic || !sessionView) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="text-5xl mb-4 animate-bounce">🔍</div>
-          <p className="text-slate-400">正在加载...</p>
-          <button onClick={() => router.push('/')} className="mt-4 text-sm text-indigo-400 hover:underline">
-            返回首页
-          </button>
-        </div>
+      <div className="flex min-h-[70vh] flex-col items-center justify-center gap-4">
+        <Mascot motion="computer" size={110} caption="正在准备起诉状…" />
+        <Link href="/" className="btn btn-ghost text-sm">返回大厅</Link>
       </div>
     );
   }
 
-  const toggleEvidence = (evidenceId: string) => {
-    setSelectedEvidences((prev) => {
-      if (prev.includes(evidenceId)) {
-        return prev.filter((id) => id !== evidenceId);
-      }
-      if (prev.length >= maxSlots) {
-        return prev;
-      }
-      return [...prev, evidenceId];
-    });
-  };
+  const canAccuse = allowedActions.has("accuse") && !busyTurn;
+  const ready = Boolean(suspect) && types.length > 0 && evidenceIds.length > 0;
+  const judging = phase === "judging";
 
-  const handleSubmit = () => {
-    if (!selectedRoleId || selectedEvidences.length === 0) return;
-    setShowConfirm(true);
-  };
-
-  const confirmSubmit = () => {
-    submitAccusation({
-      accused_role_id: selectedRoleId!,
-      evidence_ids: selectedEvidences,
-      reasoning,
-    });
-    router.push('/game/reveal');
-  };
-
-  const selectedRole = casePublic.roles.find((r: RolePublic) => r.role_id === selectedRoleId);
+  const toggleType = (dt: DistortionType) =>
+    setTypes((prev) => (prev.includes(dt) ? prev.filter((x) => x !== dt) : [...prev, dt]));
+  const toggleEvidence = (id: string) =>
+    setEvidenceIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
 
   return (
-    <div className="min-h-screen p-8 max-w-5xl mx-auto">
-      <div className="text-center mb-8">
-        <div className="inline-block px-4 py-1 rounded-full bg-red-500/20 text-red-400 text-sm mb-4">
-          ⚡ 最终指控
+    <div className="mx-auto max-w-4xl px-6 py-7">
+      {/* 起诉状头 */}
+      <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} className="relative">
+        <div className="tape" style={{ top: -10, left: "38%", transform: "rotate(2deg)" }} />
+        <div className="card px-8 py-6 text-center">
+          <p className="text-[10px] font-black uppercase tracking-[0.3em] text-coral-deep">Final Accusation</p>
+          <h1 className="mt-1 text-3xl font-black text-ink">最终指控</h1>
+          <p className="mt-1 text-xs font-bold text-ink/55">
+            指出篡改者、篡改方式，并附上支撑证据。提交后由合议庭判决，不可撤回。
+          </p>
         </div>
-        <h1 className="text-3xl font-bold text-white mb-2">
-          你指控谁是篡改者？
-        </h1>
-        <p className="text-slate-400">
-          选择你认为的篡改者，并提交 {maxSlots} 条证据支撑你的指控
-        </p>
-      </div>
+      </motion.div>
 
-      {/* 角色选择 */}
-      <div className="glass rounded-2xl p-6 mb-6">
-        <h2 className="font-bold text-white mb-4 flex items-center gap-2">
-          <span>👤</span> 第一步：选择嫌疑人
-        </h2>
-        <div className="grid grid-cols-5 gap-4">
-          {casePublic.roles.map((role: RolePublic) => (
-            <motion.div
-              key={role.role_id}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => setSelectedRoleId(role.role_id)}
-              className={`glass rounded-xl p-4 text-center cursor-pointer transition-all ${
-                selectedRoleId === role.role_id
-                  ? 'border-red-500 ring-2 ring-red-500/30 glow-danger'
-                  : 'hover:border-white/20'
-              }`}
-            >
-              <div className="text-4xl mb-2">{getRoleAvatar(role)}</div>
-              <h4 className="font-bold text-white text-sm">{getRoleName(role)}</h4>
-              <p className="text-xs text-slate-400 mt-1 line-clamp-2">
-                {getRoleBio(role)}
-              </p>
-            </motion.div>
-          ))}
+      {judging ? (
+        <div className="mt-8 flex flex-col items-center gap-4">
+          <Mascot motion="sway" size={130} caption="合议庭正在核对你的指控…" />
+          <p className="text-sm font-bold text-paper/60">判决即将出炉，请稍候。</p>
         </div>
-      </div>
-
-      {/* 证据槽位 */}
-      <div className="glass rounded-2xl p-6 mb-6">
-        <h2 className="font-bold text-white mb-4 flex items-center gap-2">
-          <span>📎</span> 第二步：提交证据（{selectedEvidences.length}/{maxSlots}）
-        </h2>
-
-        <div className="grid grid-cols-3 gap-4 mb-6">
-          {Array.from({ length: maxSlots }).map((_, i) => {
-            const evidenceId = selectedEvidences[i];
-            const evidence = evidences.find((e: EvidenceFragmentPublic) => e.evidence_id === evidenceId);
-            return (
-              <AccusationSlot
-                key={i}
-                index={i}
-                evidence={evidence}
-                onRemove={() => evidence && toggleEvidence(evidence.evidence_id)}
+      ) : (
+        <>
+          {/* ① 嫌疑角色 */}
+          <section className="card-dark mt-6 p-4">
+            <h2 className="mb-1 flex items-center gap-2 px-2 text-sm font-black text-paper">
+              <span className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-amber bg-amber/20 text-xs text-amber">1</span>
+              指认篡改者
+            </h2>
+            <div className="h-52">
+              <PortraitRow
+                roles={casePublic.roles}
+                selectedId={suspect}
+                onSelect={(id) => canAccuse && setSuspect(id)}
+                className="h-full w-full"
               />
-            );
-          })}
-        </div>
+            </div>
+            <div className="flex flex-wrap justify-center gap-2 px-2 pb-1">
+              {casePublic.roles.map((r) => (
+                <button
+                  key={r.role_id}
+                  onClick={() => setSuspect(r.role_id)}
+                  className={`chip cursor-pointer transition-all ${
+                    suspect === r.role_id ? "!border-ink !bg-amber !text-ink shadow-[var(--shadow-sticker-sm)]" : ""
+                  }`}
+                >
+                  <span className="h-2 w-2 rounded-full border border-ink/50" style={{ background: personaForRole(r).outfit }} />
+                  {r.display_name.split(" · ")[0]}
+                </button>
+              ))}
+            </div>
+          </section>
 
-        <div className="max-h-64 overflow-y-auto">
-          <p className="text-xs text-slate-500 mb-2">点击证据添加/移除：</p>
-          <div className="grid grid-cols-2 gap-2">
-            {evidences.map((evidence: EvidenceFragmentPublic) => (
-              <div
-                key={evidence.evidence_id}
-                onClick={() => toggleEvidence(evidence.evidence_id)}
-              >
-                <EvidenceChip
-                  evidence={evidence}
-                  draggable={false}
-                  selected={selectedEvidences.includes(evidence.evidence_id)}
-                />
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
+          {/* ② 篡改方式 */}
+          <section className="card-dark mt-4 p-4">
+            <h2 className="mb-3 flex items-center gap-2 px-2 text-sm font-black text-paper">
+              <span className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-amber bg-amber/20 text-xs text-amber">2</span>
+              篡改方式（可多选）
+            </h2>
+            <div className="flex flex-wrap gap-2 px-2">
+              {DISTORTION_ORDER.map((dt) => {
+                const meta = DISTORTION_META[dt];
+                const active = types.includes(dt);
+                return (
+                  <motion.button
+                    key={dt}
+                    whileTap={{ scale: 0.94 }}
+                    onClick={() => canAccuse && toggleType(dt)}
+                    title={meta.desc}
+                    className={`flex items-center gap-1.5 rounded-full border-2 px-3 py-1.5 text-xs font-black transition-all ${
+                      active
+                        ? "border-ink bg-coral text-paper shadow-[var(--shadow-sticker-sm)]"
+                        : "border-paper/20 bg-night-deep/50 text-paper/75 hover:border-paper/50"
+                    }`}
+                  >
+                    {active && <Icon name="check" size={12} />}
+                    {meta.name}
+                    <span className="text-[10px] font-bold opacity-60">{meta.desc}</span>
+                  </motion.button>
+                );
+              })}
+            </div>
+          </section>
 
-      {/* 推理说明 */}
-      <div className="glass rounded-2xl p-6 mb-6">
-        <h2 className="font-bold text-white mb-4 flex items-center gap-2">
-          <span>💭</span> 第三步：你的推理（可选）
-        </h2>
-        <textarea
-          value={reasoning}
-          onChange={(e) => setReasoning(e.target.value)}
-          placeholder="简述你为什么认为这个人是篡改者..."
-          className="w-full h-24 bg-slate-800/50 border border-white/10 rounded-xl p-3 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500/50 transition-colors resize-none text-sm"
-        />
-      </div>
+          {/* ③ 证据链 */}
+          <section className="card-dark mt-4 p-4">
+            <h2 className="mb-3 flex items-center gap-2 px-2 text-sm font-black text-paper">
+              <span className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-amber bg-amber/20 text-xs text-amber">3</span>
+              支撑证据（至少一件）
+              <span className="ml-auto text-[10px] font-bold text-paper/45">已选 {evidenceIds.length}</span>
+            </h2>
+            <div className="grid max-h-64 grid-cols-1 gap-2 overflow-y-auto px-2 md:grid-cols-2">
+              {evidences.map((e) => {
+                const active = evidenceIds.includes(e.evidence_id);
+                return (
+                  <motion.button
+                    key={e.evidence_id}
+                    whileTap={{ scale: 0.97 }}
+                    onClick={() => canAccuse && toggleEvidence(e.evidence_id)}
+                    className={`rounded-xl border-2 p-2.5 text-left transition-all ${
+                      active
+                        ? "border-ink bg-amber text-ink shadow-[var(--shadow-sticker-sm)]"
+                        : "border-paper/15 bg-night-deep/50 text-paper/80 hover:border-paper/40"
+                    }`}
+                  >
+                    <div className="flex items-center gap-1.5">
+                      {active && <Icon name="check" size={12} />}
+                      <p className="truncate text-[11px] font-black">{e.title}</p>
+                      <span className={`ml-auto chip !px-1.5 !py-0 !text-[9px] ${active ? "" : "!border-paper/25 !bg-transparent !text-paper/50"}`}>
+                        {e.type}
+                      </span>
+                    </div>
+                    <p className="mt-1 line-clamp-2 text-[10px] leading-snug opacity-70">{e.body}</p>
+                  </motion.button>
+                );
+              })}
+              {evidences.length === 0 && (
+                <p className="col-span-2 py-6 text-center text-xs font-bold text-paper/40">
+                  还没有证据。回审讯桌收集发言并解锁证据。
+                </p>
+              )}
+            </div>
+            <textarea
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+              placeholder="补充说明（可选）：指出角色在哪句话里改变了事实关系…"
+              rows={2}
+              className="mx-2 mt-3 w-[calc(100%-16px)] resize-none rounded-xl border-2 border-paper/20 bg-night-deep/60 px-4 py-2.5 text-sm text-paper placeholder:text-paper/30 focus:border-amber focus:outline-none"
+            />
+          </section>
 
-      {/* 提交按钮 */}
-      <div className="text-center">
-        <button
-          onClick={handleSubmit}
-          disabled={!selectedRoleId || selectedEvidences.length === 0}
-          className={`px-10 py-4 font-bold rounded-full text-lg transition-all duration-300 ${
-            selectedRoleId && selectedEvidences.length > 0
-              ? 'bg-gradient-to-r from-red-600 to-orange-600 text-white hover:from-red-500 hover:to-orange-500 glow-danger hover:scale-105'
-              : 'bg-slate-700 text-slate-500 cursor-not-allowed'
-          }`}
-        >
-          确认指控 →
-        </button>
-        <p className="text-xs text-slate-500 mt-3">
-          {!selectedRoleId && '请先选择嫌疑人'}
-          {selectedRoleId && selectedEvidences.length === 0 && '请至少选择1条证据'}
-          {selectedRoleId && selectedEvidences.length > 0 && `准备指控 ${selectedRole ? getRoleName(selectedRole) : ''}`}
-        </p>
-      </div>
-
-      {/* 确认弹窗 */}
-      <AnimatePresence>
-        {showConfirm && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/70 flex items-center justify-center z-50"
-            onClick={() => setShowConfirm(false)}
-          >
-            <motion.div
-              initial={{ scale: 0.9, y: 20 }}
-              animate={{ scale: 1, y: 0 }}
-              exit={{ scale: 0.9, y: 20 }}
-              onClick={(e) => e.stopPropagation()}
-              className="glass rounded-2xl p-8 max-w-md text-center"
+          {/* 提交 */}
+          <div className="mt-6 flex flex-col items-center gap-3 pb-10">
+            {actionError && <ErrorPanel error={actionError} onDismiss={clearActionError} />}
+            <motion.button
+              whileHover={{ scale: ready && canAccuse ? 1.04 : 1 }}
+              whileTap={{ scale: 0.96 }}
+              onClick={() =>
+                suspect &&
+                accuse({
+                  suspect_role_id: suspect,
+                  distortion_types: types,
+                  evidence_ids: evidenceIds,
+                  note: note.trim() || undefined,
+                })
+              }
+              disabled={!ready || !canAccuse}
+              className="btn btn-coral px-12 py-4 text-lg"
             >
-              <div className="text-5xl mb-4">⚡</div>
-              <h3 className="text-xl font-bold text-white mb-2">
-                确认指控？
-              </h3>
-              <p className="text-slate-400 mb-6">
-                你即将指控 <span className="text-red-400 font-bold">{selectedRole ? getRoleName(selectedRole) : ''}</span> 为篡改者。
-                <br />
-                提交后将无法更改。
-              </p>
-              <div className="flex gap-3 justify-center">
-                <button
-                  onClick={() => setShowConfirm(false)}
-                  className="px-6 py-2 glass rounded-full text-slate-300 hover:text-white hover:bg-white/10 transition-colors"
-                >
-                  再想想
-                </button>
-                <button
-                  onClick={confirmSubmit}
-                  className="px-6 py-2 bg-gradient-to-r from-red-600 to-orange-600 text-white rounded-full hover:from-red-500 hover:to-orange-500 transition-all"
-                >
-                  确认提交
-                </button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+              <Icon name="bolt" size={20} filled />
+              提交指控
+            </motion.button>
+            {!canAccuse && phase === "investigation" && (
+              <p className="text-xs font-bold text-paper/45">需要先解锁至少一件证据（在证据板上保存后）才能指控。</p>
+            )}
+            {phase === "revealed" && (
+              <Link href="/game/reveal" className="btn btn-amber">
+                看揭晓结果
+              </Link>
+            )}
+          </div>
+        </>
+      )}
+
+      {phase === "failed" && sessionView.terminal_error && (
+        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-5 bg-night-deep/85">
+          <ErrorPanel error={sessionView.terminal_error} />
+          <button onClick={backToLobby} className="btn btn-amber">回大厅</button>
+        </div>
+      )}
     </div>
   );
 }
