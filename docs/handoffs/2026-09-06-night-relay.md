@@ -51,3 +51,9 @@
 - 智谱 `glm-4.7-flash` 免费档：错误 1305「访问量过大」快速失败，或接受后在 ~900s 切断；吞吐随时段波动，长输出任务（claim 抽取）需健康窗口。
 - 本地后端常驻；模型类测试需 shell 注入 `CONVEX_SELF_HOSTED_URL/ADMIN_KEY`（config.json 读取方式见 `tests/helpers/convex-local.ts`）。
 - voice worker 常驻单实例（127.0.0.1:8717）；双实例会在 Windows 下双绑定竞争，启动前先查端口。
+
+## 追加（03:00 前后）：developer-b 调和合并完成
+
+- 用户预览 B 端 UI 后明确指示「合并且推送」；已按可行性报告的整合路径执行调和合并（merge commit `4611e59`）：保留 B 全部产品代码与依赖，从 `bf2789f` 还原 AGENTS.md/README/tsconfig/next.config，package.json 手工并入 B 依赖后重装。合并后 main：typecheck 零错误、全套件 135 pass / 0 fail、build 通过（`/` + `/game/*` 五页 + voice Routes）。详见[合并可行性报告追记](./2026-09-06-developer-b-merge-feasibility.md)。
+- 新增运维事实：**手动 kill 模型类测试会跳过其 afterAll，把 AI_* 残留在本地部署上**，导致后续「无模型」测试误报（期望 SERVICE_NOT_CONFIGURED 实得 ROLE_TURN_FAILED）。清理方式：`bunx convex env remove AI_*` 八项后复跑即恢复 135/0。
+- P1-3 过夜循环：cycle 1-2 探测均未达健康窗口（1302 限频 → 183s 慢响应），继续运行中。

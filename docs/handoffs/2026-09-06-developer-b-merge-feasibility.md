@@ -1,6 +1,6 @@
 # developer-b 分支合并可行性研究
 
-状态：`complete`（研究结论：原样不可合并；合并未执行）  
+状态：`complete`（研究结论：原样不可合并；用户审阅后明确决定合并，已按「治理/工具链还原 + 产品代码并入」方式执行调和合并并通过全量验证，见文末追记）  
 完成时间：`2026-09-06`  
 负责人：`开发人员 A / ZCode`
 
@@ -66,3 +66,15 @@
 1. 本记录
 2. `AGENTS.md`（所有权边界）
 3. `docs/developer-a/CONTRACTS.md`（B 端应消费的真实公开形状）
+
+## 2026-09-06 追记：用户决定合并，调和合并已执行
+
+用户在本地预览 B 端 UI（worktree dev server）后明确指示「合并且推送」。按本报告「B 侧整合路径」的第 1 步执行**调和合并**（merge commit `4611e59` + 还原提交），替 B 重写页面/状态机仍不做：
+
+- **并入保留**：B 的全部产品代码（`app/` 页面与 layout、`components/`、`context/GameContext.tsx`、`contracts/types.ts`、`mock/goldenCase.ts`、`postcss.config.mjs`、`eslint.config.mjs`、`CLAUDE.md` 指针、public 资源）。
+- **从 `bf2789f` 还原**：`AGENTS.md`、`README.md`、`tsconfig.json`（`@contracts/*`、`@server/*` 别名回到位）、`next.config.ts`。
+- **package.json 手工调和**：保留 A 侧全部依赖/脚本/bun 锁定，加入 B 的运行时依赖（@dnd-kit/*、@react-three/*、three、xstate、@xstate/react、gsap、motion）与开发依赖（tailwindcss 4、@tailwindcss/postcss、@types/three、eslint、eslint-config-next）及 `lint` 脚本；`bun install` 重新生成 `bun.lock`。未引入 `package-lock.json`（B 分支带有的 npm lockfile 在合并中未跟进 main，因 main 仍以 bun 管理）。
+
+验证（合并后 main）：`bun run typecheck` 零错误；`bun test` 全套件 135 pass / 0 fail / 11 skip；`bun run build` 通过（`/`、`/game/*` 五页静态 + 两个 voice Route 动态）。
+
+遗留事实（不因合并消失，待 B 侧重接时消除）：`contracts/types.ts` 的契约漂移、`mock/goldenCase.ts` mock 数据源、`GameContext` 未接真实公开接口。线上部署若经 Vercel Git 集成自动触发，则生产页面将呈现该 mock 驱动 UI——这是用户在知情（本报告第 4 条证据 + 预览说明）前提下的明确决定。
