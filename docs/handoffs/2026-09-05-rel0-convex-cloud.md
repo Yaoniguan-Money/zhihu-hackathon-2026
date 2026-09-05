@@ -1,8 +1,14 @@
-# REL0：P0 公网部署——Convex Cloud 完成，Vercel 待登录
+# REL0：P0 公网部署
 
-状态：`in_progress`（权威数据侧完成并验证；Web/API 侧等 `vercel login` 后执行）
-完成时间：`2026-09-05`
+状态：`complete`（Convex Cloud + Vercel Web 均已部署并验证）  
+完成时间：`2026-09-05`  
 负责人：`开发人员 A / ZCode`
+
+## 生产入口
+
+- **Web**：https://zhihu-hackathon-2026.vercel.app（Vercel 项目 `cai-awaystry/zhihu-hackathon-2026`，Production 环境变量 `NEXT_PUBLIC_CONVEX_URL=https://agile-turtle-860.convex.cloud`）
+- **权威数据**：https://agile-turtle-860.convex.cloud（site：`https://agile-turtle-860.convex.site`）
+- 当前线上页面为 PF0 骨架页（产品 UI 属开发人员 B）；数据侧已可完整游玩。
 
 ## 实际完成
 
@@ -17,11 +23,8 @@
 
 ## 明确未完成
 
-- **Vercel Web/API 部署**：CLI 已安装但未登录（`vercel whoami` 提示需 `vercel login`，浏览器授权只能由用户完成）。剩余步骤（登录后我执行）：
-  1. `vercel link`（关联 Git 仓库或新建项目）
-  2. `vercel env add NEXT_PUBLIC_CONVEX_URL production` → `https://agile-turtle-860.convex.cloud`（Next.js 构建期内联，必须先于首次 build 设置）
-  3. `vercel deploy --prod` + 线上冒烟（页面可访问、匿名建局、公开接口）
-- 产品页面仍为 PF0 骨架页（产品 UI 属开发人员 B 范围）；REL0 验收中的「已签署 Golden 系统案件」与数据侧条件已就绪。
+- 无（本环节范围内）。产品页面为 PF0 骨架页（B 范围）；B 的页面引用 `NEXT_PUBLIC_CONVEX_URL` 后构建期自动内联（骨架页不含引用，故产物中无该串，属预期）。
+- 可选增强：`vercel git connect` 打开 Git 推送自动部署（当前用 CLI 手动部署）；删除多余的空部署 `woozy-alpaca-64`。
 
 ## 修改文件
 
@@ -41,19 +44,20 @@
 - `bun golden-case/case-demo-001/build-and-verify.ts` — 全绿；冻结文件 git diff 零内容漂移。
 - `bun test tests/tb2-golden.test.ts tests/tb8-evidence.test.ts tests/tb9-accuse.test.ts` — 13 pass / 0 fail。
 - `bun scripts/seed-golden.ts https://agile-turtle-860.convex.cloud` — created。
-- `bun scripts/verify-rel0.ts https://agile-turtle-860.convex.cloud` — 8 PASS。
+- `bun scripts/verify-rel0.ts https://agile-turtle-860.convex.cloud` — 8 PASS（案件目录/五角色投影/匿名认证/邀请码拒绝/建局初始态/Owner 隔离×2/事件序列）。
 - `NEXT_PUBLIC_CONVEX_URL=https://agile-turtle-860.convex.cloud bun run build` — 通过；`bun run typecheck` 通过。
+- Vercel：`vercel deploy --prod` Ready；线上冒烟 https://zhihu-hackathon-2026.vercel.app → 200（骨架页内容正确）；`vercel env pull --environment production` 确认 `NEXT_PUBLIC_CONVEX_URL` 值正确；`convex logs --prod` 日志流可观察。
 
 ## 已知风险、阻塞与下一步
 
-- 阻塞：`vercel login`（用户浏览器授权）。完成后按上文 3 步执行 Web 部署与线上冒烟。
-- `woozy-alpaca-64` 多余部署建议用户在 dashboard 删除。
-- 生产 JWT 密钥为本次新生成；如需轮换，同时更新 `JWT_PRIVATE_KEY` 与 `JWKS`（必须来自同一密钥对）。
-- 下一步：① 用户 `vercel login` → 完成 Web 部署 + 线上冒烟 → REL0 COMPLETE；② P1-1 录音对质可开工（不依赖部署）。
+- 生产 JWT 密钥为本次新生成；如需轮换，同时更新 `JWT_PRIVATE_KEY` 与 `JWKS`（必须来自同一密钥对，`JWKS` 缺失/不匹配时 `/.well-known/jwks.json` 500 或校验失败）。
+- 部署密钥只存 gitignored `.convex/deploy-key.env`；建议用户在 dashboard 定期轮换。
+- 多余空部署 `woozy-alpaca-64` 可在 dashboard 删除。
+- 下一步：① P1-1 录音对质（可立即开工）；② P1-3 等用户提供第二篇真实 URL + 全文；③ P1-2 本地语音（含用户音色 A/B 试听）。
 
 ## 最小接手阅读顺序
 
 1. 本记录
-2. `DEVELOPER_A_IMPLEMENTATION_PLAN.md` 第 10 节（REL0 边界）
+2. `DEVELOPER_A_IMPLEMENTATION_PLAN.md` 第 10 节（REL0/P0 边界）
 3. `scripts/verify-rel0.ts`（验证清单即验收清单）
 4. `docs/handoffs/2026-09-05-tb10-full-chain.md`

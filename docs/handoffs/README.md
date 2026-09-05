@@ -92,4 +92,4 @@ docs/handoffs/<ticket-or-stage-id>.md
 | TB8 Evidence 与 Board | complete | [2026-09-05-tb8-evidence-board](./2026-09-05-tb8-evidence-board.md) |
 | TB2b 用户案件完整编译器 | complete | [2026-09-05-tb2b-user-case-compiler](./2026-09-05-tb2b-user-case-compiler.md) |
 | TB10 P0 全链证明 | complete | [2026-09-05-tb10-full-chain](./2026-09-05-tb10-full-chain.md) |
-| REL0 Convex Cloud（Vercel 待登录） | in_progress | [2026-09-05-rel0-convex-cloud](./2026-09-05-rel0-convex-cloud.md) |
+| REL0 P0 公网部署 | complete | [2026-09-05-rel0-convex-cloud](./2026-09-05-rel0-convex-cloud.md) |

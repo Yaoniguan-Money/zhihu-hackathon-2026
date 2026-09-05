@@ -19,3 +19,6 @@ convex/_generated/
 
 # 官方 skill 升级源包（用户下载，保留不跟踪）
 /zhihu-cli-skill-0.5.3-beta.20260904115023/
+
+.vercel
+.env*
