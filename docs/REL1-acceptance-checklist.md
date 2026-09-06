@@ -5,7 +5,7 @@
 ## 0. 前置
 
 - [ ] 本地后端运行中（见 `docs/handoffs/2026-09-05-workspace-ascii-path.md`）
-- [ ] 真实模型可用（`.env.local` 八项 `AI_*`；当前 ⛔ DeepSeek 余额不足，需充值或换显式配置）
+- [ ] 真实模型可用（`.env.local` 八项 `AI_*`；2026-09-06 已切换智谱 `glm-4.7-flash`，smoke 通过；注意免费档时段性过载，见 AI 切换 handoff）
 - [ ] 语音 Worker 运行中：`cd voice-worker && .venv/Scripts/python.exe worker.py`
 
 ## 1. P0 完整游玩（可用线上/本地数据面）
@@ -29,7 +29,7 @@
 - [ ] 超过 30 秒音频 → `VOICE_AUDIO_TOO_LONG`；纯静音 → `VOICE_NO_SPEECH`
 - [ ] Worker 未启动时调用语音 Route → `VOICE_ASR_FAILED` / `VOICE_TTS_FAILED`（保留键盘输入路径）
 
-## 4. P1-3 第二案件 ⛔（等 DeepSeek 余额恢复）
+## 4. P1-3 第二案件 ⛔（2026-09-06 更新：等 glm-4.7-flash 之外的抽取模型决策——flash 档不满足长文逐字抽取契约，游玩链不受影响，见 AI 切换 handoff）
 
 - [ ] `RUN_MODEL_INTEGRATION=1 bun test tests/p13-second-case.test.ts` 全绿（编译 → 不变量/Span → 开场 → 审讯 → 对质 → 指控 → Reveal）
 - [ ] 用户对照知乎原页抽查 `golden-case/case-demo-002/source.md`（逐段完整性）
