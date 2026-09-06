@@ -50,6 +50,8 @@
 
 ## 已知风险、阻塞与下一步
 
+- **生产部署阻塞（Vercel 平台侧，2026-09-06 上午追加）**：Git 推送不会触发自动部署（线上 `zhihu-hackathon-2026.vercel.app` 至今仍是 19h 前的 PF0 骨架页，Age 头可证）。以 CLI（已登录 `yaoniguan56-1806`，项目已链接）发起生产部署两次：上传成功（首次因未排除本地工件超限，新增 `.vercelignore` 后解决），但**云端构建始终不启动**（status UNKNOWN、Builds 0ms、无任何构建日志，等 35 分钟无变化；删除卡死部署后重发依旧）。需用户登录 vercel.com 后台检查该 team/project 的构建并发/额度或卡住的 builder；恢复后任意一次 `vercel deploy --prod --yes`（或后台 Redeploy）即可上线新前端——仓库内容已就绪、本地已验证。
+
 - **外部阻塞（供应商）**：GLM `glm-4.7-flash` 免费档 smoke 可过、但完整角色回合（长结构化输出）间歇失败（症状与 [AI 切换 handoff](./2026-09-06-ai-provider-switch-glm.md) 记录的 1305/900s 切断一致）。后台健康探测循环（每 8 分钟 `model-smoke`，日志 `/tmp/health-probe.log`）已挂起，健康窗口内可直接在 https://localhost:3100 人工试玩全链。
 - **测试环境态互斥**：产品可玩（部署带 AI_*）与"无模型"测试族（断言 SERVICE_NOT_CONFIGURED）不能同时成立；批量验收若要 135/0 基线，先 `bunx convex env remove AI_*`（八项）再跑，验完按 REL1 前置重新配置。建议后续由 A 侧为该测试族引入独立无模型部署。
 - REL1 人工清单项（麦克风试听、case-demo-002 审阅、verify-rel0 等）保持留待用户，与 [REL1 清单](../REL1-acceptance-checklist.md) 一致。

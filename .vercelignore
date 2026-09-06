@@ -1,0 +1,25 @@
+# Vercel CLI 上传范围约束：构建在云端进行，本地工件一律不上传
+node_modules
+.next
+.convex
+.vercel
+.zcode
+__MACOSX
+
+# 本地语音 Worker 的重资产（模型/虚拟环境/试听/日志），源码保留
+voice-worker/.venv
+voice-worker/models
+voice-worker/audition
+voice-worker/*.log
+
+# 用户本地素材副本与工具链源包（gitignore 同源）
+刘看山动态
+看山三视图
+刘看山动态.zip
+看山三视图.zip
+zhihu-cli-skill-0.5.3-beta.20260904115023
+
+*.tsbuildinfo
+next-env.d.ts
+.env
+.env.*
