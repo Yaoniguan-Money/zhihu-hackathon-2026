@@ -6,6 +6,14 @@
 const ZHIHU_API_BASE = 'https://developer.zhihu.com/api/v1';
 const ZHIHU_ZHIDA_URL = 'https://developer.zhihu.com/v1/chat/completions';
 
+const FALLBACK_HOT_ITEMS: ZhihuHotItem[] = [
+  { title: '多省明确取消应届毕业生身份限制，释放了什么信号？', url: 'https://www.zhihu.com/question/demo1', thumbnailUrl: '', summary: '四川、山东、贵州等多省明确取消应届毕业生身份限制，影响考公考编' },
+  { title: '如何看待AI生成内容标识管理办法正式实施？', url: 'https://www.zhihu.com/question/demo2', thumbnailUrl: '', summary: 'AI生成内容必须显著标识，违规最高罚10万' },
+  { title: '多家银行存款利率告别2时代，普通人如何理财？', url: 'https://www.zhihu.com/question/demo3', thumbnailUrl: '', summary: '工行、建行等大行下调存款利率，三年期跌破2%' },
+  { title: '国产芯片取得突破，7nm量产意味着什么？', url: 'https://www.zhihu.com/question/demo4', thumbnailUrl: '', summary: '中芯国际7nm工艺量产，国产芯片产业链加速' },
+  { title: '延迟退休政策正式落地，对不同行业影响几何？', url: 'https://www.zhihu.com/question/demo5', thumbnailUrl: '', summary: '渐进式延迟退休方案确定，影响80后90后群体' },
+];
+
 function getHeaders() {
   const secret = process.env.ZHIHU_ACCESS_SECRET;
   if (!secret) throw new Error('ZHIHU_ACCESS_SECRET not configured');
@@ -59,6 +67,9 @@ export async function fetchZhihuHotList(limit: number = 10): Promise<ZhihuHotIte
     }
   const json = await resp.json();
   if (json.Code !== 0) {
+    if (json.Code === 30001 || json.Code === 30002) {
+      return FALLBACK_HOT_ITEMS.slice(0, limit);
+    }
     throw new Error(`知乎热榜错误: ${json.Message} (Code: ${json.Code})`);
   }
   return (json.Data?.Items ?? []).map((item: Record<string, string>) => ({
@@ -79,27 +90,36 @@ export async function fetchZhihuHotList(limit: number = 10): Promise<ZhihuHotIte
 export async function searchZhihu(query: string, count: number = 5): Promise<ZhihuSearchItem[]> {
   const params = new URLSearchParams({ Query: query, Count: String(Math.min(count, 10)) });
   const url = `${ZHIHU_API_BASE}/content/zhihu_search?${params}`;
-  const resp = await fetch(url, { headers: getHeaders() });
-  if (!resp.ok) {
-    const text = await resp.text();
-    throw new Error(`知乎搜索请求失败 (${resp.status}): ${text}`);
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 10000);
+  try {
+    const resp = await fetch(url, { headers: getHeaders(), signal: controller.signal });
+    if (!resp.ok) {
+      const text = await resp.text();
+      throw new Error(`知乎搜索请求失败 (${resp.status}): ${text}`);
+    }
+    const json = await resp.json();
+    if (json.Code !== 0) {
+      if (json.Code === 30001 || json.Code === 30002) {
+        return [];
+      }
+      throw new Error(`知乎搜索错误: ${json.Message} (Code: ${json.Code})`);
+    }
+    return (json.Data?.Items ?? []).map((item: Record<string, unknown>) => ({
+      title: String(item.Title ?? ''),
+      contentType: String(item.ContentType ?? ''),
+      contentId: String(item.ContentID ?? ''),
+      contentText: String(item.ContentText ?? ''),
+      url: String(item.Url ?? ''),
+      commentCount: Number(item.CommentCount ?? 0),
+      voteUpCount: Number(item.VoteUpCount ?? 0),
+      authorName: String(item.AuthorName ?? '知乎用户'),
+      authorAvatar: String(item.AuthorAvatar ?? ''),
+      authorityLevel: String(item.AuthorityLevel ?? '1'),
+    }));
+  } finally {
+    clearTimeout(timeout);
   }
-  const json = await resp.json();
-  if (json.Code !== 0) {
-    throw new Error(`知乎搜索错误: ${json.Message} (Code: ${json.Code})`);
-  }
-  return (json.Data?.Items ?? []).map((item: Record<string, unknown>) => ({
-    title: String(item.Title ?? ''),
-    contentType: String(item.ContentType ?? ''),
-    contentId: String(item.ContentID ?? ''),
-    contentText: String(item.ContentText ?? ''),
-    url: String(item.Url ?? ''),
-    commentCount: Number(item.CommentCount ?? 0),
-    voteUpCount: Number(item.VoteUpCount ?? 0),
-    authorName: String(item.AuthorName ?? '知乎用户'),
-    authorAvatar: String(item.AuthorAvatar ?? ''),
-    authorityLevel: String(item.AuthorityLevel ?? '1'),
-  }));
 }
 
 /**

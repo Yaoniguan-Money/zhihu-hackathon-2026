@@ -15,15 +15,20 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const hasConvex = !!process.env.NEXT_PUBLIC_CONVEX_URL;
   return (
     <html lang="zh-CN" className="h-full" suppressHydrationWarning>
       <body className="min-h-full bg-night text-paper antialiased">
-        <ConvexAuthProvider client={convexClient}>
-          <GameProvider>
-            {children}
-            <Toaster />
-          </GameProvider>
-        </ConvexAuthProvider>
+        {hasConvex ? (
+          <ConvexAuthProvider client={convexClient}>
+            <GameProvider>
+              {children}
+              <Toaster />
+            </GameProvider>
+          </ConvexAuthProvider>
+        ) : (
+          <>{children}</>
+        )}
       </body>
     </html>
   );
