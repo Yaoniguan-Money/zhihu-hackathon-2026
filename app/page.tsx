@@ -245,6 +245,28 @@ export default function Home() {
 
         <CustomCaseForm />
 
+        {/* 知乎社区集成入口 */}
+        <div className="grid grid-cols-2 gap-3">
+          <a href="/zhihu/hot" className="card-dark flex flex-col items-center gap-1 p-4 text-center transition-colors hover:border-amber/40">
+            <span className="text-2xl">🔥</span>
+            <span className="text-xs font-black text-paper">今日热案</span>
+            <span className="text-[10px] text-paper/50">知乎热榜生成</span>
+          </a>
+          <a href="/zhihu/search" className="card-dark flex flex-col items-center gap-1 p-4 text-center transition-colors hover:border-amber/40">
+            <span className="text-2xl">🔍</span>
+            <span className="text-xs font-black text-paper">知乎搜索</span>
+            <span className="text-[10px] text-paper/50">搜索知乎内容</span>
+          </a>
+        </div>
+
+        <a href="/zhihu/score-card" className="card-dark flex items-center gap-3 p-4 text-center transition-colors hover:border-amber/40">
+          <span className="text-2xl">🏆</span>
+          <div className="flex-1 text-left">
+            <span className="block text-xs font-black text-paper">辨别力战绩卡</span>
+            <span className="block text-[10px] text-paper/50">查看上次成绩 · 分享到知乎</span>
+          </div>
+        </a>
+
         <div className="card-dark p-4 text-xs leading-relaxed text-paper/60">
           <p className="mb-1 font-black text-paper/80">玩法 · 90 秒看懂</p>
           <p>① 五个 AI 角色围绕圆桌各自开场，只有一人篡改了原文。</p>
