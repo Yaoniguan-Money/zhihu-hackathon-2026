@@ -1,0 +1,87 @@
+{
+  "character": "JiYunting",
+  "review_note": "五向与参考同角色：深色侧分短 Bob、细框圆眼镜、深靛紫西装浅紫衬衫、紫色吊坠项链、黑平板；比沈青梧略高（2.49→2.53m 实测 2.49m 级），轮廓与沈可区分；动作极值六项均有效。",
+  "source_blend": "art/blender/characters/ji-yunting/v014_rigged.blend",
+  "glb_sha256": "6441a8e09ca9e6caea668ee3be9f6b7af4898acc1dee42a855a5e80bcdf24778",
+  "technical_checks": "passed",
+  "images": [
+    {
+      "path": "art/blender/renders/ji-yunting/final/Front.png",
+      "size": [
+        800,
+        1000
+      ]
+    },
+    {
+      "path": "art/blender/renders/ji-yunting/final/ThreeQuarterFront.png",
+      "size": [
+        800,
+        1000
+      ]
+    },
+    {
+      "path": "art/blender/renders/ji-yunting/final/Side.png",
+      "size": [
+        800,
+        1000
+      ]
+    },
+    {
+      "path": "art/blender/renders/ji-yunting/final/ThreeQuarterBack.png",
+      "size": [
+        800,
+        1000
+      ]
+    },
+    {
+      "path": "art/blender/renders/ji-yunting/final/Back.png",
+      "size": [
+        800,
+        1000
+      ]
+    },
+    {
+      "path": "art/blender/renders/ji-yunting/poses/Blink.png",
+      "size": [
+        700,
+        700
+      ]
+    },
+    {
+      "path": "art/blender/renders/ji-yunting/poses/TalkMouth.png",
+      "size": [
+        700,
+        700
+      ]
+    },
+    {
+      "path": "art/blender/renders/ji-yunting/poses/HeadTurn.png",
+      "size": [
+        700,
+        700
+      ]
+    },
+    {
+      "path": "art/blender/renders/ji-yunting/poses/GestureHand.png",
+      "size": [
+        700,
+        700
+      ]
+    },
+    {
+      "path": "art/blender/renders/ji-yunting/poses/GestureLean.png",
+      "size": [
+        700,
+        700
+      ]
+    },
+    {
+      "path": "art/blender/renders/ji-yunting/poses/GestureShrug.png",
+      "size": [
+        700,
+        700
+      ]
+    }
+  ],
+  "art_review": "completed_with_stylized_simplification"
+}

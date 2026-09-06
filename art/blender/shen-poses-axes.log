@@ -1,0 +1,11 @@
+00:00.547  blend            | Read blend: "D:\Users\yaoni\Desktop\zhihu-hackathon\art\blender\characters\shen-qingwu\v049_rigged.blend"
+00:09.594  render           | Saved: 'D:\Users\yaoni\Desktop\zhihu-hackathon\art\blender\renders\shen-qingwu\poses\Blink.png'
+00:18.954  render           | Saved: 'D:\Users\yaoni\Desktop\zhihu-hackathon\art\blender\renders\shen-qingwu\poses\TalkMouth.png'
+00:27.360  render           | Saved: 'D:\Users\yaoni\Desktop\zhihu-hackathon\art\blender\renders\shen-qingwu\poses\HeadTurn.png'
+00:35.688  render           | Saved: 'D:\Users\yaoni\Desktop\zhihu-hackathon\art\blender\renders\shen-qingwu\poses\GestureHand.png'
+00:44.641  render           | Saved: 'D:\Users\yaoni\Desktop\zhihu-hackathon\art\blender\renders\shen-qingwu\poses\GestureLean.png'
+00:53.907  render           | Saved: 'D:\Users\yaoni\Desktop\zhihu-hackathon\art\blender\renders\shen-qingwu\poses\GestureShrug.png'
+POSE_QA_RENDERED shen-qingwu
+Blender 5.2.1 LTS (hash 9e2066aef7ef built 2026-08-25 02:38:20)
+
+Blender quit

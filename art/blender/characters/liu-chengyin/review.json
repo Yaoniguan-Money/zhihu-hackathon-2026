@@ -1,0 +1,87 @@
+{
+  "character": "LiuChengyin",
+  "review_note": "五向与参考同角色：葡萄紫波浪卷发（发束脊线正弦波修复后读作卷发）、棕色斜戴贝雷帽带帽梗、芥末黄风衣、深棕内搭长裤、棕金格围巾带流苏、褐色挎包、金圆耳环、左手笔记本钢笔；卷发体积为五人最宽，轮廓辨识度良好；动作极值六项均有效。",
+  "source_blend": "art/blender/characters/liu-chengyin/v012_rigged.blend",
+  "glb_sha256": "7627a1645402303d4c27506be0913740b8687bdaf62c88363b2bcb38c0919d64",
+  "technical_checks": "passed",
+  "images": [
+    {
+      "path": "art/blender/renders/liu-chengyin/final/Front.png",
+      "size": [
+        800,
+        1000
+      ]
+    },
+    {
+      "path": "art/blender/renders/liu-chengyin/final/ThreeQuarterFront.png",
+      "size": [
+        800,
+        1000
+      ]
+    },
+    {
+      "path": "art/blender/renders/liu-chengyin/final/Side.png",
+      "size": [
+        800,
+        1000
+      ]
+    },
+    {
+      "path": "art/blender/renders/liu-chengyin/final/ThreeQuarterBack.png",
+      "size": [
+        800,
+        1000
+      ]
+    },
+    {
+      "path": "art/blender/renders/liu-chengyin/final/Back.png",
+      "size": [
+        800,
+        1000
+      ]
+    },
+    {
+      "path": "art/blender/renders/liu-chengyin/poses/Blink.png",
+      "size": [
+        700,
+        700
+      ]
+    },
+    {
+      "path": "art/blender/renders/liu-chengyin/poses/TalkMouth.png",
+      "size": [
+        700,
+        700
+      ]
+    },
+    {
+      "path": "art/blender/renders/liu-chengyin/poses/HeadTurn.png",
+      "size": [
+        700,
+        700
+      ]
+    },
+    {
+      "path": "art/blender/renders/liu-chengyin/poses/GestureHand.png",
+      "size": [
+        700,
+        700
+      ]
+    },
+    {
+      "path": "art/blender/renders/liu-chengyin/poses/GestureLean.png",
+      "size": [
+        700,
+        700
+      ]
+    },
+    {
+      "path": "art/blender/renders/liu-chengyin/poses/GestureShrug.png",
+      "size": [
+        700,
+        700
+      ]
+    }
+  ],
+  "art_review": "completed_with_stylized_simplification"
+}

@@ -1,0 +1,64 @@
+{
+  "file": "art/blender/exports/ji-yunting.glb",
+  "meshes": 102,
+  "clips": [
+    {
+      "name": "Idle",
+      "tracks": 84,
+      "evaluated": true
+    },
+    {
+      "name": "Blink",
+      "tracks": 89,
+      "evaluated": true
+    },
+    {
+      "name": "HeadTurn",
+      "tracks": 84,
+      "evaluated": true
+    },
+    {
+      "name": "TalkMouth",
+      "tracks": 86,
+      "evaluated": true
+    },
+    {
+      "name": "Nod",
+      "tracks": 84,
+      "evaluated": true
+    },
+    {
+      "name": "ShakeHead",
+      "tracks": 84,
+      "evaluated": true
+    },
+    {
+      "name": "GestureLean",
+      "tracks": 84,
+      "evaluated": true
+    },
+    {
+      "name": "GestureShrug",
+      "tracks": 84,
+      "evaluated": true
+    },
+    {
+      "name": "GestureHand",
+      "tracks": 84,
+      "evaluated": true
+    }
+  ],
+  "bounds": {
+    "min": [
+      -0.49616460025819425,
+      0.002537383387977153,
+      -0.4003937542438507
+    ],
+    "max": [
+      0.49616460025819425,
+      2.4887378040991344,
+      0.3745350241661072
+    ]
+  },
+  "status": "passed"
+}

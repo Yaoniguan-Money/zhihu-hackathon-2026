@@ -1,0 +1,15 @@
+{
+  "file": "detective-room.glb",
+  "bytes": 4470900,
+  "sha256": "9ebb3c303dea8d31e001a85d9338575dbb5071e9e18d8556152b97e06174bf2f",
+  "triangles": 74900,
+  "nodes": 599,
+  "mesh_count": 599,
+  "materials": 62,
+  "skins": 0,
+  "skinned_primitives": 0,
+  "morph_targets": 0,
+  "animations": {},
+  "embedded_resources": true,
+  "checks": "passed"
+}

@@ -1,0 +1,209 @@
+00:00.641  blend            | Read blend: "D:\Users\yaoni\Desktop\zhihu-hackathon\art\blender\characters\ji-yunting\v002_blockout.blend"
+Info: Saved as "v003_face.blend"
+SAVED_STAGE D:\Users\yaoni\Desktop\zhihu-hackathon\art\blender\characters\ji-yunting\v003_face.blend
+Info: Saved as "v004_hair.blend"
+SAVED_STAGE D:\Users\yaoni\Desktop\zhihu-hackathon\art\blender\characters\ji-yunting\v004_hair.blend
+Info: Saved as "v005_clothing.blend"
+SAVED_STAGE D:\Users\yaoni\Desktop\zhihu-hackathon\art\blender\characters\ji-yunting\v005_clothing.blend
+Info: Saved as "v006_accessories.blend"
+SAVED_STAGE D:\Users\yaoni\Desktop\zhihu-hackathon\art\blender\characters\ji-yunting\v006_accessories.blend
+INFO Draco is available, use library at D:\5.2\scripts\addons_core\io_scene_gltf2\bf_intern_draco_bridge.dll
+INFO MeshOptimizer is available, use library at D:\5.2\scripts\addons_core\io_scene_gltf2\bf_intern_meshopt_bridge.dll
+22:20:46 | INFO: Starting glTF 2.0 export
+22:20:46 | INFO: Extracting primitive: CHR_JiYunting_Ankle_L_Geometry
+22:20:46 | INFO: Primitives created: 1
+22:20:46 | INFO: Extracting primitive: CHR_JiYunting_Ankle_R_Geometry
+22:20:46 | INFO: Primitives created: 1
+22:20:46 | INFO: Extracting primitive: CHR_JiYunting_BackBelt_Button_1_Geometry
+22:20:46 | INFO: Primitives created: 1
+22:20:46 | INFO: Extracting primitive: CHR_JiYunting_BackBelt_Button_-1_Geometry
+22:20:46 | INFO: Primitives created: 1
+22:20:46 | INFO: Extracting primitive: CHR_JiYunting_Belt_Buckle_Geometry
+22:20:46 | INFO: Primitives created: 1
+22:20:46 | INFO: Extracting primitive: CHR_JiYunting_Body_Pelvis_Geometry
+22:20:46 | INFO: Primitives created: 1
+22:20:46 | INFO: Extracting primitive: CHR_JiYunting_Body_Torso_Geometry
+22:20:46 | INFO: Primitives created: 1
+22:20:46 | INFO: Extracting primitive: CHR_JiYunting_Brow_L_Geometry
+22:20:46 | INFO: Primitives created: 1
+22:20:46 | INFO: Extracting primitive: CHR_JiYunting_Brow_R_Geometry
+22:20:46 | INFO: Primitives created: 1
+22:20:46 | INFO: Extracting primitive: CHR_JiYunting_Coat_Geometry
+22:20:46 | INFO: Primitives created: 2
+22:20:46 | INFO: Extracting primitive: CHR_JiYunting_Coat_BackBelt_Geometry
+22:20:46 | INFO: Primitives created: 1
+22:20:46 | INFO: Extracting primitive: CHR_JiYunting_Coat_Button_1_0_Geometry
+22:20:46 | INFO: Primitives created: 1
+22:20:46 | INFO: Extracting primitive: CHR_JiYunting_Coat_Button_1_1_Geometry
+22:20:46 | INFO: Primitives created: 1
+22:20:46 | INFO: Extracting primitive: CHR_JiYunting_Coat_Button_1_2_Geometry
+22:20:46 | INFO: Primitives created: 1
+22:20:46 | INFO: Extracting primitive: CHR_JiYunting_Coat_Button_-1_0_Geometry
+22:20:46 | INFO: Primitives created: 1
+22:20:46 | INFO: Extracting primitive: CHR_JiYunting_Coat_Button_-1_1_Geometry
+22:20:46 | INFO: Primitives created: 1
+22:20:46 | INFO: Extracting primitive: CHR_JiYunting_Coat_Button_-1_2_Geometry
+22:20:46 | INFO: Primitives created: 1
+22:20:46 | INFO: Extracting primitive: CHR_JiYunting_Coat_Edge_L_Geometry
+22:20:46 | INFO: Primitives created: 1
+22:20:46 | INFO: Extracting primitive: CHR_JiYunting_Coat_Edge_R_Geometry
+22:20:46 | INFO: Primitives created: 1
+22:20:46 | INFO: Extracting primitive: CHR_JiYunting_Coat_Lapel_L_Geometry
+22:20:46 | INFO: Primitives created: 1
+22:20:46 | INFO: Extracting primitive: CHR_JiYunting_Coat_Lapel_R_Geometry
+22:20:46 | INFO: Primitives created: 1
+22:20:46 | INFO: Extracting primitive: CHR_JiYunting_Coat_Pocket_L_Geometry
+22:20:46 | INFO: Primitives created: 1
+22:20:46 | INFO: Extracting primitive: CHR_JiYunting_Coat_Pocket_R_Geometry
+22:20:46 | INFO: Primitives created: 1
+22:20:46 | INFO: Extracting primitive: CHR_JiYunting_Cuff_L_Geometry
+22:20:46 | INFO: Primitives created: 1
+22:20:46 | INFO: Extracting primitive: CHR_JiYunting_Cuff_R_Geometry
+22:20:46 | INFO: Primitives created: 1
+22:20:46 | INFO: Extracting primitive: CHR_JiYunting_Ear_L_Geometry
+22:20:46 | INFO: Primitives created: 1
+22:20:46 | INFO: Extracting primitive: CHR_JiYunting_Ear_R_Geometry
+22:20:46 | INFO: Primitives created: 1
+22:20:46 | INFO: Extracting primitive: CHR_JiYunting_EarConcha_L_Geometry
+22:20:46 | INFO: Primitives created: 1
+22:20:46 | INFO: Extracting primitive: CHR_JiYunting_EarConcha_R_Geometry
+22:20:46 | INFO: Primitives created: 1
+22:20:46 | INFO: Extracting primitive: CHR_JiYunting_EarTragus_L_Geometry
+22:20:46 | INFO: Primitives created: 1
+22:20:46 | INFO: Extracting primitive: CHR_JiYunting_EarTragus_R_Geometry
+22:20:46 | INFO: Primitives created: 1
+22:20:46 | INFO: Extracting primitive: CHR_JiYunting_EyeBall_L_Geometry
+22:20:46 | INFO: Primitives created: 1
+22:20:46 | INFO: Extracting primitive: CHR_JiYunting_EyeBall_R_Geometry
+22:20:46 | INFO: Primitives created: 1
+22:20:46 | INFO: Extracting primitive: CHR_JiYunting_Face_IntegratedSockets.001
+22:20:46 | INFO: Primitives created: 1
+22:20:46 | INFO: Extracting primitive: CHR_JiYunting_Glasses_Bridge_Geometry
+22:20:46 | INFO: Primitives created: 1
+22:20:46 | INFO: Extracting primitive: CHR_JiYunting_Glasses_Frame_L_Geometry
+22:20:46 | INFO: Primitives created: 1
+22:20:46 | INFO: Extracting primitive: CHR_JiYunting_Glasses_Frame_R_Geometry
+22:20:46 | INFO: Primitives created: 1
+22:20:46 | INFO: Extracting primitive: CHR_JiYunting_Glasses_Temple_L_Geometry
+22:20:46 | INFO: Primitives created: 1
+22:20:46 | INFO: Extracting primitive: CHR_JiYunting_Glasses_Temple_R_Geometry
+22:20:46 | INFO: Primitives created: 1
+22:20:46 | INFO: Extracting primitive: CHR_JiYunting_Hair_BackClump_00_Geometry
+22:20:46 | INFO: Primitives created: 2
+22:20:46 | INFO: Extracting primitive: CHR_JiYunting_Hair_FrontBang_00_Geometry
+22:20:46 | INFO: Primitives created: 2
+22:20:46 | INFO: Extracting primitive: CHR_JiYunting_Hair_BaseCap_Geometry
+22:20:46 | INFO: Primitives created: 1
+22:20:46 | INFO: Extracting primitive: CHR_JiYunting_Hair_SideLock_00_Geometry
+22:20:46 | INFO: Primitives created: 2
+22:20:46 | INFO: Extracting primitive: CHR_JiYunting_Hand_Palm_L_Geometry
+22:20:46 | INFO: Primitives created: 1
+22:20:46 | INFO: Extracting primitive: CHR_JiYunting_Hand_Palm_R_Geometry
+22:20:46 | INFO: Primitives created: 1
+22:20:46 | INFO: Extracting primitive: CHR_JiYunting_Iris_L_Geometry
+22:20:46 | INFO: Primitives created: 4
+22:20:46 | INFO: Extracting primitive: CHR_JiYunting_Iris_R_Geometry
+22:20:46 | INFO: Primitives created: 4
+22:20:46 | INFO: Extracting primitive: CHR_JiYunting_Lips_Geometry
+22:20:46 | INFO: Primitives created: 1
+22:20:46 | INFO: Extracting primitive: CHR_JiYunting_LowerLash_L_Geometry
+22:20:46 | INFO: Primitives created: 1
+22:20:46 | INFO: Extracting primitive: CHR_JiYunting_LowerLash_R_Geometry
+22:20:46 | INFO: Primitives created: 1
+22:20:46 | INFO: Extracting primitive: CHR_JiYunting_MouthCavity_Geometry
+22:20:46 | INFO: Primitives created: 1
+22:20:46 | INFO: Extracting primitive: CHR_JiYunting_Neck_Geometry
+22:20:46 | INFO: Primitives created: 1
+22:20:46 | INFO: Extracting primitive: CHR_JiYunting_Necklace_Geometry
+22:20:46 | INFO: Primitives created: 1
+22:20:46 | INFO: Extracting primitive: CHR_JiYunting_NoseBridge_Geometry
+22:20:46 | INFO: Primitives created: 1
+22:20:46 | INFO: Extracting primitive: CHR_JiYunting_NoseTip_Geometry
+22:20:46 | INFO: Primitives created: 1
+22:20:46 | INFO: Extracting primitive: CHR_JiYunting_Nostril_1_Geometry
+22:20:46 | INFO: Primitives created: 1
+22:20:46 | INFO: Extracting primitive: CHR_JiYunting_Nostril_-1_Geometry
+22:20:46 | INFO: Primitives created: 1
+22:20:46 | INFO: Extracting primitive: CHR_JiYunting_Pants_Cuff_L_Geometry
+22:20:46 | INFO: Primitives created: 1
+22:20:46 | INFO: Extracting primitive: CHR_JiYunting_Pants_Cuff_R_Geometry
+22:20:46 | INFO: Primitives created: 1
+22:20:46 | INFO: Extracting primitive: CHR_JiYunting_Pants_L_Geometry
+22:20:46 | INFO: Primitives created: 1
+22:20:46 | INFO: Extracting primitive: CHR_JiYunting_Pants_R_Geometry
+22:20:46 | INFO: Primitives created: 1
+22:20:46 | INFO: Extracting primitive: CHR_JiYunting_Pendant_Geometry
+22:20:46 | INFO: Primitives created: 1
+22:20:46 | INFO: Extracting primitive: CHR_JiYunting_Shirt_Button_0_Geometry
+22:20:46 | INFO: Primitives created: 1
+22:20:46 | INFO: Extracting primitive: CHR_JiYunting_Shirt_Button_1_Geometry
+22:20:46 | INFO: Primitives created: 1
+22:20:46 | INFO: Extracting primitive: CHR_JiYunting_Shirt_Button_2_Geometry
+22:20:46 | INFO: Primitives created: 1
+22:20:46 | INFO: Extracting primitive: CHR_JiYunting_Shirt_Button_3_Geometry
+22:20:46 | INFO: Primitives created: 1
+22:20:46 | INFO: Extracting primitive: CHR_JiYunting_Shirt_Collar_L_Geometry
+22:20:46 | INFO: Primitives created: 1
+22:20:46 | INFO: Extracting primitive: CHR_JiYunting_Shirt_Collar_R_Geometry
+22:20:46 | INFO: Primitives created: 1
+22:20:46 | INFO: Extracting primitive: CHR_JiYunting_Shoe_Bit_L_Geometry
+22:20:46 | INFO: Primitives created: 1
+22:20:46 | INFO: Extracting primitive: CHR_JiYunting_Shoe_Bit_R_Geometry
+22:20:46 | INFO: Primitives created: 1
+22:20:46 | INFO: Extracting primitive: CHR_JiYunting_Shoe_Heel_L_Geometry
+22:20:46 | INFO: Primitives created: 1
+22:20:46 | INFO: Extracting primitive: CHR_JiYunting_Shoe_Heel_R_Geometry
+22:20:46 | INFO: Primitives created: 1
+22:20:46 | INFO: Extracting primitive: CHR_JiYunting_Shoe_Instep_L_Geometry
+22:20:46 | INFO: Primitives created: 1
+22:20:46 | INFO: Extracting primitive: CHR_JiYunting_Shoe_Instep_R_Geometry
+22:20:46 | INFO: Primitives created: 1
+22:20:46 | INFO: Extracting primitive: CHR_JiYunting_Shoe_Sole_L_Geometry
+22:20:46 | INFO: Primitives created: 1
+22:20:46 | INFO: Extracting primitive: CHR_JiYunting_Shoe_Sole_R_Geometry
+22:20:46 | INFO: Primitives created: 1
+22:20:46 | INFO: Extracting primitive: CHR_JiYunting_Shoe_Upper_L_Geometry
+22:20:46 | INFO: Primitives created: 1
+22:20:46 | INFO: Extracting primitive: CHR_JiYunting_Shoe_Upper_R_Geometry
+22:20:46 | INFO: Primitives created: 1
+22:20:46 | INFO: Extracting primitive: CHR_JiYunting_Shoe_VampSeam_L_Geometry
+22:20:46 | INFO: Primitives created: 1
+22:20:46 | INFO: Extracting primitive: CHR_JiYunting_Shoe_VampSeam_R_Geometry
+22:20:46 | INFO: Primitives created: 1
+22:20:46 | INFO: Extracting primitive: CHR_JiYunting_ShoulderCap_L_Geometry
+22:20:46 | INFO: Primitives created: 1
+22:20:46 | INFO: Extracting primitive: CHR_JiYunting_ShoulderCap_R_Geometry
+22:20:46 | INFO: Primitives created: 1
+22:20:46 | INFO: Extracting primitive: CHR_JiYunting_Sleeve_L_Geometry
+22:20:46 | INFO: Primitives created: 1
+22:20:46 | INFO: Extracting primitive: CHR_JiYunting_Sleeve_R_Geometry
+22:20:46 | INFO: Primitives created: 1
+22:20:46 | INFO: Extracting primitive: CHR_JiYunting_Tablet_Geometry
+22:20:46 | INFO: Primitives created: 1
+22:20:46 | INFO: Extracting primitive: CHR_JiYunting_Tablet_Camera_Geometry
+22:20:46 | INFO: Primitives created: 1
+22:20:46 | INFO: Extracting primitive: CHR_JiYunting_Tablet_Screen_Geometry
+22:20:46 | INFO: Primitives created: 1
+22:20:46 | INFO: Extracting primitive: CHR_JiYunting_UpperLash_L_Geometry
+22:20:46 | INFO: Primitives created: 1
+22:20:46 | INFO: Extracting primitive: CHR_JiYunting_UpperLash_R_Geometry
+22:20:46 | INFO: Primitives created: 1
+22:20:46 | INFO: Extracting primitive: CHR_JiYunting_WaistBelt_Geometry
+22:20:46 | INFO: Primitives created: 1
+22:20:46 | INFO: Extracting primitive: CHR_JiYunting_WatchFace_Geometry
+22:20:46 | INFO: Primitives created: 1
+22:20:46 | INFO: Extracting primitive: CHR_JiYunting_WatchStrap_Geometry
+22:20:46 | INFO: Primitives created: 1
+22:20:47 | INFO: Finished glTF 2.0 export in 1.7967379093170166 s
+
+CHARACTER_METRICS {"character": "JiYunting", "triangles": 71064, "meshes": 92, "animation_clips": ["Idle", "Blink", "HeadTurn", "TalkMouth", "Nod", "ShakeHead", "GestureLean", "GestureShrug", "GestureHand"], "export": "art\\blender\\exports\\ji-yunting.glb", "height_m": 2.4861998471897095, "uv_complete": true, "status": "awaiting_visual_QA"}
+Info: Saved as "v007_rigged.blend"
+SAVED_STAGE D:\Users\yaoni\Desktop\zhihu-hackathon\art\blender\characters\ji-yunting\v007_rigged.blend
+00:15.484  render           | Saved: 'D:\Users\yaoni\Desktop\zhihu-hackathon\art\blender\renders\ji-yunting\final\Front.png'
+00:25.375  render           | Saved: 'D:\Users\yaoni\Desktop\zhihu-hackathon\art\blender\renders\ji-yunting\final\ThreeQuarterFront.png'
+00:34.391  render           | Saved: 'D:\Users\yaoni\Desktop\zhihu-hackathon\art\blender\renders\ji-yunting\final\Side.png'
+00:43.969  render           | Saved: 'D:\Users\yaoni\Desktop\zhihu-hackathon\art\blender\renders\ji-yunting\final\ThreeQuarterBack.png'
+00:54.094  render           | Saved: 'D:\Users\yaoni\Desktop\zhihu-hackathon\art\blender\renders\ji-yunting\final\Back.png'
+Blender 5.2.1 LTS (hash 9e2066aef7ef built 2026-08-25 02:38:20)
+
+Blender quit

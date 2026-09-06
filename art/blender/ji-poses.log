@@ -1,0 +1,11 @@
+00:00.671  blend            | Read blend: "D:\Users\yaoni\Desktop\zhihu-hackathon\art\blender\characters\ji-yunting\v007_rigged.blend"
+00:07.031  render           | Saved: 'D:\Users\yaoni\Desktop\zhihu-hackathon\art\blender\renders\ji-yunting\poses\Blink.png'
+00:12.781  render           | Saved: 'D:\Users\yaoni\Desktop\zhihu-hackathon\art\blender\renders\ji-yunting\poses\TalkMouth.png'
+00:18.484  render           | Saved: 'D:\Users\yaoni\Desktop\zhihu-hackathon\art\blender\renders\ji-yunting\poses\HeadTurn.png'
+00:23.765  render           | Saved: 'D:\Users\yaoni\Desktop\zhihu-hackathon\art\blender\renders\ji-yunting\poses\GestureHand.png'
+00:28.921  render           | Saved: 'D:\Users\yaoni\Desktop\zhihu-hackathon\art\blender\renders\ji-yunting\poses\GestureLean.png'
+00:34.203  render           | Saved: 'D:\Users\yaoni\Desktop\zhihu-hackathon\art\blender\renders\ji-yunting\poses\GestureShrug.png'
+POSE_QA_RENDERED ji-yunting
+Blender 5.2.1 LTS (hash 9e2066aef7ef built 2026-08-25 02:38:20)
+
+Blender quit

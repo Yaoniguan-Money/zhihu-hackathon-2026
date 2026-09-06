@@ -1,0 +1,101 @@
+[
+  {
+    "source": "public/assets/cast/shen-qingwu.png",
+    "sha256": "d3cc00f103e42f2b00cba465ffbf36d1c210070bb22d6e319b0df6cc1d38b0ae",
+    "size": [
+      1086,
+      1448
+    ],
+    "decoded": true
+  },
+  {
+    "source": "public/assets/cast/four-views/shen-qingwu.png",
+    "sha256": "ba157532b09b1941295a76276a760d79af8e96d383b32d0a098a7f7f2c18048d",
+    "size": [
+      1448,
+      1086
+    ],
+    "decoded": true
+  },
+  {
+    "source": "public/assets/cast/ji-yunting.png",
+    "sha256": "3f6e21279cd6cb74441cc8b1a5d83346e9dd26fa917cfeb42867bab3de1571ce",
+    "size": [
+      1086,
+      1448
+    ],
+    "decoded": true
+  },
+  {
+    "source": "public/assets/cast/four-views/ji-yunting.png",
+    "sha256": "b17afd3fd7101fab91a28a560d287ec65d699d13756cf107e0d5ba79a42a3e0e",
+    "size": [
+      1448,
+      1086
+    ],
+    "decoded": true
+  },
+  {
+    "source": "public/assets/cast/a-lan.png",
+    "sha256": "8669e85546fcbbd4a5f88b7db513e041ca404258dd52b546025e94221323b320",
+    "size": [
+      1086,
+      1448
+    ],
+    "decoded": true
+  },
+  {
+    "source": "public/assets/cast/four-views/a-lan.png",
+    "sha256": "4d5b1eb3c20b77528a9a1b28f84461856328da38a9f42d8bf02982c1e0e4c99a",
+    "size": [
+      1448,
+      1086
+    ],
+    "decoded": true
+  },
+  {
+    "source": "public/assets/cast/he-xu.png",
+    "sha256": "bf928d03e066b2eed37c46bf260c179167d54041501688aa7aa3f720573c7272",
+    "size": [
+      1086,
+      1448
+    ],
+    "decoded": true
+  },
+  {
+    "source": "public/assets/cast/four-views/he-xu.png",
+    "sha256": "e939fcdf735d0661f2219f993e313c671b0e586201cf4b86dbe834d5ff6afacf",
+    "size": [
+      1448,
+      1086
+    ],
+    "decoded": true
+  },
+  {
+    "source": "public/assets/cast/liu-chengyin.png",
+    "sha256": "79be044b200da7db0536e88b78141966057bee7562147da94bbd57e05441efbc",
+    "size": [
+      1086,
+      1448
+    ],
+    "decoded": true
+  },
+  {
+    "source": "public/assets/cast/four-views/liu-chengyin.png",
+    "sha256": "e9962d440e4d53dbcfc6890e8bb51aa397b86e178b2b429ecef2f5850361d9cf",
+    "size": [
+      1448,
+      1086
+    ],
+    "decoded": true
+  },
+  {
+    "source": "public/assets/scenes/detective-room.png",
+    "sha256": "33d35ec272d9bcc21eb88211b3878b42de8bf316cbc41627590ffd6519bd0a64",
+    "size": [
+      1672,
+      941
+    ],
+    "decoded": true
+  }
+]

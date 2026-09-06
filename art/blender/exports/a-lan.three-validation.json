@@ -1,0 +1,64 @@
+{
+  "file": "art/blender/exports/a-lan.glb",
+  "meshes": 101,
+  "clips": [
+    {
+      "name": "Idle",
+      "tracks": 84,
+      "evaluated": true
+    },
+    {
+      "name": "Blink",
+      "tracks": 89,
+      "evaluated": true
+    },
+    {
+      "name": "HeadTurn",
+      "tracks": 84,
+      "evaluated": true
+    },
+    {
+      "name": "TalkMouth",
+      "tracks": 86,
+      "evaluated": true
+    },
+    {
+      "name": "Nod",
+      "tracks": 84,
+      "evaluated": true
+    },
+    {
+      "name": "ShakeHead",
+      "tracks": 84,
+      "evaluated": true
+    },
+    {
+      "name": "GestureLean",
+      "tracks": 84,
+      "evaluated": true
+    },
+    {
+      "name": "GestureShrug",
+      "tracks": 84,
+      "evaluated": true
+    },
+    {
+      "name": "GestureHand",
+      "tracks": 84,
+      "evaluated": true
+    }
+  ],
+  "bounds": {
+    "min": [
+      -0.5053659081459045,
+      0.009214962498604904,
+      -0.38315001130104065
+    ],
+    "max": [
+      0.5015092492103577,
+      2.3786277770996094,
+      0.3579300343990326
+    ]
+  },
+  "status": "passed"
+}

@@ -1,0 +1,64 @@
+{
+  "file": "art/blender/exports/liu-chengyin.glb",
+  "meshes": 147,
+  "clips": [
+    {
+      "name": "Idle",
+      "tracks": 84,
+      "evaluated": true
+    },
+    {
+      "name": "Blink",
+      "tracks": 89,
+      "evaluated": true
+    },
+    {
+      "name": "HeadTurn",
+      "tracks": 84,
+      "evaluated": true
+    },
+    {
+      "name": "TalkMouth",
+      "tracks": 86,
+      "evaluated": true
+    },
+    {
+      "name": "Nod",
+      "tracks": 84,
+      "evaluated": true
+    },
+    {
+      "name": "ShakeHead",
+      "tracks": 84,
+      "evaluated": true
+    },
+    {
+      "name": "GestureLean",
+      "tracks": 84,
+      "evaluated": true
+    },
+    {
+      "name": "GestureShrug",
+      "tracks": 84,
+      "evaluated": true
+    },
+    {
+      "name": "GestureHand",
+      "tracks": 84,
+      "evaluated": true
+    }
+  ],
+  "bounds": {
+    "min": [
+      -0.5563334822654724,
+      0.0024750933202096486,
+      -0.4336971044540405
+    ],
+    "max": [
+      0.5543379783630371,
+      2.5174264907836914,
+      0.36531001329421997
+    ]
+  },
+  "status": "passed"
+}

@@ -1,0 +1,32 @@
+[
+  {
+    "clip": "Blink",
+    "frame": 12,
+    "evaluated": true
+  },
+  {
+    "clip": "TalkMouth",
+    "frame": 19,
+    "evaluated": true
+  },
+  {
+    "clip": "HeadTurn",
+    "frame": 16,
+    "evaluated": true
+  },
+  {
+    "clip": "GestureHand",
+    "frame": 25,
+    "evaluated": true
+  },
+  {
+    "clip": "GestureLean",
+    "frame": 25,
+    "evaluated": true
+  },
+  {
+    "clip": "GestureShrug",
+    "frame": 19,
+    "evaluated": true
+  }
+]

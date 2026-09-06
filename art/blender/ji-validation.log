@@ -1,0 +1,99 @@
+{
+  "file": "ji-yunting.glb",
+  "bytes": 3059096,
+  "sha256": "5aaff5ab6c6867b7fb015ff8adb534cd985515cadb6432c4fd269e07051f37df",
+  "triangles": 71064,
+  "nodes": 121,
+  "mesh_count": 92,
+  "materials": 23,
+  "skins": 1,
+  "skinned_primitives": 102,
+  "morph_targets": 7,
+  "animations": {
+    "Idle": {
+      "channels": 84,
+      "paths": [
+        "rotation",
+        "scale",
+        "translation"
+      ],
+      "duration": 3.0416666666666665
+    },
+    "Blink": {
+      "channels": 89,
+      "paths": [
+        "rotation",
+        "scale",
+        "translation",
+        "weights"
+      ],
+      "duration": 1.0416666666666667
+    },
+    "HeadTurn": {
+      "channels": 84,
+      "paths": [
+        "rotation",
+        "scale",
+        "translation"
+      ],
+      "duration": 2.5416666666666665
+    },
+    "TalkMouth": {
+      "channels": 86,
+      "paths": [
+        "rotation",
+        "scale",
+        "translation",
+        "weights"
+      ],
+      "duration": 2.0416666666666665
+    },
+    "Nod": {
+      "channels": 84,
+      "paths": [
+        "rotation",
+        "scale",
+        "translation"
+      ],
+      "duration": 1.5416666666666667
+    },
+    "ShakeHead": {
+      "channels": 84,
+      "paths": [
+        "rotation",
+        "scale",
+        "translation"
+      ],
+      "duration": 2.0416666666666665
+    },
+    "GestureLean": {
+      "channels": 84,
+      "paths": [
+        "rotation",
+        "scale",
+        "translation"
+      ],
+      "duration": 2.0416666666666665
+    },
+    "GestureShrug": {
+      "channels": 84,
+      "paths": [
+        "rotation",
+        "scale",
+        "translation"
+      ],
+      "duration": 1.5416666666666667
+    },
+    "GestureHand": {
+      "channels": 84,
+      "paths": [
+        "rotation",
+        "scale",
+        "translation"
+      ],
+      "duration": 2.0416666666666665
+    }
+  },
+  "embedded_resources": true,
+  "checks": "passed"
+}

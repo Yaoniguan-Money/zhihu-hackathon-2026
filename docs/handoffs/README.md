@@ -69,6 +69,7 @@ docs/handoffs/<ticket-or-stage-id>.md
 
 | 环节 | 状态 | 记录 |
 |---|---|---|
+| ART0 Blender 参考资产读取与制作基准 | complete | [2026-09-06-art0-reference-analysis](./2026-09-06-art0-reference-analysis.md) |
 | 基础资源与工程文档 | complete | [2026-09-04-foundation-resources-and-docs](./2026-09-04-foundation-resources-and-docs.md) |
 | 开发人员 A 根计划迁移 | complete | [2026-09-04-developer-a-plan-migration](./2026-09-04-developer-a-plan-migration.md) |
 | 知乎 Access Secret 配置（含 CLI 重装） | complete | [2026-09-04-zhihu-access-secret-configured](./2026-09-04-zhihu-access-secret-configured.md) |
@@ -101,3 +102,10 @@ docs/handoffs/<ticket-or-stage-id>.md
 | 2026-09-06 夜间开发中继 | complete | [2026-09-06-night-relay](./2026-09-06-night-relay.md) |
 | FE-B1 前端审美重制 + 真实数据重接 | complete | [2026-09-06-frontend-b-aesthetic-live-data](./2026-09-06-frontend-b-aesthetic-live-data.md) |
 | FE-B2 按官方资产重构前端视觉（3D 人物/场景/立绘落位） | complete | [2026-09-06-frontend-b2-asset-visual-rebuild](./2026-09-06-frontend-b2-asset-visual-rebuild.md) |
+
+| ART-CHR-a-lan Blender 角色 | complete | [2026-09-06-art-chr-a-lan](./2026-09-06-art-chr-a-lan.md) |
+| ART-CHR-he-xu Blender 角色 | complete | [2026-09-06-art-chr-he-xu](./2026-09-06-art-chr-he-xu.md) |
+| ART-CHR-liu-chengyin Blender 角色 | complete | [2026-09-06-art-chr-liu-chengyin](./2026-09-06-art-chr-liu-chengyin.md) |
+| ART-CHR-shen-qingwu Blender 角色 | complete | [2026-09-06-art-chr-shen-qingwu](./2026-09-06-art-chr-shen-qingwu.md) |
+| ART-CHR-ji-yunting Blender 角色 | complete | [2026-09-06-art-chr-ji-yunting](./2026-09-06-art-chr-ji-yunting.md) |
+| ART-ENV-detective-room Blender 场景 | complete | [2026-09-07-art-env-detective-room](./2026-09-07-art-env-detective-room.md) |

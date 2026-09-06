@@ -1,0 +1,87 @@
+{
+  "character": "HeXu",
+  "review_note": "五向与参考同角色：银灰后梳短发、金丝圆眼镜、连续络腮胡+八字胡（两轮修复后胡须为连续壳体+造型发束，紧贴下颌无悬浮）、酒红领结长围巾、棕大衣马甲、左手精装笔记本；五人中最高（2.56m 实测），与基准系统一致；动作极值六项均有效，TalkMouth 开口无胡须穿模。",
+  "source_blend": "art/blender/characters/he-xu/v017_rigged.blend",
+  "glb_sha256": "bda9d382c8afb1a1f01f3e8f0a30399b0eec34d081876c2db9876b8ab5143e57",
+  "technical_checks": "passed",
+  "images": [
+    {
+      "path": "art/blender/renders/he-xu/final/Front.png",
+      "size": [
+        800,
+        1000
+      ]
+    },
+    {
+      "path": "art/blender/renders/he-xu/final/ThreeQuarterFront.png",
+      "size": [
+        800,
+        1000
+      ]
+    },
+    {
+      "path": "art/blender/renders/he-xu/final/Side.png",
+      "size": [
+        800,
+        1000
+      ]
+    },
+    {
+      "path": "art/blender/renders/he-xu/final/ThreeQuarterBack.png",
+      "size": [
+        800,
+        1000
+      ]
+    },
+    {
+      "path": "art/blender/renders/he-xu/final/Back.png",
+      "size": [
+        800,
+        1000
+      ]
+    },
+    {
+      "path": "art/blender/renders/he-xu/poses/Blink.png",
+      "size": [
+        700,
+        700
+      ]
+    },
+    {
+      "path": "art/blender/renders/he-xu/poses/TalkMouth.png",
+      "size": [
+        700,
+        700
+      ]
+    },
+    {
+      "path": "art/blender/renders/he-xu/poses/HeadTurn.png",
+      "size": [
+        700,
+        700
+      ]
+    },
+    {
+      "path": "art/blender/renders/he-xu/poses/GestureHand.png",
+      "size": [
+        700,
+        700
+      ]
+    },
+    {
+      "path": "art/blender/renders/he-xu/poses/GestureLean.png",
+      "size": [
+        700,
+        700
+      ]
+    },
+    {
+      "path": "art/blender/renders/he-xu/poses/GestureShrug.png",
+      "size": [
+        700,
+        700
+      ]
+    }
+  ],
+  "art_review": "completed_with_stylized_simplification"
+}

@@ -1,0 +1,99 @@
+{
+  "file": "shen-qingwu.glb",
+  "bytes": 3358620,
+  "sha256": "7e996edd2d5057479f856cd22eb21d5e1085624c34558c0bdd226c29f3587a97",
+  "triangles": 73964,
+  "nodes": 130,
+  "mesh_count": 101,
+  "materials": 22,
+  "skins": 1,
+  "skinned_primitives": 111,
+  "morph_targets": 7,
+  "animations": {
+    "Idle": {
+      "channels": 84,
+      "paths": [
+        "rotation",
+        "scale",
+        "translation"
+      ],
+      "duration": 3.0416666666666665
+    },
+    "Blink": {
+      "channels": 89,
+      "paths": [
+        "rotation",
+        "scale",
+        "translation",
+        "weights"
+      ],
+      "duration": 1.0416666666666667
+    },
+    "HeadTurn": {
+      "channels": 84,
+      "paths": [
+        "rotation",
+        "scale",
+        "translation"
+      ],
+      "duration": 2.5416666666666665
+    },
+    "TalkMouth": {
+      "channels": 86,
+      "paths": [
+        "rotation",
+        "scale",
+        "translation",
+        "weights"
+      ],
+      "duration": 2.0416666666666665
+    },
+    "Nod": {
+      "channels": 84,
+      "paths": [
+        "rotation",
+        "scale",
+        "translation"
+      ],
+      "duration": 1.5416666666666667
+    },
+    "ShakeHead": {
+      "channels": 84,
+      "paths": [
+        "rotation",
+        "scale",
+        "translation"
+      ],
+      "duration": 2.0416666666666665
+    },
+    "GestureLean": {
+      "channels": 84,
+      "paths": [
+        "rotation",
+        "scale",
+        "translation"
+      ],
+      "duration": 2.0416666666666665
+    },
+    "GestureShrug": {
+      "channels": 84,
+      "paths": [
+        "rotation",
+        "scale",
+        "translation"
+      ],
+      "duration": 1.5416666666666667
+    },
+    "GestureHand": {
+      "channels": 84,
+      "paths": [
+        "rotation",
+        "scale",
+        "translation"
+      ],
+      "duration": 2.0416666666666665
+    }
+  },
+  "embedded_resources": true,
+  "checks": "passed"
+}

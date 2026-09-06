@@ -1,0 +1,87 @@
+{
+  "character": "ShenQingwu",
+  "review_note": "五向与参考同角色：棕色偏分 Bob 内扣弧线、灰蓝绿风衣米白内衬、记者证 PRESS 胸牌、黑色肩包、线圈笔记本与文件；基准角色（2.49m），后续四人共用其头身比/脸/眼/肤/绑定系统；动作极值六项均有效。",
+  "source_blend": "art/blender/characters/shen-qingwu/v049_rigged.blend",
+  "glb_sha256": "7e996edd2d5057479f856cd22eb21d5e1085624c34558c0bdd226c29f3587a97",
+  "technical_checks": "passed",
+  "images": [
+    {
+      "path": "art/blender/renders/shen-qingwu/final/Front.png",
+      "size": [
+        800,
+        1000
+      ]
+    },
+    {
+      "path": "art/blender/renders/shen-qingwu/final/ThreeQuarterFront.png",
+      "size": [
+        800,
+        1000
+      ]
+    },
+    {
+      "path": "art/blender/renders/shen-qingwu/final/Side.png",
+      "size": [
+        800,
+        1000
+      ]
+    },
+    {
+      "path": "art/blender/renders/shen-qingwu/final/ThreeQuarterBack.png",
+      "size": [
+        800,
+        1000
+      ]
+    },
+    {
+      "path": "art/blender/renders/shen-qingwu/final/Back.png",
+      "size": [
+        800,
+        1000
+      ]
+    },
+    {
+      "path": "art/blender/renders/shen-qingwu/poses/Blink.png",
+      "size": [
+        700,
+        700
+      ]
+    },
+    {
+      "path": "art/blender/renders/shen-qingwu/poses/TalkMouth.png",
+      "size": [
+        700,
+        700
+      ]
+    },
+    {
+      "path": "art/blender/renders/shen-qingwu/poses/HeadTurn.png",
+      "size": [
+        700,
+        700
+      ]
+    },
+    {
+      "path": "art/blender/renders/shen-qingwu/poses/GestureHand.png",
+      "size": [
+        700,
+        700
+      ]
+    },
+    {
+      "path": "art/blender/renders/shen-qingwu/poses/GestureLean.png",
+      "size": [
+        700,
+        700
+      ]
+    },
+    {
+      "path": "art/blender/renders/shen-qingwu/poses/GestureShrug.png",
+      "size": [
+        700,
+        700
+      ]
+    }
+  ],
+  "art_review": "completed_with_stylized_simplification"
+}

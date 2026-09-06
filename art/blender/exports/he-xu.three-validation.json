@@ -1,0 +1,64 @@
+{
+  "file": "art/blender/exports/he-xu.glb",
+  "meshes": 134,
+  "clips": [
+    {
+      "name": "Idle",
+      "tracks": 84,
+      "evaluated": true
+    },
+    {
+      "name": "Blink",
+      "tracks": 89,
+      "evaluated": true
+    },
+    {
+      "name": "HeadTurn",
+      "tracks": 84,
+      "evaluated": true
+    },
+    {
+      "name": "TalkMouth",
+      "tracks": 86,
+      "evaluated": true
+    },
+    {
+      "name": "Nod",
+      "tracks": 84,
+      "evaluated": true
+    },
+    {
+      "name": "ShakeHead",
+      "tracks": 84,
+      "evaluated": true
+    },
+    {
+      "name": "GestureLean",
+      "tracks": 84,
+      "evaluated": true
+    },
+    {
+      "name": "GestureShrug",
+      "tracks": 84,
+      "evaluated": true
+    },
+    {
+      "name": "GestureHand",
+      "tracks": 84,
+      "evaluated": true
+    }
+  ],
+  "bounds": {
+    "min": [
+      -0.5108295161223935,
+      0.0026124823160187647,
+      -0.4121972918510437
+    ],
+    "max": [
+      0.5162949562072754,
+      2.5627230296565418,
+      0.38560500741004944
+    ]
+  },
+  "status": "passed"
+}

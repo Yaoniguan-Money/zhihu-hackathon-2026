@@ -1,0 +1,80 @@
+{
+  "character": "ShenQingwu",
+  "triangles": 73964,
+  "meshes": 101,
+  "bones": [
+    "Root",
+    "Pelvis",
+    "Spine_01",
+    "Spine_02",
+    "Chest",
+    "Neck",
+    "Head",
+    "Jaw",
+    "Eye_R",
+    "Eye_L",
+    "Clavicle_R",
+    "UpperArm_R",
+    "ForeArm_R",
+    "Hand_R",
+    "Scarf_R",
+    "Clavicle_L",
+    "UpperArm_L",
+    "ForeArm_L",
+    "Hand_L",
+    "Scarf_L",
+    "UpperLeg_R",
+    "LowerLeg_R",
+    "Foot_R",
+    "Coat_R",
+    "UpperLeg_L",
+    "LowerLeg_L",
+    "Foot_L",
+    "Coat_L"
+  ],
+  "animation_clips": [
+    "Idle",
+    "Blink",
+    "HeadTurn",
+    "TalkMouth",
+    "Nod",
+    "ShakeHead",
+    "GestureLean",
+    "GestureShrug",
+    "GestureHand"
+  ],
+  "shape_keys": {
+    "CHR_ShenQingwu_UpperLash_L": [
+      "Basis",
+      "Blink"
+    ],
+    "CHR_ShenQingwu_LowerLash_L": [
+      "Basis",
+      "Blink"
+    ],
+    "CHR_ShenQingwu_UpperLash_R": [
+      "Basis",
+      "Blink"
+    ],
+    "CHR_ShenQingwu_LowerLash_R": [
+      "Basis",
+      "Blink"
+    ],
+    "CHR_ShenQingwu_Face": [
+      "Basis",
+      "Blink"
+    ],
+    "CHR_ShenQingwu_Lips": [
+      "Basis",
+      "MouthOpen"
+    ],
+    "CHR_ShenQingwu_MouthCavity": [
+      "Basis",
+      "MouthOpen"
+    ]
+  },
+  "export": "art\\blender\\exports\\shen-qingwu.glb",
+  "height_m": 2.4494579434394836,
+  "uv_complete": true,
+  "status": "awaiting_visual_QA"
+}

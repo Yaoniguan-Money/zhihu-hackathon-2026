@@ -1,0 +1,19 @@
+{
+  "scene": "detective-room",
+  "triangles": 74900,
+  "meshes": 599,
+  "collections": [
+    "ENV_Room",
+    "ENV_Table",
+    "ENV_Chairs",
+    "ENV_EvidenceWall",
+    "ENV_Bookshelf",
+    "ENV_Window",
+    "ENV_Lighting",
+    "ENV_Props",
+    "ENV_Plants"
+  ],
+  "export": "art\\blender\\exports\\detective-room.glb",
+  "uv_complete": true,
+  "status": "awaiting_visual_QA"
+}

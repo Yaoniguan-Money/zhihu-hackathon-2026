@@ -32,3 +32,13 @@ __pycache__/
 
 # 试听产物（用户本地播放，不入仓库）
 voice-worker/audition/
+
+# Blender 中间阶段工程仅保留本地（最新 *_rigged/*.blend 已入库；scene 全量入库）
+art/blender/characters/*/v*_reference.blend
+art/blender/characters/*/v*_blockout.blend
+art/blender/characters/*/v*_face.blend
+art/blender/characters/*/v*_hair.blend
+art/blender/characters/*/v*_clothing.blend
+art/blender/characters/*/v*_accessories.blend
+*.blend1
+__MACOSX/

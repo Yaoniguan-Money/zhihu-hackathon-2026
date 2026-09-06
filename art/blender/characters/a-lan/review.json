@@ -1,0 +1,87 @@
+{
+  "character": "Alan",
+  "review_note": "五向与参考同角色：红棕蓬乱短发+双翘发束轮廓、珊瑚红连帽衫（芥黄抽绳）、炭灰工装裤、DEV 工牌、左臂平板、双肩包、红白运动鞋均落实；头身比与沈青梧/纪云汀一致，无穿模；动作极值六项均有效。",
+  "source_blend": "art/blender/characters/a-lan/v007_rigged.blend",
+  "glb_sha256": "8966d2e074ae3cdcb825012bf4bbdd51f0b0b257fc45d2ca6fe21694a86e21df",
+  "technical_checks": "passed",
+  "images": [
+    {
+      "path": "art/blender/renders/a-lan/final/Front.png",
+      "size": [
+        800,
+        1000
+      ]
+    },
+    {
+      "path": "art/blender/renders/a-lan/final/ThreeQuarterFront.png",
+      "size": [
+        800,
+        1000
+      ]
+    },
+    {
+      "path": "art/blender/renders/a-lan/final/Side.png",
+      "size": [
+        800,
+        1000
+      ]
+    },
+    {
+      "path": "art/blender/renders/a-lan/final/ThreeQuarterBack.png",
+      "size": [
+        800,
+        1000
+      ]
+    },
+    {
+      "path": "art/blender/renders/a-lan/final/Back.png",
+      "size": [
+        800,
+        1000
+      ]
+    },
+    {
+      "path": "art/blender/renders/a-lan/poses/Blink.png",
+      "size": [
+        700,
+        700
+      ]
+    },
+    {
+      "path": "art/blender/renders/a-lan/poses/TalkMouth.png",
+      "size": [
+        700,
+        700
+      ]
+    },
+    {
+      "path": "art/blender/renders/a-lan/poses/HeadTurn.png",
+      "size": [
+        700,
+        700
+      ]
+    },
+    {
+      "path": "art/blender/renders/a-lan/poses/GestureHand.png",
+      "size": [
+        700,
+        700
+      ]
+    },
+    {
+      "path": "art/blender/renders/a-lan/poses/GestureLean.png",
+      "size": [
+        700,
+        700
+      ]
+    },
+    {
+      "path": "art/blender/renders/a-lan/poses/GestureShrug.png",
+      "size": [
+        700,
+        700
+      ]
+    }
+  ],
+  "art_review": "completed_with_stylized_simplification"
+}

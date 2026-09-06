@@ -1,0 +1,80 @@
+{
+  "character": "JiYunting",
+  "triangles": 71064,
+  "meshes": 92,
+  "bones": [
+    "Root",
+    "Pelvis",
+    "Spine_01",
+    "Spine_02",
+    "Chest",
+    "Neck",
+    "Head",
+    "Jaw",
+    "Eye_R",
+    "Eye_L",
+    "Clavicle_R",
+    "UpperArm_R",
+    "ForeArm_R",
+    "Hand_R",
+    "Scarf_R",
+    "Clavicle_L",
+    "UpperArm_L",
+    "ForeArm_L",
+    "Hand_L",
+    "Scarf_L",
+    "UpperLeg_R",
+    "LowerLeg_R",
+    "Foot_R",
+    "Coat_R",
+    "UpperLeg_L",
+    "LowerLeg_L",
+    "Foot_L",
+    "Coat_L"
+  ],
+  "animation_clips": [
+    "Idle",
+    "Blink",
+    "HeadTurn",
+    "TalkMouth",
+    "Nod",
+    "ShakeHead",
+    "GestureLean",
+    "GestureShrug",
+    "GestureHand"
+  ],
+  "shape_keys": {
+    "CHR_JiYunting_UpperLash_L": [
+      "Basis",
+      "Blink"
+    ],
+    "CHR_JiYunting_LowerLash_L": [
+      "Basis",
+      "Blink"
+    ],
+    "CHR_JiYunting_UpperLash_R": [
+      "Basis",
+      "Blink"
+    ],
+    "CHR_JiYunting_LowerLash_R": [
+      "Basis",
+      "Blink"
+    ],
+    "CHR_JiYunting_Face": [
+      "Basis",
+      "Blink"
+    ],
+    "CHR_JiYunting_Lips": [
+      "Basis",
+      "MouthOpen"
+    ],
+    "CHR_JiYunting_MouthCavity": [
+      "Basis",
+      "MouthOpen"
+    ]
+  },
+  "export": "art\\blender\\exports\\ji-yunting.glb",
+  "height_m": 2.4861998471897095,
+  "uv_complete": true,
+  "status": "awaiting_visual_QA"
+}
