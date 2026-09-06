@@ -2,8 +2,7 @@
 
 import { Canvas } from "@react-three/fiber";
 import { ContactShadows, Environment, Lightformer } from "@react-three/drei";
-import CastCharacter from "./characters/CastCharacter";
-import { personaForRole } from "./characters/personas";
+import GlbCharacter from "./characters/GlbCharacter";
 import type { RolePublic } from "@/contracts/public";
 
 interface PortraitRowProps {
@@ -37,10 +36,9 @@ export default function PortraitRow({ roles, selectedId, onSelect, className }: 
         </Environment>
         <group position={[0, 0, 0]}>
           {roles.map((role, i) => (
-            <CastCharacter
+            <GlbCharacter
               key={role.role_id}
               role={role}
-              look={personaForRole(role)}
               position={[(i - (roles.length - 1) / 2) * gap, 0, 0]}
               rotationY={((i % 2 === 0 ? 1 : -1) * Math.PI) / 14}
               withStool={false}

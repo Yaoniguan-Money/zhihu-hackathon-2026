@@ -49,3 +49,9 @@ python art/blender/scripts/inspect_glb.py art/blender/exports/detective-room.glb
 ```
 
 重新生成已有阶段时自动递增版本号，保留旧 Blender 文件。导出 GLB 与 `final` 渲染指向当前版本；它们不是历史版本索引。不要把早期失败版本作为最新结果。
+
+## 前端接入（已完成）
+
+- GLB 已复制到 `public/models/`；`components/three/characters/GlbCharacter.tsx` 为与原 `CastCharacter` 同 props 的替换组件：SkeletonUtils 克隆多实例、按 persona_key→slug 映射（calm_reporter→shen-qingwu 等五项）、按实测包围盒高度归一化到 2.0、坐姿用"世界轴最短旋转"驱动大腿/小腿骨骼（臀部落凳面 0.495）、眨眼/口型走 Blink/MouthOpen 形变、手势走骨骼包络。
+- 消费方已切换：`InterrogationStage`（大厅+审讯，角色用 Suspense 包裹防整画布挂起）、`PortraitRow`（档案/指控页立绘排）。`app/dev-glb` 为 GLB 预览工作台（坐/立/说话/手势切换）；`app/dev-characters` 保留原程序化角色作比对。
+- 已知边界：情绪（皱眉/腮红/汗滴）在 GLB 上暂无对应形变，仅以颤抖/呼吸强度体现；截图可能恰好抓到闭眼帧。

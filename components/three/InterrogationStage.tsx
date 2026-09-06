@@ -1,13 +1,12 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, Suspense } from "react";
 import { Canvas } from "@react-three/fiber";
 import { ContactShadows, Environment, Lightformer, Preload } from "@react-three/drei";
-import CastCharacter from "./characters/CastCharacter";
+import GlbCharacter from "./characters/GlbCharacter";
 import InterrogationRoom from "./scene/InterrogationRoom";
 import CameraRig from "./CameraRig";
 import SpeechBubble from "./SpeechBubble";
-import { personaForRole } from "./characters/personas";
 import type { RoleEmotion, RolePublic, RoleStance } from "@/contracts/public";
 
 export interface StageRoleState {
@@ -99,25 +98,26 @@ export default function InterrogationStage({
 
       <InterrogationRoom />
 
-      {roles.map((state, i) => {
-        const { position, rotationY } = seatTransform(i, roles.length);
-        return (
-          <CastCharacter
-            key={state.role.role_id}
-            role={state.role}
-            look={personaForRole(state.role)}
-            position={position}
-            rotationY={rotationY}
-            emotion={state.emotion}
-            stance={state.stance}
-            speaking={state.speaking}
-            pressure={state.pressure}
-            gestureSeed={state.gestureSeed}
-            selected={state.selected}
-            onClick={state.onClick}
-          />
-        );
-      })}
+      <Suspense fallback={null}>
+        {roles.map((state, i) => {
+          const { position, rotationY } = seatTransform(i, roles.length);
+          return (
+            <GlbCharacter
+              key={state.role.role_id}
+              role={state.role}
+              position={position}
+              rotationY={rotationY}
+              emotion={state.emotion}
+              stance={state.stance}
+              speaking={state.speaking}
+              pressure={state.pressure}
+              gestureSeed={state.gestureSeed}
+              selected={state.selected}
+              onClick={state.onClick}
+            />
+          );
+        })}
+      </Suspense>
 
       <ContactShadows position={[0, 0.01, 0]} opacity={0.45} scale={12} blur={2.4} far={2.4} color="#120f1e" />
 

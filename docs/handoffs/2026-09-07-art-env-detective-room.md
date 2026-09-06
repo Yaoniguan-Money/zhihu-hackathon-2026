@@ -61,3 +61,10 @@
 3. `docs/art/ASSET_DIRECTION.md`
 4. `art/blender/DELIVERY.md`
 5. `art/blender/scene/metrics.json`
+
+## 追记（2026-09-07）：前端接入完成
+
+- 新增 `components/three/characters/GlbCharacter.tsx`（与 CastCharacter 同 props 的 GLB 渲染器），`InterrogationStage` 与 `PortraitRow` 已切换为 GLB 角色；`public/models/` 为 GLB 分发目录；`app/dev-glb` 预览工作台。
+- 关键实现：SkeletonUtils 克隆支持多实例；坐姿按"骨骼世界轴最短旋转"（ compensate bone roll，直接改 rotation.x 会锥形散开）驱动大腿/小腿并整体下沉至凳面；眨眼/口型逐帧驱动 Blink/MouthOpen morph；待机/手势走骨骼包络；舞台内角色用 Suspense 包裹，避免 useGLTF 挂起整块画布。
+- 浏览器实测（localhost:3000 + IAB）：大厅五人围桌坐姿、档案页立绘排、dev-glb 单角色坐/立/口型全部正常；`bun run typecheck`、`npx eslint components/three app/dev-glb` 通过。
+- 未替换 `app/dev-characters`（保留程序化角色作比对工作台）；情绪形变（皱眉/腮红/汗滴）待后续按需扩展。
