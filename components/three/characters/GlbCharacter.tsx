@@ -103,6 +103,7 @@ export default function GlbCharacter({
     blinkTargets: [] as THREE.Mesh[],
     mouthTargets: [] as THREE.Mesh[],
     bones: {} as Record<string, THREE.Object3D | undefined>,
+    restQ: {} as Record<string, THREE.Quaternion>,
     blink: 0,
     blinkTimer: 2.5,
     mouth: 0,
@@ -113,6 +114,9 @@ export default function GlbCharacter({
     gestureT: 0,
     lastSeed: gestureSeed,
     randomized: false,
+    idleLeanZ: 0,
+    idleLeanX: 0,
+    idleHeadZ: 0,
   });
 
   // 实例就绪后：收集 morph 网格与骨骼，应用坐姿，关闭视锥剔除（骨骼动画边界盒会漂移）
@@ -154,10 +158,31 @@ export default function GlbCharacter({
     ];
     r.bones = {};
     for (const n of names) r.bones[n] = instance.getObjectByName(n);
+    // 记录动画涉及骨骼的静息四元数：动画=静息 × 附加旋转，绝不清零静息姿态
+    // （直接写 rotation 会把手臂覆写成 T-pose，是"手部扭曲"的根源）
+    r.restQ = {};
+    for (const n of [
+      "Spine_01",
+      "Spine_02",
+      "Chest",
+      "Neck",
+      "Head",
+      "Clavicle_L",
+      "Clavicle_R",
+      "UpperArm_R",
+      "ForeArm_R",
+    ]) {
+      const b = r.bones[n];
+      if (b) r.restQ[n] = b.quaternion.clone();
+    }
     if (!r.randomized) {
       r.randomized = true;
       r.blinkTimer = 1.5 + Math.random() * 3;
       r.lookTimer = 2 + Math.random() * 3;
+      // 每个角色一份随机微姿态，消除整齐划一的僵硬感
+      r.idleLeanZ = (Math.random() - 0.5) * 0.06;
+      r.idleLeanX = Math.random() * 0.035;
+      r.idleHeadZ = (Math.random() - 0.5) * 0.09;
     }
   }, [instance]);
 
@@ -220,7 +245,6 @@ export default function GlbCharacter({
     const r = rig.current;
     const t = state.clock.elapsedTime;
     const lerp = 1 - Math.pow(0.0018, delta);
-    const bone = (n: string) => r.bones[n];
     const pressureBoost = Math.max(0, (pressure - 40) / 60);
     const tremble = EMOTION_TREMBLE[emotion] + pressureBoost * 0.004;
 
@@ -295,30 +319,26 @@ export default function GlbCharacter({
 
     const breath = Math.sin(t * (speaking ? 4.6 : 2.1)) * (speaking ? 0.03 : 0.016);
 
-    const head = bone("Head");
-    const neck = bone("Neck");
-    if (head) {
-      head.rotation.y = r.lookYaw + gYaw;
-      head.rotation.z = gTilt;
-      head.rotation.x = Math.sin(t * (speaking ? 3.1 : 1.6)) * (speaking ? 0.05 : 0.02) + gNod;
-    }
-    if (neck) neck.rotation.y = r.lookYaw * 0.4;
-    const chest = bone("Chest");
-    if (chest) chest.rotation.x = breath * 0.6 + gLean * 0.5;
-    const spine = bone("Spine_01");
-    if (spine) spine.rotation.x = gLean;
-    const armR = bone("UpperArm_R");
-    const foreR = bone("ForeArm_R");
-    if (armR && foreR) {
-      armR.rotation.x = -gArm * 0.8;
-      foreR.rotation.x = -gArm * 1.1 - (speaking ? Math.sin(t * 5.2) * 0.08 : 0);
-    }
-    const clavL = bone("Clavicle_L");
-    const clavR = bone("Clavicle_R");
-    if (clavL && clavR) {
-      clavL.rotation.z = gArm * 0.1;
-      clavR.rotation.z = -gArm * 0.1;
-    }
+    // 动画 = 静息四元数 × 附加小旋转（绝不覆写静息姿态）
+    const _e = new THREE.Euler();
+    const _q = new THREE.Quaternion();
+    const pose = (name: string, x: number, y: number, z: number) => {
+      const b = r.bones[name];
+      const q0 = r.restQ[name];
+      if (!b || !q0) return;
+      _e.set(x, y, z);
+      _q.setFromEuler(_e);
+      b.quaternion.copy(q0).multiply(_q);
+    };
+
+    pose("Head", Math.sin(t * (speaking ? 3.1 : 1.6)) * (speaking ? 0.05 : 0.02) + gNod, r.lookYaw + gYaw, gTilt + r.idleHeadZ);
+    pose("Neck", 0, r.lookYaw * 0.4, r.idleHeadZ * 0.4);
+    pose("Chest", 0.05 + r.idleLeanX + breath * 0.6 + gLean * 0.5, 0, Math.sin(t * 1.15) * 0.02 + r.idleLeanZ);
+    pose("Spine_01", gLean + 0.02, 0, Math.sin(t * 1.15 + 0.8) * 0.015 + r.idleLeanZ * 0.5);
+    pose("UpperArm_R", -gArm * 0.8, 0, -gArm * 0.25);
+    pose("ForeArm_R", -gArm * 1.1 - (speaking ? Math.sin(t * 5.2) * 0.08 : 0) - 0.08, 0, 0);
+    pose("Clavicle_L", 0, 0, gArm * 0.1);
+    pose("Clavicle_R", 0, 0, -gArm * 0.1);
 
     if (root.current) {
       const base = root.current.scale.x || 1;
