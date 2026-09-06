@@ -2,8 +2,8 @@
 
 import { useMemo } from "react";
 import { Canvas } from "@react-three/fiber";
-import { ContactShadows, Preload } from "@react-three/drei";
-import ChibiCharacter from "./characters/ChibiCharacter";
+import { ContactShadows, Environment, Lightformer, Preload } from "@react-three/drei";
+import CastCharacter from "./characters/CastCharacter";
 import InterrogationRoom from "./scene/InterrogationRoom";
 import CameraRig from "./CameraRig";
 import SpeechBubble from "./SpeechBubble";
@@ -37,7 +37,7 @@ interface InterrogationStageProps {
   className?: string;
 }
 
-const SEAT_RADIUS = 2.6;
+const SEAT_RADIUS = 2.35;
 
 export function seatTransform(index: number, total: number): {
   position: [number, number, number];
@@ -75,22 +75,34 @@ export default function InterrogationStage({
     <Canvas
       shadows
       dpr={[1, 1.75]}
-      camera={{ position: [0, 8.5, 11.5], fov: 42, near: 0.1, far: 60 }}
+      camera={{ position: [0, 7.8, 10.8], fov: 42, near: 0.1, far: 60 }}
       gl={{ antialias: true }}
       className={className}
     >
-      <color attach="background" args={["#191631"]} />
-      <fog attach="fog" args={["#191631", 11, 20]} />
-      <ambientLight intensity={0.55} color="#8f8ac2" />
-      <hemisphereLight args={["#5d5a8c", "#241f38", 0.5]} />
-      <directionalLight position={[6, 7, 4]} intensity={0.35} color="#9fb0ff" />
+      <color attach="background" args={["#171430"]} />
+      <fog attach="fog" args={["#171430", 11, 20]} />
+
+      {/* 基础夜色光 */}
+      <ambientLight intensity={0.5} color="#8f8ac2" />
+      <hemisphereLight args={["#5d5a8c", "#2a2038", 0.55]} />
+      {/* 面部补光：暖色正面软光，保证表情可读 */}
+      <directionalLight position={[2.5, 4.5, 6.5]} intensity={0.9} color="#ffe7c4" />
+      {/* 窗侧冷色轮廓光 */}
+      <directionalLight position={[-4, 3, -5]} intensity={0.35} color="#7f9bff" />
+
+      {/* 程序化环境反射（无网络依赖） */}
+      <Environment resolution={64} frames={1} background={false}>
+        <Lightformer intensity={0.7} position={[0, 5, 0]} scale={[10, 10, 1]} rotation-x={Math.PI / 2} color="#fff4e0" />
+        <Lightformer intensity={0.35} position={[-5, 1, -1]} scale={[6, 3, 1]} rotation-y={Math.PI / 2} color="#8890ff" />
+        <Lightformer intensity={0.3} position={[5, 2, 1]} scale={[6, 3, 1]} rotation-y={-Math.PI / 2} color="#ffd9a0" />
+      </Environment>
 
       <InterrogationRoom />
 
       {roles.map((state, i) => {
         const { position, rotationY } = seatTransform(i, roles.length);
         return (
-          <ChibiCharacter
+          <CastCharacter
             key={state.role.role_id}
             role={state.role}
             look={personaForRole(state.role)}
@@ -111,7 +123,7 @@ export default function InterrogationStage({
 
       {bubble && bubbleSeat && (
         <SpeechBubble
-          position={[bubbleSeat[0], 2.0, bubbleSeat[2]]}
+          position={[bubbleSeat[0], 2.35, bubbleSeat[2]]}
           name={bubble.name}
           color={bubble.color}
           text={bubble.text}

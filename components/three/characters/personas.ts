@@ -1,103 +1,174 @@
 import type { RolePublic } from "@/contracts/public";
 
 /**
- * 角色 → 卡通外观。已知 persona_key 走精选设定；
- * 用户自建案件的自由文本 persona 用关键词推断；
+ * 角色 → 外观设定（对齐官方立绘资产 public/assets/cast/*.png 的盲盒渲染风）。
+ * 已知 persona_key 走精选设定；用户自建案件的自由文本 persona 用关键词推断；
  * 仍然无法判定时按 role_id 哈希从预设池取一套，保证同角色永远同外观。
  */
 
-export type HairStyle = "short" | "bob" | "bun" | "swept" | "curly" | "hood";
-export type HatStyle = "none" | "beret" | "cap" | "beanie";
-export type Accessory = "none" | "press-card" | "bowtie" | "scarf" | "necklace" | "lanyard";
+export type HairStyle = "bob" | "tousledBob" | "messy" | "swept" | "curly";
+export type OutfitStyle = "trench" | "suit" | "hoodie" | "professor";
+export type ShoeStyle = "flat" | "heel" | "sneaker";
+export type GlassesStyle = "none" | "round" | "oval";
+export type CastProp =
+  | "pressCard"
+  | "lanyard"
+  | "bowtie"
+  | "scarf"
+  | "plaidScarf"
+  | "book"
+  | "notebook"
+  | "laptop"
+  | "satchel"
+  | "shoulderBag"
+  | "watch"
+  | "necklace"
+  | "earrings";
 
 export interface PersonaLook {
   skin: string;
+  /** 腮红基色 */
+  blush: string;
   hair: string;
+  /** 眉毛/睫毛等深色发饰 */
+  hairDark: string;
+  /** 虹膜基色 */
+  eye: string;
   hairStyle: HairStyle;
+  outfitStyle: OutfitStyle;
   outfit: string;
   outfitAccent: string;
-  glasses: boolean;
-  hat: HatStyle;
-  accessory: Accessory;
+  trousers: string;
+  shoes: string;
+  shoeStyle: ShoeStyle;
+  /** true=双手捧物在胸前（教授的书），手臂摆动幅度收小 */
+  holdFront: boolean;
+  glasses: GlassesStyle;
+  hat: "none" | "beret";
+  props: CastProp[];
   beard: boolean;
-  blushDefault: number;
 }
-
-const baseLook: Omit<PersonaLook, "skin" | "hair" | "hairStyle" | "outfit" | "outfitAccent" | "hat" | "accessory"> = {
-  glasses: false,
-  beard: false,
-  blushDefault: 0.22,
-};
 
 export const PERSONA_PRESETS: PersonaLook[] = [
   {
-    ...baseLook,
-    skin: "#ffdfc4",
-    hair: "#4a3226",
+    // 沈青梧 · 财经调查记者
+    skin: "#ffdfc0",
+    blush: "#ff9d94",
+    hair: "#6d4a33",
+    hairDark: "#452c1c",
+    eye: "#7c4a28",
     hairStyle: "bob",
-    outfit: "#2ea79b",
-    outfitAccent: "#f6f1e6",
-    glasses: false,
+    outfitStyle: "trench",
+    outfit: "#5a7f76",
+    outfitAccent: "#efe8d6",
+    trousers: "#547a70",
+    shoes: "#2c2830",
+    shoeStyle: "flat",
+    glasses: "none",
     hat: "none",
-    accessory: "press-card",
+    props: ["pressCard", "shoulderBag"],
+    beard: false,
+    holdFront: false,
   },
   {
-    ...baseLook,
-    skin: "#ffe3c2",
-    hair: "#2b2b33",
-    hairStyle: "swept",
-    outfit: "#5b5bd6",
-    outfitAccent: "#c7c9f4",
-    glasses: true,
+    // 纪云汀 · 行业分析师
+    skin: "#ffdcbd",
+    blush: "#ff9d94",
+    hair: "#4a3b33",
+    hairDark: "#2c211c",
+    eye: "#5d4638",
+    hairStyle: "tousledBob",
+    outfitStyle: "suit",
+    outfit: "#464b6d",
+    outfitAccent: "#cfbde9",
+    trousers: "#3c4160",
+    shoes: "#252230",
+    shoeStyle: "heel",
+    glasses: "oval",
     hat: "none",
-    accessory: "necklace",
+    props: ["notebook", "watch", "necklace"],
+    beard: false,
+    holdFront: false,
   },
   {
-    ...baseLook,
+    // 阿岚 · 前端工程师
     skin: "#ffd9b8",
-    hair: "#8a4a2f",
-    hairStyle: "hood",
-    outfit: "#e4685d",
-    outfitAccent: "#ffd9a0",
-    glasses: false,
+    blush: "#ff9d90",
+    hair: "#a55d38",
+    hairDark: "#6b381e",
+    eye: "#6f4425",
+    hairStyle: "messy",
+    outfitStyle: "hoodie",
+    outfit: "#c55e48",
+    outfitAccent: "#efb64b",
+    trousers: "#34333d",
+    shoes: "#e9e3d5",
+    shoeStyle: "sneaker",
+    glasses: "none",
     hat: "none",
-    accessory: "lanyard",
-    blushDefault: 0.4,
+    props: ["lanyard", "laptop"],
+    beard: false,
+    holdFront: false,
   },
   {
-    ...baseLook,
-    skin: "#f2cfa8",
-    hair: "#9a9aa4",
-    hairStyle: "short",
-    outfit: "#8a6b46",
-    outfitAccent: "#c8402f",
-    glasses: true,
+    // 何叙 · 政治经济学教授
+    skin: "#f8d2b0",
+    blush: "#f2988d",
+    hair: "#bcb6ae",
+    hairDark: "#8d867d",
+    eye: "#504337",
+    hairStyle: "swept",
+    outfitStyle: "professor",
+    outfit: "#6b5441",
+    outfitAccent: "#9d3040",
+    trousers: "#594636",
+    shoes: "#2f221a",
+    shoeStyle: "flat",
+    glasses: "round",
     hat: "none",
-    accessory: "bowtie",
+    props: ["bowtie", "scarf", "book"],
     beard: true,
-    blushDefault: 0.15,
+    holdFront: true,
   },
   {
-    ...baseLook,
-    skin: "#ffe0bd",
-    hair: "#3d2f4a",
+    // 柳成荫 · 自由撰稿人
+    skin: "#ffdcbc",
+    blush: "#ff9d94",
+    hair: "#5d4469",
+    hairDark: "#3f2f4c",
+    eye: "#5c4055",
     hairStyle: "curly",
-    outfit: "#d9a13b",
-    outfitAccent: "#4b3f2f",
-    glasses: false,
+    outfitStyle: "trench",
+    outfit: "#d7a843",
+    outfitAccent: "#f0e6d1",
+    trousers: "#4c3c31",
+    shoes: "#34251d",
+    shoeStyle: "heel",
+    glasses: "none",
     hat: "beret",
-    accessory: "scarf",
+    props: ["plaidScarf", "satchel", "earrings"],
+    beard: false,
+    holdFront: false,
   },
   {
-    ...baseLook,
-    skin: "#f7cfae",
-    hair: "#1f1f28",
-    hairStyle: "bun",
-    outfit: "#c2557a",
-    outfitAccent: "#f2e3c9",
-    glasses: true,
+    // 哈希兜底：档案管理员式中性外观
+    skin: "#ffdfc6",
+    blush: "#ff9d94",
+    hair: "#2f2a36",
+    hairDark: "#1d1922",
+    eye: "#3f3a44",
+    hairStyle: "tousledBob",
+    outfitStyle: "suit",
+    outfit: "#7a6a54",
+    outfitAccent: "#e8dfc8",
+    trousers: "#423c4a",
+    shoes: "#2c2830",
+    shoeStyle: "flat",
+    glasses: "none",
     hat: "none",
-    accessory: "none",
+    props: ["notebook"],
+    beard: false,
+    holdFront: false,
   },
 ];
 
@@ -114,8 +185,7 @@ const KEYWORD_LOOKS: Array<{ test: RegExp; look: PersonaLook }> = [
   { test: /分析师|研究员|数据|博士|学者/, look: PERSONA_PRESETS[1] },
   { test: /工程师|程序员|职工|上班|员工|打工/, look: PERSONA_PRESETS[2] },
   { test: /教授|专家|经济学家|导师/, look: PERSONA_PRESETS[3] },
-  { test: /撰稿人|作家|评论|观察/, look: PERSONA_PRESETS[4] },
-  { test: /编辑|自媒体|运营|策划|规划|理财/, look: PERSONA_PRESETS[5] },
+  { test: /撰稿人|作家|评论|观察|编辑|自媒体|运营|策划|理财/, look: PERSONA_PRESETS[4] },
 ];
 
 function hashString(input: string): number {

@@ -1,8 +1,8 @@
 "use client";
 
 import { Canvas } from "@react-three/fiber";
-import { ContactShadows } from "@react-three/drei";
-import ChibiCharacter from "./characters/ChibiCharacter";
+import { ContactShadows, Environment, Lightformer } from "@react-three/drei";
+import CastCharacter from "./characters/CastCharacter";
 import { personaForRole } from "./characters/personas";
 import type { RolePublic } from "@/contracts/public";
 
@@ -14,24 +14,30 @@ interface PortraitRowProps {
   className?: string;
 }
 
-/** 排成一排的 Q 版角色立绘（单 Canvas，档案页与指控页共用）。 */
+/** 排成一排的盲盒角色立柱（单 Canvas，档案页与指控页共用）。 */
 export default function PortraitRow({ roles, selectedId, onSelect, className }: PortraitRowProps) {
-  const gap = 1.0;
+  const gap = 1.05;
   const width = Math.max(roles.length * gap, 2.4);
 
   return (
     <div className={className}>
       <Canvas
         dpr={[1, 1.75]}
-        camera={{ position: [0, 1.02, width * 0.72 + 1.1], fov: 35 }}
+        camera={{ position: [0, 1.04, width * 0.72 + 1.35], fov: 35 }}
         gl={{ antialias: true, alpha: true }}
+        onCreated={({ camera }) => camera.lookAt(0, 1.02, 0)}
       >
-        <ambientLight intensity={0.75} color="#a9a4d6" />
-        <directionalLight position={[3, 6, 5]} intensity={1.5} color="#ffe0b0" castShadow />
-        <directionalLight position={[-4, 3, 2]} intensity={0.5} color="#8f9bff" />
+        <ambientLight intensity={0.42} color="#c4bfe0" />
+        <directionalLight position={[3, 6, 5]} intensity={0.9} color="#ffdcae" castShadow />
+        <directionalLight position={[-4, 3, -3]} intensity={0.4} color="#8f9bff" />
+        <directionalLight position={[0, 2.5, 6]} intensity={0.4} color="#fff6e8" />
+        <Environment resolution={64} frames={1} background={false}>
+          <Lightformer intensity={0.6} position={[0, 5, 0]} scale={[10, 10, 1]} rotation-x={Math.PI / 2} color="#fff4e0" />
+          <Lightformer intensity={0.3} position={[-5, 1, 0]} scale={[6, 3, 1]} rotation-y={Math.PI / 2} color="#cfd4ff" />
+        </Environment>
         <group position={[0, 0, 0]}>
           {roles.map((role, i) => (
-            <ChibiCharacter
+            <CastCharacter
               key={role.role_id}
               role={role}
               look={personaForRole(role)}

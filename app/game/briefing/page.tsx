@@ -1,6 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import Image from "next/image";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "motion/react";
@@ -10,6 +11,7 @@ import Mascot from "@/components/ui/Mascot";
 import ErrorPanel from "@/components/ui/ErrorPanel";
 import { Icon } from "@/components/ui/Icons";
 import { personaForRole } from "@/components/three/characters/personas";
+import { castArtFor, SCENE_ART } from "@/components/three/characters/castArt";
 
 const PortraitRow = dynamic(() => import("@/components/three/PortraitRow"), {
   ssr: false,
@@ -51,7 +53,15 @@ export default function BriefingPage() {
       {/* 档案头 */}
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="relative">
         <div className="tape" style={{ top: -10, left: "42%", transform: "rotate(-2deg)" }} />
-        <div className="card relative px-8 py-7">
+        <div className="card relative overflow-hidden px-8 py-7">
+          {/* 场景资产图横幅 */}
+          <div className="relative -mx-8 -mt-7 mb-5 h-40 overflow-hidden md:h-52">
+            <Image src={SCENE_ART} alt="侦探会议室 · 月下" fill sizes="(max-width: 1024px) 100vw, 960px" className="object-cover object-center" priority />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#f7f1e3] via-[#f7f1e3]/10 to-transparent" />
+            <p className="absolute bottom-2 right-4 text-[10px] font-black uppercase tracking-[0.3em] text-ink/70 drop-shadow-[0_1px_0_rgba(247,241,227,0.8)]">
+              Detective Meeting Room · Moonlight
+            </p>
+          </div>
           <p className="text-[11px] font-black uppercase tracking-[0.3em] text-coral-deep">Case File</p>
           <h1 className="mt-2 text-3xl font-black leading-tight text-ink">{casePublic.title}</h1>
           <p className="mt-2 text-sm font-bold text-ink/60">{casePublic.summary}</p>
@@ -85,18 +95,27 @@ export default function BriefingPage() {
           <PortraitRow roles={casePublic.roles} className="h-full w-full" />
         </div>
         <div className="grid grid-cols-2 gap-2 px-2 pb-2 md:grid-cols-5">
-          {casePublic.roles.map((role) => (
-            <div key={role.role_id} className="rounded-xl border border-paper/10 bg-night-deep/50 p-2.5">
-              <div className="flex items-center gap-1.5">
-                <span
-                  className="h-2.5 w-2.5 rounded-full border border-ink/60"
-                  style={{ background: personaForRole(role).outfit }}
-                />
-                <p className="truncate text-xs font-black text-paper">{role.display_name}</p>
+          {casePublic.roles.map((role) => {
+            const art = castArtFor(role.persona_key);
+            return (
+              <div key={role.role_id} className="rounded-xl border border-paper/10 bg-night-deep/50 p-2.5">
+                <div className="flex items-center gap-2">
+                  {art ? (
+                    <span className="relative h-9 w-9 shrink-0 overflow-hidden rounded-full border border-paper/25">
+                      <Image src={art.portrait} alt={role.display_name} fill sizes="36px" className="object-cover object-top" />
+                    </span>
+                  ) : (
+                    <span
+                      className="h-2.5 w-2.5 shrink-0 rounded-full border border-ink/60"
+                      style={{ background: personaForRole(role).outfit }}
+                    />
+                  )}
+                  <p className="truncate text-xs font-black text-paper">{role.display_name}</p>
+                </div>
+                <p className="mt-1 line-clamp-2 text-[11px] leading-snug text-paper/55">{role.public_bio}</p>
               </div>
-              <p className="mt-1 line-clamp-2 text-[11px] leading-snug text-paper/55">{role.public_bio}</p>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </motion.section>
 

@@ -2,12 +2,14 @@
 
 import { useEffect, useRef } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import gsap from "gsap";
 import { useGame } from "@/context/GameContext";
 import Mascot from "@/components/ui/Mascot";
 import ErrorPanel from "@/components/ui/ErrorPanel";
 import { Icon } from "@/components/ui/Icons";
 import { personaForRole } from "@/components/three/characters/personas";
+import { castArtFor } from "@/components/three/characters/castArt";
 import { DISTORTION_META } from "@/lib/distortions";
 
 export default function RevealPage() {
@@ -113,9 +115,21 @@ export default function RevealPage() {
       {/* 真凶卡 */}
       {culprit && (
         <div className="rv-culprit card mx-auto mt-5 max-w-lg px-7 py-6 text-center">
-          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full border-4 border-ink text-2xl font-black text-paper" style={{ background: personaForRole(culprit).outfit }}>
-            {culprit.display_name.slice(0, 1)}
-          </div>
+          {castArtFor(culprit.persona_key) ? (
+            <div className="relative mx-auto h-44 w-36 overflow-hidden rounded-2xl border-2 border-ink shadow-[3px_3px_0_0_rgba(26,22,38,0.85)]">
+              <Image
+                src={castArtFor(culprit.persona_key)!.portrait}
+                alt={culprit.display_name}
+                fill
+                sizes="144px"
+                className="object-cover object-top"
+              />
+            </div>
+          ) : (
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full border-4 border-ink text-2xl font-black text-paper" style={{ background: personaForRole(culprit).outfit }}>
+              {culprit.display_name.slice(0, 1)}
+            </div>
+          )}
           <h2 className="mt-3 text-2xl font-black text-ink">{culprit.display_name}</h2>
           <p className="mt-1 text-xs font-bold text-ink/60">{culprit.public_bio}</p>
           <div className="rv-badges mt-4 flex flex-wrap justify-center gap-2">

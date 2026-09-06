@@ -100,3 +100,4 @@ docs/handoffs/<ticket-or-stage-id>.md
 | AI 供应商切换：智谱 GLM | complete | [2026-09-06-ai-provider-switch-glm](./2026-09-06-ai-provider-switch-glm.md) |
 | 2026-09-06 夜间开发中继 | complete | [2026-09-06-night-relay](./2026-09-06-night-relay.md) |
 | FE-B1 前端审美重制 + 真实数据重接 | complete | [2026-09-06-frontend-b-aesthetic-live-data](./2026-09-06-frontend-b-aesthetic-live-data.md) |
+| FE-B2 按官方资产重构前端视觉（3D 人物/场景/立绘落位） | complete | [2026-09-06-frontend-b2-asset-visual-rebuild](./2026-09-06-frontend-b2-asset-visual-rebuild.md) |

@@ -16,8 +16,8 @@ interface CameraRigProps {
   autoRotate?: boolean;
 }
 
-const DEFAULT_POS = new THREE.Vector3(0, 3.4, 6.6);
-const DEFAULT_TARGET = new THREE.Vector3(0, 0.9, 0);
+const DEFAULT_POS = new THREE.Vector3(0, 3.5, 7.0);
+const DEFAULT_TARGET = new THREE.Vector3(0, 1.0, 0);
 
 export default function CameraRig({ focus, intro = true, autoRotate = false }: CameraRigProps) {
   const controlsRef = useRef<OrbitControlsImpl>(null);
@@ -28,7 +28,7 @@ export default function CameraRig({ focus, intro = true, autoRotate = false }: C
 
   useEffect(() => {
     if (!intro) return;
-    const startPos = new THREE.Vector3(0, 8.5, 11.5);
+    const startPos = new THREE.Vector3(0, 7.8, 10.8);
     camera.position.copy(startPos);
     const tl = gsap.timeline();
     tl.to(camera.position, {
@@ -45,16 +45,16 @@ export default function CameraRig({ focus, intro = true, autoRotate = false }: C
 
   useEffect(() => {
     const focusTarget = focus
-      ? new THREE.Vector3(focus[0] * 0.92, 1.15, focus[2] * 0.92)
+      ? new THREE.Vector3(focus[0] * 0.92, 1.3, focus[2] * 0.92)
       : DEFAULT_TARGET.clone();
     targetLook.current.copy(focusTarget);
     if (focus) {
       const dir = new THREE.Vector3(focus[0], 0, focus[2]).normalize();
       // 站到角色外侧斜上方，看向桌心
       targetPos.current.set(
-        focus[0] * 0.55 - dir.z * 2.6,
-        2.2,
-        focus[2] * 0.55 + dir.x * 2.6,
+        focus[0] * 0.55 - dir.z * 2.5,
+        2.1,
+        focus[2] * 0.55 + dir.x * 2.5,
       );
     } else {
       targetPos.current.copy(DEFAULT_POS);

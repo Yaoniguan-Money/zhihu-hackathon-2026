@@ -3,28 +3,32 @@
 import { useMemo } from "react";
 import { Sparkles } from "@react-three/drei";
 import * as THREE from "three";
+import { woodFloorTexture } from "../characters/canvasTextures";
 
 /**
- * 卡通审讯室静态场景：圆木桌、吊灯暖光、夜窗、书架、软木板证据墙、绿植。
- * 阴影只由吊灯 SpotLight 投射，控制绘制成本。
+ * 侦探会议室（对照官方场景资产图 public/assets/scenes/detective-room.png）：
+ * 暖胡桃木圆桌 + 黄铜吊灯暖光 + 软木板证据墙红线 + 书架 + 月夜窗 + 绿罩台灯柜。
+ * 材质统一 meshStandardMaterial 软渲染，贴合立绘的盲盒渲染质感。
  */
 
-const INK = "#33283d";
+const WOOD = "#6a4526";
+const WOOD_DARK = "#54371f";
+const BRASS = "#b08850";
 
-function seededBooks(): Array<{ x: number; y: number; h: number; w: number; color: string; tilt: number }> {
-  const colors = ["#d94f3d", "#2ea79b", "#e0a34a", "#5b5bd6", "#c2557a", "#7c8a3f"];
+function seededBooks(): Array<{ x: number; y: number; h: number; w: number; color: string }> {
+  const colors = ["#a04434", "#4e7d72", "#c99a4a", "#4d5482", "#a2596f", "#75834a"];
   let seed = 42;
   const rand = () => {
     seed = (seed * 16807) % 2147483647;
     return seed / 2147483647;
   };
-  const books: Array<{ x: number; y: number; h: number; w: number; color: string; tilt: number }> = [];
+  const books: Array<{ x: number; y: number; h: number; w: number; color: string }> = [];
   for (const shelfY of [0.52, 1.06, 1.6]) {
     let x = -0.82;
     while (x < 0.7) {
       const w = 0.05 + rand() * 0.05;
       const h = 0.3 + rand() * 0.12;
-      books.push({ x, y: shelfY, h, w, color: colors[Math.floor(rand() * colors.length)], tilt: 0 });
+      books.push({ x, y: shelfY, h, w, color: colors[Math.floor(rand() * colors.length)] });
       x += w + 0.012;
       if (rand() < 0.08) x += 0.1;
     }
@@ -33,91 +37,146 @@ function seededBooks(): Array<{ x: number; y: number; h: number; w: number; colo
 }
 
 export default function InterrogationRoom() {
-  const books = useMemo(seededBooks, []);
+  const books = useMemo(() => seededBooks(), []);
+  const floorTex = useMemo(() => woodFloorTexture(), []);
+  const tableTex = useMemo(() => {
+    const tex = woodFloorTexture().clone();
+    tex.needsUpdate = true;
+    tex.center.set(0.5, 0.5);
+    return tex;
+  }, []);
 
   return (
     <group>
       {/* 地板与地毯 */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.02, 0]} receiveShadow>
         <circleGeometry args={[10, 48]} />
-        <meshToonMaterial color="#6d4a2f" />
+        <meshStandardMaterial color="#9a7a52" map={floorTex} roughness={0.8} />
       </mesh>
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]} receiveShadow>
-        <circleGeometry args={[4.4, 48]} />
-        <meshToonMaterial color="#3f3a5c" />
+        <circleGeometry args={[4.35, 48]} />
+        <meshStandardMaterial color="#4c4560" roughness={0.9} />
       </mesh>
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.005, 0]}>
-        <ringGeometry args={[4.1, 4.28, 48]} />
-        <meshToonMaterial color="#e0a34a" />
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.006, 0]}>
+        <ringGeometry args={[4.05, 4.28, 48]} />
+        <meshStandardMaterial color="#c99a4a" roughness={0.75} />
+      </mesh>
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.006, 0]}>
+        <ringGeometry args={[2.5, 2.62, 48]} />
+        <meshStandardMaterial color="#5c5478" roughness={0.8} />
       </mesh>
 
-      {/* 圆形围墙（暗夜蓝）+ 墙裙 */}
+      {/* 圆形围墙 + 墙裙 */}
       <mesh position={[0, 3, 0]}>
         <cylinderGeometry args={[9.5, 9.5, 6, 48, 1, true]} />
-        <meshToonMaterial color="#2a2740" side={THREE.BackSide} />
+        <meshStandardMaterial color="#3d3750" side={THREE.BackSide} roughness={0.9} />
       </mesh>
       <mesh position={[0, 0.5, 0]}>
         <cylinderGeometry args={[9.45, 9.45, 1, 48, 1, true]} />
-        <meshToonMaterial color="#3a3554" side={THREE.BackSide} />
+        <meshStandardMaterial color="#2f2a40" side={THREE.BackSide} roughness={0.9} />
       </mesh>
 
       {/* 中央圆桌 */}
-      <group position={[0, 0, 0]}>
-        <mesh position={[0, 0.72, 0]} castShadow receiveShadow>
-          <cylinderGeometry args={[1.55, 1.45, 0.09, 40]} />
-          <meshToonMaterial color="#a9713f" />
+      <group>
+        <mesh position={[0, 0.74, 0]} castShadow receiveShadow>
+          <cylinderGeometry args={[1.55, 1.45, 0.1, 40]} />
+          <meshStandardMaterial color="#8a5f36" map={tableTex} roughness={0.55} />
         </mesh>
-        <mesh position={[0, 0.35, 0]}>
-          <cylinderGeometry args={[0.16, 0.22, 0.66, 16]} />
-          <meshToonMaterial color="#7c4f2a" />
+        <mesh position={[0, 0.36, 0]}>
+          <cylinderGeometry args={[0.17, 0.24, 0.64, 16]} />
+          <meshStandardMaterial color={WOOD_DARK} roughness={0.7} />
         </mesh>
         <mesh position={[0, 0.04, 0]}>
-          <cylinderGeometry args={[0.62, 0.7, 0.08, 24]} />
-          <meshToonMaterial color="#7c4f2a" />
+          <cylinderGeometry args={[0.64, 0.72, 0.08, 24]} />
+          <meshStandardMaterial color={WOOD_DARK} roughness={0.7} />
         </mesh>
-        {/* 桌面证据纸与放大镜道具 */}
-        <mesh position={[0.4, 0.775, 0.3]} rotation={[-Math.PI / 2, 0, 0.5]}>
-          <planeGeometry args={[0.42, 0.56]} />
-          <meshToonMaterial color="#fdf8ec" />
-        </mesh>
-        <mesh position={[0.38, 0.782, 0.28]} rotation={[-Math.PI / 2, 0, 0.5]}>
-          <planeGeometry args={[0.3, 0.02]} />
-          <meshToonMaterial color="#b8b0a0" />
-        </mesh>
-        <group position={[-0.5, 0.82, 0.25]} rotation={[0, 0.4, 0.15]}>
-          <mesh>
-            <torusGeometry args={[0.09, 0.016, 10, 24]} />
-            <meshToonMaterial color="#e0a34a" />
+
+        {/* 桌面道具：地图纸 / 马克杯 / 笔筒 / 放大镜 / 录音机 */}
+        {[
+          [0.32, 0.36, 0.4],
+          [-0.15, 0.28, -0.35],
+        ].map(([x, , z], i) => (
+          <mesh key={i} position={[x, 0.796, z]} rotation={[-Math.PI / 2, 0, i * 1.1]}>
+            <planeGeometry args={[0.5, 0.66]} />
+            <meshStandardMaterial color="#efe6d0" roughness={0.85} />
           </mesh>
-          <mesh position={[0.11, -0.13, 0]} rotation={[0, 0, -0.8]}>
-            <cylinderGeometry args={[0.012, 0.012, 0.22, 8]} />
-            <meshToonMaterial color="#8a5a36" />
+        ))}
+        {[
+          [-0.52, 0.22],
+          [0.58, -0.28],
+          [0.12, 0.52],
+        ].map(([x, z], i) => (
+          <group key={i} position={[x, 0, z]}>
+            <mesh position={[0, 0.86, 0]}>
+              <cylinderGeometry args={[0.055, 0.048, 0.11, 14]} />
+              <meshStandardMaterial color="#e8e2d2" roughness={0.5} />
+            </mesh>
+            <mesh position={[0.06, 0.87, 0]} rotation={[Math.PI / 2, 0, 0]}>
+              <torusGeometry args={[0.032, 0.011, 8, 16, Math.PI]} />
+              <meshStandardMaterial color="#e8e2d2" roughness={0.5} />
+            </mesh>
+          </group>
+        ))}
+        <group position={[-0.3, 0, 0.42]}>
+          <mesh position={[0, 0.85, 0]}>
+            <cylinderGeometry args={[0.05, 0.06, 0.1, 12]} />
+            <meshStandardMaterial color="#3c4258" roughness={0.6} />
+          </mesh>
+          {[-0.03, 0, 0.03].map((x, i) => (
+            <mesh key={i} position={[x, 0.94, 0]} rotation={[0, 0, x * 2]}>
+              <cylinderGeometry args={[0.006, 0.006, 0.12, 6]} />
+              <meshStandardMaterial color={i === 1 ? "#c9524a" : "#46507a"} roughness={0.5} />
+            </mesh>
+          ))}
+        </group>
+        <group position={[0.42, 0, 0.34]} rotation={[0, 0.4, 0.12]}>
+          <mesh position={[0, 0.85, 0]}>
+            <torusGeometry args={[0.085, 0.015, 10, 24]} />
+            <meshStandardMaterial color={BRASS} roughness={0.35} metalness={0.7} />
+          </mesh>
+          <mesh position={[0.1, 0.77, 0]} rotation={[0, 0, -0.7]}>
+            <cylinderGeometry args={[0.012, 0.012, 0.2, 8]} />
+            <meshStandardMaterial color={WOOD_DARK} roughness={0.5} />
+          </mesh>
+        </group>
+        <group position={[-0.05, 0, -0.62]} rotation={[0, 0.2, 0]}>
+          <mesh position={[0, 0.83, 0]} castShadow>
+            <boxGeometry args={[0.26, 0.09, 0.16]} />
+            <meshStandardMaterial color="#6e3b32" roughness={0.55} />
+          </mesh>
+          <mesh position={[0.07, 0.83, 0.082]}>
+            <cylinderGeometry args={[0.03, 0.03, 0.012, 12]} />
+            <meshStandardMaterial color="#2c2830" roughness={0.4} />
           </mesh>
         </group>
       </group>
 
       {/* 吊灯 */}
-      <group position={[0, 2.35, 0]}>
-        <mesh position={[0, 0.75, 0]}>
-          <cylinderGeometry args={[0.008, 0.008, 1.5, 6]} />
-          <meshToonMaterial color={INK} />
+      <group position={[0, 2.32, 0]}>
+        <mesh position={[0, 0.78, 0]}>
+          <cylinderGeometry args={[0.008, 0.008, 1.56, 6]} />
+          <meshStandardMaterial color="#1c1826" />
         </mesh>
         <mesh castShadow>
-          <coneGeometry args={[0.42, 0.32, 24, 1, true]} />
-          <meshToonMaterial color="#e0a34a" side={THREE.DoubleSide} />
+          <coneGeometry args={[0.46, 0.34, 28, 1, true]} />
+          <meshStandardMaterial color={BRASS} side={THREE.DoubleSide} roughness={0.4} metalness={0.6} />
         </mesh>
-        <mesh position={[0, -0.12, 0]}>
-          <sphereGeometry args={[0.09, 16, 16]} />
-          <meshBasicMaterial color="#ffe9b0" />
+        <mesh position={[0, -0.13, 0]}>
+          <sphereGeometry args={[0.075, 16, 16]} />
+          <meshBasicMaterial color="#ffedbb" />
         </mesh>
-        <pointLight position={[0, -0.25, 0]} intensity={12} distance={9} color="#ffd98a" />
+        <mesh position={[0, 0.12, 0]}>
+          <cylinderGeometry args={[0.05, 0.07, 0.1, 12]} />
+          <meshStandardMaterial color="#8a6838" roughness={0.4} metalness={0.6} />
+        </mesh>
+        <pointLight position={[0, -0.3, 0]} intensity={14} distance={10} color="#ffd98a" />
         <spotLight
-          position={[0, -0.1, 0]}
+          position={[0, -0.12, 0]}
           target-position={[0, 0, 0]}
-          angle={0.62}
-          penumbra={0.7}
-          intensity={55}
-          distance={9}
+          angle={0.66}
+          penumbra={0.75}
+          intensity={62}
+          distance={10}
           color="#ffce7a"
           castShadow
           shadow-mapSize={[1024, 1024]}
@@ -125,160 +184,242 @@ export default function InterrogationRoom() {
         />
       </group>
 
-      {/* 夜窗（挂在墙内侧） */}
-      <group position={[0, 2.1, -9.3]} rotation={[0, 0, 0]}>
+      {/* 月夜窗（挂墙内侧）：月亮 + 城市剪影 + 窗框 + 窗帘 */}
+      <group position={[0, 2.2, -9.3]}>
         <mesh>
-          <planeGeometry args={[2.4, 1.7]} />
-          <meshBasicMaterial color="#131b38" />
+          <planeGeometry args={[2.7, 2.0]} />
+          <meshBasicMaterial color="#0d1530" />
         </mesh>
-        <mesh position={[0, 0.45, 0.02]}>
-          <circleGeometry args={[0.24, 24]} />
-          <meshBasicMaterial color="#f4ecd0" />
+        {/* 月亮与光晕 */}
+        <mesh position={[0.82, 0.6, 0.02]}>
+          <circleGeometry args={[0.26, 32]} />
+          <meshBasicMaterial color="#f6f0d8" />
         </mesh>
+        <mesh position={[0.82, 0.6, 0.015]}>
+          <circleGeometry args={[0.4, 32]} />
+          <meshBasicMaterial color="#e8e4c8" transparent opacity={0.24} />
+        </mesh>
+        {/* 星 */}
         {[
-          [-0.8, 0.5],
-          [-0.5, 0.1],
-          [0.6, 0.55],
-          [0.9, 0.05],
-          [0.3, -0.3],
-          [-0.2, 0.6],
-          [0.75, -0.5],
+          [-1.0, 0.72],
+          [-0.6, 0.35],
+          [0.2, 0.8],
+          [0.55, 0.15],
+          [-0.2, 0.5],
+          [1.05, 0.2],
         ].map(([x, y], i) => (
           <mesh key={i} position={[x, y, 0.02]}>
-            <circleGeometry args={[0.02, 8]} />
+            <circleGeometry args={[0.018, 8]} />
             <meshBasicMaterial color="#dfe6ff" />
           </mesh>
         ))}
-        <mesh position={[0, 0, 0.04]}>
-          <ringGeometry args={[1.19, 1.24, 4, 1, Math.PI / 4]} />
-          <meshToonMaterial color="#5b4a32" />
-        </mesh>
-        <mesh>
-          <planeGeometry args={[2.62, 1.92]} />
-          <meshToonMaterial color="#5b4a32" />
-        </mesh>
+        {/* 城市剪影 */}
+        {[
+          [-1.1, -0.55, 0.3, 0.5],
+          [-0.8, -0.62, 0.24, 0.36],
+          [-0.45, -0.5, 0.34, 0.6],
+          [0.3, -0.6, 0.4, 0.4],
+          [0.7, -0.52, 0.3, 0.56],
+          [1.1, -0.6, 0.26, 0.4],
+        ].map(([x, y, w, h], i) => (
+          <group key={i} position={[x, y, 0.02]}>
+            <mesh>
+              <planeGeometry args={[w, h]} />
+              <meshBasicMaterial color="#131c3a" />
+            </mesh>
+            {[0, 1, 2].map((r) => (
+              <mesh key={r} position={[(r - 1) * w * 0.24, -h * 0.1 + r * 0.06, 0.005]}>
+                <circleGeometry args={[0.022, 4]} />
+                <meshBasicMaterial color="#e8c47a" />
+              </mesh>
+            ))}
+          </group>
+        ))}
+        {/* 窗框 */}
         <mesh position={[0, 0, 0.05]}>
-          <planeGeometry args={[2.42, 1.72]} />
-          <meshBasicMaterial color="#0c1226" transparent opacity={0} />
-        </mesh>
-        {/* 窗框纵横条 */}
-        <mesh position={[0, 0, 0.06]}>
-          <planeGeometry args={[0.07, 1.78]} />
-          <meshToonMaterial color="#6d5a3f" />
+          <planeGeometry args={[2.95, 2.25]} />
+          <meshStandardMaterial color="#4a3a28" roughness={0.7} />
         </mesh>
         <mesh position={[0, 0, 0.06]}>
-          <planeGeometry args={[2.58, 0.07]} />
-          <meshToonMaterial color="#6d5a3f" />
+          <planeGeometry args={[2.72, 2.02]} />
+          <meshBasicMaterial color="#0d1530" />
+        </mesh>
+        <mesh position={[0, 0, 0.075]}>
+          <planeGeometry args={[0.06, 2.0]} />
+          <meshStandardMaterial color="#5c4a32" roughness={0.7} />
+        </mesh>
+        <mesh position={[0, 0, 0.075]}>
+          <planeGeometry args={[2.7, 0.06]} />
+          <meshStandardMaterial color="#5c4a32" roughness={0.7} />
+        </mesh>
+        {/* 窗帘 */}
+        <mesh position={[-1.45, 0.1, 0.09]} rotation={[0, 0, 0.03]}>
+          <planeGeometry args={[0.4, 2.3]} />
+          <meshStandardMaterial color="#37406a" roughness={0.85} side={THREE.DoubleSide} />
+        </mesh>
+        <mesh position={[1.45, 0.1, 0.09]} rotation={[0, 0, -0.03]}>
+          <planeGeometry args={[0.4, 2.3]} />
+          <meshStandardMaterial color="#37406a" roughness={0.85} side={THREE.DoubleSide} />
         </mesh>
       </group>
-      <pointLight position={[0, 2.4, -8.4]} intensity={6} distance={6} color="#7f9bff" />
+      {/* 月光冷色补光 */}
+      <directionalLight position={[0, 4, -9]} intensity={0.5} color="#7f9bff" />
 
       {/* 书架 */}
       <group position={[-5.2, 0, -6.4]} rotation={[0, 0.65, 0]}>
         <mesh position={[0, 1.05, -0.18]}>
           <boxGeometry args={[1.9, 2.1, 0.36]} />
-          <meshToonMaterial color="#6d4a2f" />
+          <meshStandardMaterial color={WOOD} roughness={0.75} />
         </mesh>
         {books.map((b, i) => (
           <mesh key={i} position={[b.x, b.y, 0.02]}>
             <boxGeometry args={[b.w, b.h, 0.26]} />
-            <meshToonMaterial color={b.color} />
+            <meshStandardMaterial color={b.color} roughness={0.7} />
           </mesh>
         ))}
       </group>
 
-      {/* 软木板证据墙：钉着的纸与红线 */}
-      <group position={[4.6, 1.9, -6.2]} rotation={[0, -0.6, 0]}>
+      {/* 软木板证据墙：照片/纸条 + 红线 */}
+      <group position={[4.6, 2.0, -6.2]} rotation={[0, -0.6, 0]}>
         <mesh>
-          <boxGeometry args={[2.1, 1.5, 0.06]} />
-          <meshToonMaterial color="#8a6b46" />
+          <boxGeometry args={[2.3, 1.6, 0.06]} />
+          <meshStandardMaterial color="#6e4f30" roughness={0.8} />
         </mesh>
         <mesh position={[0, 0, 0.035]}>
-          <planeGeometry args={[1.94, 1.34]} />
-          <meshToonMaterial color="#c8a06a" />
+          <planeGeometry args={[2.14, 1.44]} />
+          <meshStandardMaterial color="#b08a58" roughness={0.9} />
         </mesh>
         {[
-          [-0.55, 0.3, 0.08],
-          [0.1, 0.35, -0.06],
-          [0.6, 0.15, 0.12],
-          [-0.35, -0.3, -0.1],
-          [0.35, -0.35, 0.07],
+          [-0.62, 0.32, 0.08],
+          [0.05, 0.38, -0.06],
+          [0.66, 0.18, 0.12],
+          [-0.4, -0.28, -0.1],
+          [0.3, -0.34, 0.07],
+          [0.75, -0.3, -0.12],
+          [-0.75, -0.25, 0.05],
         ].map(([x, y, r], i) => (
           <group key={i} position={[x, y, 0.05]} rotation={[0, 0, r]}>
             <mesh>
-              <planeGeometry args={[0.34, 0.42]} />
-              <meshToonMaterial color="#fdf8ec" />
+              <planeGeometry args={[0.34, i % 2 ? 0.42 : 0.3]} />
+              <meshStandardMaterial color={i % 3 === 0 ? "#d8d2c2" : "#efe6d0"} roughness={0.85} />
             </mesh>
-            <mesh position={[0, 0.24, 0.01]}>
-              <circleGeometry args={[0.022, 10]} />
-              <meshBasicMaterial color={i % 2 ? "#d94f3d" : "#e0a34a"} />
-            </mesh>
-            <mesh position={[0, 0.08, 0.008]}>
-              <planeGeometry args={[0.24, 0.02]} />
-              <meshToonMaterial color="#b8b0a0" />
-            </mesh>
-            <mesh position={[0, 0.02, 0.008]}>
-              <planeGeometry args={[0.24, 0.02]} />
-              <meshToonMaterial color="#b8b0a0" />
-            </mesh>
-            <mesh position={[0, -0.04, 0.008]}>
-              <planeGeometry args={[0.18, 0.02]} />
-              <meshToonMaterial color="#b8b0a0" />
+            {i % 3 === 0 && (
+              <mesh position={[0, 0.02, 0.008]}>
+                <planeGeometry args={[0.22, 0.16]} />
+                <meshStandardMaterial color="#6a6478" roughness={0.9} />
+              </mesh>
+            )}
+            {[0.08, 0, -0.08].map((ly, j) => (
+              <mesh key={j} position={[0, ly - 0.05, 0.008]}>
+                <planeGeometry args={[0.22, 0.018]} />
+                <meshStandardMaterial color="#a89c84" roughness={0.9} />
+              </mesh>
+            ))}
+            <mesh position={[0, i % 2 ? 0.24 : 0.18, 0.012]}>
+              <circleGeometry args={[0.02, 10]} />
+              <meshBasicMaterial color={i % 2 ? "#c9524a" : "#c99a4a"} />
             </mesh>
           </group>
         ))}
-        {/* 红线连接 */}
-        <mesh position={[0.05, 0.33, 0.07]} rotation={[0, 0, 1.25]}>
-          <planeGeometry args={[0.85, 0.012]} />
-          <meshBasicMaterial color="#d94f3d" />
-        </mesh>
-        <mesh position={[0.0, -0.06, 0.07]} rotation={[0, 0, -1.1]}>
-          <planeGeometry args={[0.9, 0.012]} />
-          <meshBasicMaterial color="#d94f3d" />
-        </mesh>
-      </group>
-
-      {/* 绿植 */}
-      <group position={[3.4, 0, 3.6]}>
-        <mesh position={[0, 0.22, 0]}>
-          <cylinderGeometry args={[0.26, 0.2, 0.44, 16]} />
-          <meshToonMaterial color="#c2557a" />
-        </mesh>
+        {/* 红线 */}
         {[
-          [0, 0.62, 0, 0.26],
-          [0.16, 0.5, 0.08, 0.17],
-          [-0.15, 0.55, -0.06, 0.19],
-          [0.05, 0.82, -0.05, 0.15],
-        ].map(([x, y, z, r], i) => (
-          <mesh key={i} position={[x, y, z]} castShadow>
-            <sphereGeometry args={[r, 14, 14]} />
-            <meshToonMaterial color={i % 2 ? "#3f7a44" : "#57995c"} />
+          [0.02, 0.35, 1.25, 0.95],
+          [-0.05, -0.1, -1.0, 0.85],
+          [0.35, 0.28, 0.5, 1.1],
+        ].map(([x, y, rot, len], i) => (
+          <mesh key={i} position={[x, y, 0.075]} rotation={[0, 0, rot]}>
+            <planeGeometry args={[len, 0.014]} />
+            <meshBasicMaterial color="#c9524a" />
           </mesh>
         ))}
       </group>
 
+      {/* 右侧柜 + 绿罩台灯 + 收音机 */}
+      <group position={[5.4, 0, -1.2]} rotation={[0, -1.35, 0]}>
+        <mesh position={[0, 0.42, 0]} castShadow receiveShadow>
+          <boxGeometry args={[1.6, 0.84, 0.6]} />
+          <meshStandardMaterial color={WOOD} roughness={0.75} />
+        </mesh>
+        {[-0.4, 0.4].map((x, i) => (
+          <mesh key={i} position={[x, 0.36, 0.31]}>
+            <circleGeometry args={[0.03, 10]} />
+            <meshStandardMaterial color={BRASS} roughness={0.35} metalness={0.7} />
+          </mesh>
+        ))}
+        {/* 绿罩台灯 */}
+        <group position={[-0.45, 0.84, 0]}>
+          <mesh position={[0, 0.18, 0]}>
+            <cylinderGeometry args={[0.02, 0.05, 0.36, 10]} />
+            <meshStandardMaterial color={BRASS} roughness={0.35} metalness={0.7} />
+          </mesh>
+          <mesh position={[0, 0.4, 0]} rotation={[0, 0, 0.12]}>
+            <cylinderGeometry args={[0.05, 0.17, 0.12, 20, 1, true]} />
+            <meshStandardMaterial color="#2f6e46" side={THREE.DoubleSide} roughness={0.45} />
+          </mesh>
+          <mesh position={[0, 0.345, 0]}>
+            <sphereGeometry args={[0.035, 10, 10]} />
+            <meshBasicMaterial color="#ffedbb" />
+          </mesh>
+          <pointLight position={[0, 0.32, 0]} intensity={2.2} distance={3.4} color="#c8e8a8" />
+        </group>
+        {/* 文件盒 */}
+        <mesh position={[0.4, 0.98, 0]} castShadow>
+          <boxGeometry args={[0.36, 0.28, 0.3]} />
+          <meshStandardMaterial color="#3c4258" roughness={0.6} />
+        </mesh>
+        <mesh position={[0.4, 0.9, 0.16]} rotation={[0, 0, 0]}>
+          <boxGeometry args={[0.3, 0.05, 0.02]} />
+          <meshStandardMaterial color="#e8e2d2" roughness={0.8} />
+        </mesh>
+      </group>
+
+      {/* 绿植 ×2 */}
+      {[
+        { p: [3.6, 0, 4.2] as [number, number, number], s: 1 },
+        { p: [-3.9, 0, 4.6] as [number, number, number], s: 0.8 },
+      ].map(({ p, s }, gi) => (
+        <group key={gi} position={p} scale={s}>
+          <mesh position={[0, 0.24, 0]} castShadow>
+            <cylinderGeometry args={[0.26, 0.2, 0.48, 16]} />
+            <meshStandardMaterial color="#8a5a4a" roughness={0.7} />
+          </mesh>
+          {[
+            [0, 0.66, 0, 0.27],
+            [0.17, 0.54, 0.08, 0.18],
+            [-0.16, 0.58, -0.06, 0.2],
+            [0.05, 0.86, -0.05, 0.16],
+            [-0.07, 0.78, 0.09, 0.14],
+          ].map(([x, y, z, r], i) => (
+            <mesh key={i} position={[x, y, z]} castShadow>
+              <sphereGeometry args={[r, 14, 12]} />
+              <meshStandardMaterial color={i % 2 ? "#3f7a44" : "#57995c"} roughness={0.7} />
+            </mesh>
+          ))}
+        </group>
+      ))}
+
       {/* 挂钟 */}
-      <group position={[-3.4, 2.5, -7.4]} rotation={[0, 0.5, 0]}>
+      <group position={[-3.4, 2.6, -7.4]} rotation={[0, 0.5, 0]}>
         <mesh>
-          <torusGeometry args={[0.34, 0.05, 10, 28]} />
-          <meshToonMaterial color="#e0a34a" />
+          <torusGeometry args={[0.36, 0.05, 10, 28]} />
+          <meshStandardMaterial color={WOOD_DARK} roughness={0.6} />
         </mesh>
         <mesh>
-          <circleGeometry args={[0.32, 28]} />
-          <meshToonMaterial color="#fdf8ec" />
+          <circleGeometry args={[0.34, 28]} />
+          <meshStandardMaterial color="#efe6d0" roughness={0.8} />
         </mesh>
-        <mesh position={[0, 0.06, 0.01]} rotation={[0, 0, 0.4]}>
+        <mesh position={[0, 0.07, 0.01]} rotation={[0, 0, 0.4]}>
           <planeGeometry args={[0.03, 0.2]} />
-          <meshToonMaterial color={INK} />
+          <meshStandardMaterial color="#2c2830" roughness={0.6} />
         </mesh>
         <mesh position={[0.05, 0, 0.01]} rotation={[0, 0, -1.2]}>
           <planeGeometry args={[0.03, 0.26]} />
-          <meshToonMaterial color={INK} />
+          <meshStandardMaterial color="#2c2830" roughness={0.6} />
         </mesh>
       </group>
 
       {/* 灯下漂浮尘埃 */}
-      <Sparkles count={42} scale={[3.2, 2.4, 3.2]} position={[0, 1.6, 0]} size={2.4} speed={0.25} color="#ffd98a" opacity={0.5} />
+      <Sparkles count={46} scale={[3.4, 2.6, 3.4]} position={[0, 1.7, 0]} size={2.4} speed={0.25} color="#ffd98a" opacity={0.5} />
     </group>
   );
 }
