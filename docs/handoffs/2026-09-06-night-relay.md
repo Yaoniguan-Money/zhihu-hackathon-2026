@@ -57,3 +57,9 @@
 - 用户预览 B 端 UI 后明确指示「合并且推送」；已按可行性报告的整合路径执行调和合并（merge commit `4611e59`）：保留 B 全部产品代码与依赖，从 `bf2789f` 还原 AGENTS.md/README/tsconfig/next.config，package.json 手工并入 B 依赖后重装。合并后 main：typecheck 零错误、全套件 135 pass / 0 fail、build 通过（`/` + `/game/*` 五页 + voice Routes）。详见[合并可行性报告追记](./2026-09-06-developer-b-merge-feasibility.md)。
 - 新增运维事实：**手动 kill 模型类测试会跳过其 afterAll，把 AI_* 残留在本地部署上**，导致后续「无模型」测试误报（期望 SERVICE_NOT_CONFIGURED 实得 ROLE_TURN_FAILED）。清理方式：`bunx convex env remove AI_*` 八项后复跑即恢复 135/0。
 - P1-3 过夜循环：cycle 1-2 探测均未达健康窗口（1302 限频 → 183s 慢响应），继续运行中。
+
+## 追加（10:45）：晨间协作调整与 TB9-on-GLM 状态
+
+- TB9 完整游玩链在 GLM 上的首次验证因 validator 调用 117ms 瞬断（1302 类爆发）在第一条开场显式失败（协议失败不进入语义重写，行为符合规范）；重试循环已**主动停止**——它与 FE-B1 的产品可玩态（AI_* 常驻）和健康探测共享免费档配额，环境态循环（每轮 afterAll 移除 AI_*）会互相干扰。本地部署已恢复为产品可玩态（AI_* 八项常驻）。
+- 结论性事实：GLM 免费档下「游玩链」（预种金案件，不经抽取）每次运行 ≈17 个串行模型调用，逐调用 1302 抽签下成功率约三成，重试可行但昂贵；「建案抽取」被 flash 档逐字抽取能力阻塞（见 AI 切换 handoff 追加）。两者均已如实记录，等用户模型决策。
+- 协作分工现状：FE-B1（另一会话）已在合并后的 main 上交付真实数据重接的前端（见其 handoff），本地演示入口 localhost:3100；A 侧本会话停全部后台循环，避免资源竞争；临时 worktree dev server（:3000，旧 mock UI）已清理。
