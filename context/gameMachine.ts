@@ -711,6 +711,28 @@ export const gameMachine = setup({
                 },
               },
             },
+            accusing: {
+              invoke: {
+                src: "accuser",
+                input: ({ context, event }) => {
+                  if (event.type !== "ACCUSE") throw new Error("ACCUSE required");
+                  return { sessionId: context.sessionId as string, accusation: event.accusation };
+                },
+                onDone: {
+                  target: "idle",
+                  actions: assign(({ context, event }) => ({
+                    sessionView: event.output.view ?? context.sessionView,
+                    notifs: pushNotif(context.notifs, notif("success", "指控已提交", "合议庭正在裁决，即将进入揭底")),
+                    turnBusy: false,
+                    actionError: null,
+                  })),
+                },
+                onError: {
+                  target: "idle",
+                  actions: assign({ turnBusy: false, actionError: ({ event }) => toPublicError(event.error) }),
+                },
+              },
+            },
           },
           always: [
             { target: "judging", guard: "phaseJudging" },
@@ -722,6 +744,7 @@ export const gameMachine = setup({
             PRESENT_RECORDING: { target: ".presenting", actions: assign({ turnBusy: true, actionError: null }) },
             SAVE_RECORDING: { target: ".savingRecording", actions: assign({ turnBusy: true, actionError: null }) },
             BOARD_SAVE: { target: ".savingBoard", actions: assign({ turnBusy: true, actionError: null }) },
+            ACCUSE: { target: ".accusing", actions: assign({ turnBusy: true, actionError: null }) },
           },
         },
 

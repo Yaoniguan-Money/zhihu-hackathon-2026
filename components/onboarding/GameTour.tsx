@@ -92,29 +92,37 @@ export default function GameTour({
   // portal 挂到 body：逃开含 backdrop-blur / transform 的祖先（它们会把 fixed 变成相对自身定位）。
   useEffect(() => setPortalMounted(true), []);
 
-  const measure = useCallback(() => {
-    if (!step || typeof window === "undefined") return;
-    const vw = window.innerWidth;
-    const vh = window.innerHeight;
-    const el = document.querySelector<HTMLElement>(`[data-tour="${step.target}"]`);
-    if (!el) {
-      setCenter(true);
-      setRect(null);
-      setPos({ left: Math.max(16, (vw - CARD_W) / 2), top: Math.round(vh * 0.38) });
-      return;
-    }
-    el.scrollIntoView({ block: "center", behavior: "instant" as ScrollBehavior });
-    const r = el.getBoundingClientRect();
-    const below = r.bottom + PAD + 12 + 190 < vh;
-    const left = Math.min(Math.max(16, r.left), Math.max(16, vw - CARD_W - 16));
-    setCenter(false);
-    setRect({ top: r.top, left: r.left, width: r.width, height: r.height });
-    setPos(
-      below
-        ? { left, top: r.bottom + PAD + 12 }
-        : { left, bottom: Math.max(12, vh - r.top - PAD - 12) },
-    );
-  }, [step]);
+  const measure = useCallback(
+    (scrollToTarget: boolean) => {
+      if (!step || typeof window === "undefined") return;
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
+      const el = document.querySelector<HTMLElement>(`[data-tour="${step.target}"]`);
+      if (!el) {
+        setCenter(true);
+        setRect(null);
+        setPos({ left: Math.max(16, (vw - CARD_W) / 2), top: Math.round(vh * 0.38) });
+        return;
+      }
+      // 只在换步时把目标滚进视野；滚动/resize 引发的重测绝不重新锚定，
+      // 否则 scrollIntoView → scroll 事件 → 再 scrollIntoView 会与用户滚动形成死锁。
+      if (scrollToTarget) {
+        el.scrollIntoView({ block: "center", behavior: "instant" as ScrollBehavior });
+      }
+      const r = el.getBoundingClientRect();
+      const below = r.bottom + PAD + 12 + 190 < vh;
+      const left = Math.min(Math.max(16, r.left), Math.max(16, vw - CARD_W - 16));
+      setCenter(false);
+      setRect({ top: r.top, left: r.left, width: r.width, height: r.height });
+      setPos(
+        below
+          ? { left, top: Math.max(12, r.bottom + PAD + 12) }
+          : // 说明卡贴在目标上方时，夹在视口内，避免被算到屏幕外看不见。
+            { left, bottom: Math.max(12, Math.min(vh - r.top - PAD - 12, vh - 170)) },
+      );
+    },
+    [step],
+  );
 
   const finish = useCallback(() => {
     setActive(false);
@@ -152,20 +160,28 @@ export default function GameTour({
     };
   }, [tour, enabled, storageKey, steps.length]);
 
-  // 打开/换步时测量（双次兜底布局与滚动动画）；窗口/容器滚动变化时重测。
+  // 打开/换步时：滚动定位目标并测量（双次兜底布局与滚动动画）。
   useEffect(() => {
     if (!active) return;
-    const t1 = setTimeout(measure, 60);
-    const t2 = setTimeout(measure, 400);
-    window.addEventListener("resize", measure);
-    window.addEventListener("scroll", measure, true);
+    const t1 = setTimeout(() => measure(true), 60);
+    const t2 = setTimeout(() => measure(true), 400);
     return () => {
       clearTimeout(t1);
       clearTimeout(t2);
-      window.removeEventListener("resize", measure);
-      window.removeEventListener("scroll", measure, true);
     };
   }, [active, index, measure]);
+
+  // 窗口/容器滚动变化时只重测位置，绝不重新锚定滚动。
+  useEffect(() => {
+    if (!active) return;
+    const onScrollOrResize = () => measure(false);
+    window.addEventListener("resize", onScrollOrResize);
+    window.addEventListener("scroll", onScrollOrResize, true);
+    return () => {
+      window.removeEventListener("resize", onScrollOrResize);
+      window.removeEventListener("scroll", onScrollOrResize, true);
+    };
+  }, [active, measure]);
 
   // Esc 退出。
   useEffect(() => {
