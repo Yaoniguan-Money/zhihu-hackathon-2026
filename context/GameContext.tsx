@@ -30,6 +30,8 @@ interface GameApi extends GameContextData {
   notifList: Notif[];
   /** 角色回合（ask/对质）是否在途。 */
   busyTurn: boolean;
+  /** 状态机是否已回到大厅态（用于 /game/* 路由与机器状态脱钩时的回弹）。 */
+  matchesLobby: boolean;
   selectCase: (caseId: string) => void;
   startGame: () => void;
   ask: (roleId: RoleId, mode: QuestionMode, text: string, source: QuestionSource) => void;
@@ -73,6 +75,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
     return {
       ...ctx,
       booted: !isLoading && isAuthenticated,
+      matchesLobby: snapshot.matches("lobby"),
       allowedActions: new Set(ctx.sessionView?.allowed_actions ?? []),
       phase: ctx.sessionView?.phase ?? null,
       notifList: ctx.notifs,

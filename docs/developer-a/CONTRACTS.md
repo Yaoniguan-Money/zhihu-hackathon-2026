@@ -263,6 +263,7 @@ export interface CaseCompilationStatusPublic {
 ```
 
 - `cases.listPublic` 只返回已批准且 `ready` 的系统案件；用户案件不出现在目录中。进入系统目录只能由内部操作完成，并经过 A/B Golden 审批。
+- `cases.listMine`（2026-09-08 迭代补充，additive）：返回当前身份名下 `ready` 的用户案件摘要（`case_id / title / summary / theme / updated_at`），按 `updated_at` 降序。未登录或无案件时返回空数组。用户案件对 owner 可经既有 `sessions.create` 开局；目录可见性规则不变（用户案件仍不进 `listPublic`）。
 - `cases.createFromSource` 校验通过后立即返回 `CaseCompileReceipt`；编译异步执行，进度只能经 `cases.observeCompilation` 观察，公开状态仅限 `accepted / working / succeeded / failed`。
 - 编译任何一步失败都不留下可玩 Case：`cases.getPublic` 保持 `null`，`observeCompilation` 报告 `failed` 与安全 Public Error。
 - `observeCompilation` 对不存在与不可访问的 Case 都返回 `null`。

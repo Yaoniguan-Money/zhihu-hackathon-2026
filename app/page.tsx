@@ -28,6 +28,22 @@ function StageFallback() {
   );
 }
 
+/**
+ * 建案输入净化：玩家常直接粘贴 markdown 源码，装饰性标记会让 claim 抽取的
+ * source span 与段落错位（曾触发 SOURCE_SPAN_INVALID）。提交前只删装饰、不改文字。
+ */
+function stripMarkdownDecorations(text: string): string {
+  const lines = text.split("\n").map((line) => {
+    const trimmed = line.trim();
+    if (/^(?:-{3,}|\*{3,}|_{3,})$/.test(trimmed)) return "";
+    return line.replace(/^(\s{0,3}#{1,6}\s+)/, "");
+  });
+  let out = lines.join("\n");
+  out = out.replace(/\*\*([^*\n]+)\*\*/g, "$1");
+  out = out.replace(/`([^`\n]+)`/g, "$1");
+  return out;
+}
+
 /** 自定义建案：URL + 完整正文 + 邀请码 → durable 编译 → 进度观察。 */
 function CustomCaseForm() {
   const router = useRouter();
@@ -71,7 +87,7 @@ function CustomCaseForm() {
     try {
       const receipt = await createFromSource({
         source_url: url,
-        source_text: text,
+        source_text: stripMarkdownDecorations(text),
         invite_code: invite,
         client_action_id: newClientActionId(),
       });
@@ -157,6 +173,30 @@ export default function Home() {
   const { catalog, catalogError, retryCatalog, selectCase, actionError, clearActionError, booted } = useGame();
   const [activeIdx, setActiveIdx] = useState(-1);
   const [howtoOpen, setHowtoOpen] = useState(false);
+
+  /** 我的作品架：当前身份自己编译的案件（见 cases.listMine）。 */
+  function MyCases({ onStart }: { onStart: (caseId: string) => void }) {
+    const mine = useQuery(api.cases.listMine);
+    if (!mine || mine.length === 0) return null;
+    return (
+      <div className="mt-1">
+        <p className="flex items-center gap-1.5 text-[11px] font-black text-paper/60">
+          <Icon name="board" size={12} className="text-amber" /> 我的案件 · 自己带来的文章
+        </p>
+        {mine.map((c) => (
+          <button
+            key={c.case_id}
+            onClick={() => onStart(c.case_id)}
+            className="card mt-2 w-full p-3 text-left transition-transform hover:-translate-y-0.5"
+          >
+            <p className="text-[10px] font-black uppercase tracking-widest text-coral-deep">{c.theme}</p>
+            <h3 className="mt-0.5 line-clamp-1 text-sm font-black text-ink">{c.title}</h3>
+            <p className="mt-0.5 line-clamp-1 text-[11px] text-ink/55">{c.summary}</p>
+          </button>
+        ))}
+      </div>
+    );
+  }
   useEffect(() => {
     retryCatalog();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -267,6 +307,9 @@ export default function Home() {
             </motion.button>
           ))}
         </AnimatePresence>
+
+        {/* 我的案件：自己带文章编译的案件（错过提交页自动跳转后仍可找回） */}
+        <MyCases onStart={start} />
 
         {/* ② 带一篇知乎文章来：正式建案（Suspense 包裹 useSearchParams） */}
         <SectionLabel index="②" icon="link" title="带一篇知乎文章来" />

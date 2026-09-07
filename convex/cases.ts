@@ -14,6 +14,7 @@ import {
   caseCompilationStatusPublicSchema,
   casePublicSchema,
   sourceDocumentPublicSchema,
+  type CaseCatalogItemPublic,
   type CaseCompileReceipt,
   type CasePublic,
 } from "@contracts/public/index.js";
@@ -207,6 +208,56 @@ export const listPublic = query({
         source_url: doc.source_url,
       });
     });
+  },
+});
+
+/**
+ * 我的作品架（CONTRACTS 4.4 追加，additive）：当前身份名下 ready 的用户案件。
+ * 用户案件仍不进 listPublic 系统目录；owner 可用本查询找回自己编译的案件并开局，
+ * 否则编译成功后唯一入口是提交页那次自动跳转，刷新/关窗即永久不可达。
+ */
+export const listMine = query({
+  args: {},
+  handler: async (ctx): Promise<CaseCatalogItemPublic[]> => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) return [];
+    const docs = await ctx.db
+      .query("cases")
+      .withIndex("by_owner_status", (q) =>
+        q.eq("owner_identity", identity.tokenIdentifier).eq("status", "ready"),
+      )
+      .collect();
+    const items: CaseCatalogItemPublic[] = [];
+    for (const doc of docs) {
+      if (
+        doc.status !== "ready" ||
+        doc.title === undefined ||
+        doc.summary === undefined ||
+        doc.theme === undefined
+      ) {
+        continue;
+      }
+      // 历史数据：finalize 起才开始回填 cases.source_url；旧案件从 source_documents 找回。
+      let sourceUrl = doc.source_url;
+      if (sourceUrl === undefined) {
+        const src = await ctx.db
+          .query("source_documents")
+          .withIndex("by_case_key", (q) => q.eq("case_key", doc.case_key))
+          .unique();
+        sourceUrl = src?.source_url;
+      }
+      if (sourceUrl === undefined) continue;
+      items.push(
+        caseCatalogItemPublicSchema.parse({
+          case_id: doc.case_key,
+          title: doc.title,
+          summary: doc.summary,
+          theme: doc.theme,
+          source_url: sourceUrl,
+        }),
+      );
+    }
+    return items;
   },
 });
 
@@ -868,6 +919,7 @@ export const finalizeCompilationSuccess = internalMutation({
       title: args.title,
       summary: args.summary,
       theme: args.theme,
+      source_url: args.source_url,
       public_json: JSON.stringify(casePublic),
       updated_at_ms: nowMs,
     });

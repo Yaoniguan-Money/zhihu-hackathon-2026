@@ -61,6 +61,18 @@ export default function InterrogationPage() {
   const speakTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const roleMessages = useMemo(() => messages.filter((m) => m.speaker_type === "role"), [messages]);
+
+  // 门屏等待计时：真实加载通常数秒；超过 20s 提示玩家返回大厅，避免无限盲等。
+  const [gateSeconds, setGateSeconds] = useState(0);
+  const gateWaiting = !casePublic || !sessionView;
+  useEffect(() => {
+    if (!gateWaiting) {
+      setGateSeconds(0);
+      return;
+    }
+    const t = setInterval(() => setGateSeconds((s) => s + 1), 1000);
+    return () => clearInterval(t);
+  }, [gateWaiting]);
   const latestRole = roleMessages[roleMessages.length - 1] as
     | Extract<MessagePublic, { speaker_type: "role" }>
     | undefined;
@@ -84,6 +96,11 @@ export default function InterrogationPage() {
     return (
       <div className="flex min-h-[70vh] flex-col items-center justify-center gap-4">
         <Mascot motion="computer" size={110} caption="正在进入审讯室…" />
+        <p className="text-xs font-bold text-paper/45">
+          {gateSeconds >= 20
+            ? `已等待 ${gateSeconds} 秒。若长时间无响应，请返回大厅重新开始。`
+            : `已等待 ${gateSeconds} 秒`}
+        </p>
         <Link href="/" className="btn btn-ghost text-sm">
           <Icon name="back" size={14} /> 返回大厅
         </Link>

@@ -1,8 +1,8 @@
 "use client";
 
-import { ReactNode } from "react";
+import { ReactNode, useEffect } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useGame } from "@/context/GameContext";
 import { Icon } from "@/components/ui/Icons";
 import { requestTour, type TourId } from "@/components/onboarding/GameTour";
@@ -25,9 +25,18 @@ const TOUR_FOR_PATH: Partial<Record<string, TourId>> = {
 };
 
 export default function GameLayout({ children }: { children: ReactNode }) {
-  const { phase, allowedActions, backToLobby } = useGame();
+  const { phase, allowedActions, backToLobby, booted, matchesLobby } = useGame();
   const pathname = usePathname();
+  const router = useRouter();
   const tourId = pathname ? TOUR_FOR_PATH[pathname] : undefined;
+
+  // 状态机回到大厅态而路由仍停在 /game/*（如开局失败后）时回弹大厅，
+  // 避免「正在进入审讯室…」门屏永久盲等。
+  useEffect(() => {
+    if (booted && matchesLobby && pathname?.startsWith("/game")) {
+      router.replace("/");
+    }
+  }, [booted, matchesLobby, pathname, router]);
 
   return (
     <div className="flex min-h-screen flex-col">
