@@ -42,6 +42,16 @@ export default function EvidencePage() {
   const [dirty, setDirty] = useState(false);
   const [confrontTarget, setConfrontTarget] = useState<string | null>(null); // evidence_id
 
+  // 连线模式下 Esc 取消，避免玩家被卡在连线状态。
+  useEffect(() => {
+    if (!linkFrom) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setLinkFrom(null);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [linkFrom]);
+
   // 服务端板 → 本地编辑副本（CAS：保存需 expected_revision）
   const serverBoard = sessionView?.board;
   useEffect(() => {
@@ -75,10 +85,19 @@ export default function EvidencePage() {
   const canEdit = allowedActions.has("update_board") && !busyTurn;
 
   const addEvidence = (e: EvidenceFragmentPublic, lane: BoardLane = "source") => {
-    setPlacements((prev) => [
-      ...prev,
-      { evidence_id: e.evidence_id, lane, x: 0.5, y: 0.12 + ((prev.length * 13) % 60) / 100 },
-    ]);
+    setPlacements((prev) => {
+      // 泳道内竖向排队放置，避免新芯片压住已有芯片。
+      const inLane = prev.filter((p) => p.lane === lane).length;
+      return [
+        ...prev,
+        {
+          evidence_id: e.evidence_id,
+          lane,
+          x: 0.5,
+          y: Math.min(0.9, 0.16 + inLane * 0.19),
+        },
+      ];
+    });
     setDirty(true);
   };
 
@@ -230,6 +249,14 @@ export default function EvidencePage() {
         {/* 板面：六泳道 */}
         <div className="relative min-w-0 flex-1 overflow-hidden p-3" data-tour="ev-board">
           <div ref={boardRef} className="relative h-full rounded-2xl border-2 border-paper/10 bg-[#221e40]/70">
+            {/* 连线模式横幅：紧贴板面，指引下一步动作 */}
+            {linkFrom && (
+              <div className="pointer-events-none absolute left-1/2 top-2 z-40 -translate-x-1/2">
+                <div className="card-dark !border-indigo-soft px-4 py-1.5 text-xs font-black text-paper shadow-[var(--shadow-sticker-sm)]">
+                  连线中：再点目标证据的「连线」按钮完成关系，Esc 取消
+                </div>
+              </div>
+            )}
             {/* 泳道背景 */}
             <div className="absolute inset-0 grid grid-cols-6">
               {BOARD_LANES.map((lane) => (
@@ -290,7 +317,7 @@ export default function EvidencePage() {
                   onMove={(lane, x, y) => movePlacement(p.evidence_id, lane, x, y)}
                   onLinkStart={() => canEdit && toggleLinkEnd(p.evidence_id)}
                   onConfront={
-                    e.type === "quote" && allowedActions.has("present_recording") && !busyTurn
+                    e.type === "quote" && e.source_message_id != null && allowedActions.has("present_recording") && !busyTurn
                       ? () => setConfrontTarget(e.evidence_id)
                       : undefined
                   }
@@ -528,7 +555,7 @@ function BoardChip({
       ref={ref}
       style={{ ...style, transform: "translate(-50%, -50%)", position: "absolute", zIndex: dragging ? 30 : 10 }}
       data-lane-index={laneIndex}
-      className="w-[72%] min-w-[120px]"
+      className="w-[15.5%] min-w-[150px]"
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}
       onPointerUp={onPointerUp}
