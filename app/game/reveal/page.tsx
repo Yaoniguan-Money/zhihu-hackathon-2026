@@ -293,6 +293,12 @@ export default function RevealPage() {
           </p>
           <p className="mt-1 text-[11px] font-bold text-paper/50">审讯质量：覆盖角色与追问深度</p>
         </div>
+        <div className="col-span-2 border-t border-paper/10 pt-3">
+          <p className="text-center text-[11px] leading-relaxed text-paper/45">
+            证据分秘诀：引用的证据要分别命中真相链的不同关键论断，引用多条不同类型（录音 / 原文要点 / 时间线）的证据覆盖面更广。
+            审讯分秘诀：盘问尽量多的不同角色、对重点角色反复追问、审讯会触发新证据解锁——三项各占一部分。
+          </p>
+        </div>
       </section>
 
       {/* 行动 */}
