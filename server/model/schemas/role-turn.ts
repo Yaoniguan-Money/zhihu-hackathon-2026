@@ -34,6 +34,8 @@ export function roleGeneratorSystemPrompt(input: {
       : [
           "改写要求（distorted）：你只能使用「可见事实」中的材料，但按获准的篡改方式改变它们；",
           "不得引入可见事实之外的任何新实体、数字、时间、事件或来源。",
+          "隐蔽性要求：改动只落在限定词、范围、条件与因果连接词上，语气、句长和自信程度都要与忠实转述接近；",
+          "不要堆叠绝对化措辞（如把「所有」「永远」「任何」连用），不要主动宣告自己在「补充逻辑」或「讲透本质」。",
         ].join("\n"),
     "输出必须严格符合给定 JSON schema：speech（完整发言）、support_claim_ids、stance、emotion。",
     "stance 只能取：answer、deny、challenge、clarify、evade 之一。",
