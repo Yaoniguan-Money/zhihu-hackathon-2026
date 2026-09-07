@@ -103,3 +103,22 @@
 1. 择健康窗口重开一局走完整链（大厅→开庭→开场 5/5→审讯→存录音→TTS→证据板→对质→指控→Reveal→真实成绩回写战绩卡）。
 2. 用户在自己浏览器点验战绩卡「复制文案」。
 3. ZHIHU_ACCESS_SECRET 待用户提供时写入 .env.local（gitignored）。
+
+---
+
+## 追记 2（2026-09-08）：游戏内新手指引（分步聚光灯）
+
+### 实现
+
+- 新增 `components/onboarding/GameTour.tsx`（自包含）：六个页面（大厅/简报/审讯/证据板/指控/揭晓）各一段步骤（`TOURS` 注册表：data-tour 锚点 + 标题 + 文案）；聚光灯 = 目标定位高亮框 + 巨大 box-shadow 遮罩；说明卡就近放置（下/上/居中降级），上一步/下一步/跳过，Esc 可退；首次进页自动弹出一次（`localStorage ecw.tour.<id>`），自定义事件 `ecw:tour-start` + `requestTour()` 供「?」按钮重放；`enabled` prop 控制自动弹出时机（审讯页仅 investigation 阶段）；尊重 prefers-reduced-motion。
+- **两个实现要点（踩坑记录）**：① 说明卡/高亮坐标必须在 measure()（scroll/resize 监听 + 双次 setTimeout 兜底）写入 state，不能在 render 里读 window 尺寸（视口变化后 stale render 导致卡片飞出屏幕）；② 引导层必须 `createPortal(document.body)`——大厅右栏 `backdrop-blur-md` 会创建 containing block，把 position:fixed 劫持为相对面板定位（视觉偏移 +1150px）。
+- 接线：六页关键元素加 `data-tour` 锚点并挂载 `<GameTour/>`；`app/game/layout.tsx` 导航与大 lobby 右栏头部各加「?」帮助按钮（按 pathname 映射 tour）。
+
+### 验证
+
+- `bun run typecheck` 0 错误；`bun run build` 通过。
+- 浏览器实测：大厅 4 步自动弹出→逐步推进→完成写标记→刷新不弹→「?」重放 ✅；四步说明卡全部在视口内（portal 修复后）✅；简报页首次到达自动弹出 ✅；聚光灯视觉截图目检通过（遮罩+琥珀高亮框+说明卡）✅。审讯/证据板/指控/揭晓四段 tour 与已验证段落同构，锚点存在性由代码审查保证，实际观感待全链通关时人工复看。
+
+### 修改文件
+
+- 新增 `components/onboarding/GameTour.tsx`；修改 `app/page.tsx`、`app/game/layout.tsx`、`app/game/{briefing,interrogation,evidence,accusation,reveal}/page.tsx`（data-tour 锚点 + 挂载 + 帮助按钮）。无规范变更（纯 B 侧前端）。

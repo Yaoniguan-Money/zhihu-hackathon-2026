@@ -13,6 +13,7 @@ import ErrorPanel from "@/components/ui/ErrorPanel";
 import Mascot from "@/components/ui/Mascot";
 import { Icon } from "@/components/ui/Icons";
 import type { CaseCompilationStatusPublic } from "@/contracts/public";
+import GameTour, { requestTour } from "@/components/onboarding/GameTour";
 
 const InterrogationStage = dynamic(() => import("@/components/three/InterrogationStage"), {
   ssr: false,
@@ -83,7 +84,7 @@ function CustomCaseForm() {
   const canSubmit = /^https:\/\/.+/.test(url) && text.trim().length > 0 && invite.trim().length > 0 && !caseId;
 
   return (
-    <div className="card-dark overflow-hidden">
+    <div className="card-dark overflow-hidden" data-tour="lobby-bring">
       <button
         onClick={() => setOpen((o) => !o)}
         className="flex w-full items-center gap-2 px-5 py-4 text-left"
@@ -213,12 +214,21 @@ export default function Home() {
       {/* 右侧面板 */}
       <div className="absolute bottom-4 right-4 top-4 z-10 flex w-[420px] max-w-[92vw] flex-col gap-3 overflow-y-auto rounded-3xl border-2 border-paper/10 bg-night-deep/70 p-4 backdrop-blur-md">
         {/* ① 开始一局：案件目录 */}
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between" data-tour="lobby-catalog">
           <h2 className="text-lg font-black text-paper">
             <Icon name="mask" size={20} className="mr-2 inline text-amber" />
             ① 开始一局
           </h2>
-          {!booted && <span className="text-xs text-paper/50">建立身份中…</span>}
+          <div className="flex items-center gap-2">
+            {!booted && <span className="text-xs text-paper/50">建立身份中…</span>}
+            <button
+              onClick={() => requestTour("lobby")}
+              title="新手指引"
+              className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-paper/25 text-xs font-black text-paper/60 transition-colors hover:border-amber hover:text-amber"
+            >
+              ?
+            </button>
+          </div>
         </div>
         <p className="-mt-2 text-[11px] leading-relaxed text-paper/45">
           从档案室挑一件案件，点击即可进入案情简报并开庭。
@@ -269,7 +279,7 @@ export default function Home() {
         <p className="-mt-2 text-[11px] leading-relaxed text-paper/45">
           先用热榜、搜索物色题材；正式开局仍回到 ②，粘贴文章完整正文与邀请码。
         </p>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 gap-3" data-tour="lobby-zhihu">
           <a href="/zhihu/hot" className="card-dark flex flex-col items-center gap-1 p-4 text-center transition-colors hover:border-amber/40">
             <Icon name="bolt" size={22} className="text-amber" />
             <span className="text-xs font-black text-paper">今日热案</span>
@@ -284,7 +294,7 @@ export default function Home() {
 
         {/* ④ 我的战绩：成绩卡 */}
         <SectionLabel index="④" icon="scale" title="我的战绩" />
-        <a href="/zhihu/score-card" className="card-dark -mt-2 flex items-center gap-3 p-4 text-left transition-colors hover:border-amber/40">
+        <a href="/zhihu/score-card" className="card-dark -mt-2 flex items-center gap-3 p-4 text-left transition-colors hover:border-amber/40" data-tour="lobby-score">
           <Icon name="pin" size={22} className="text-amber" />
           <div className="flex-1">
             <span className="block text-xs font-black text-paper">辨别力战绩卡</span>
@@ -323,6 +333,9 @@ export default function Home() {
         </AnimatePresence>
 
         {actionError && <ErrorPanel error={actionError} onDismiss={clearActionError} />}
+
+        {/* 新手指引（首次自动弹出，「?」重看） */}
+        <GameTour tour="lobby" enabled={booted} />
       </div>
 
       <footer className="absolute bottom-3 left-4 z-10 text-xs font-bold text-paper/40">

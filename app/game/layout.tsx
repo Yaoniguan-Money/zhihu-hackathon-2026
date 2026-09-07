@@ -2,8 +2,10 @@
 
 import { ReactNode } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useGame } from "@/context/GameContext";
 import { Icon } from "@/components/ui/Icons";
+import { requestTour, type TourId } from "@/components/onboarding/GameTour";
 
 const PHASE_LABEL: Record<string, string> = {
   briefing: "案情简报",
@@ -14,8 +16,18 @@ const PHASE_LABEL: Record<string, string> = {
   failed: "对局终止",
 };
 
+const TOUR_FOR_PATH: Partial<Record<string, TourId>> = {
+  "/game/briefing": "briefing",
+  "/game/interrogation": "interrogation",
+  "/game/evidence": "evidence",
+  "/game/accusation": "accusation",
+  "/game/reveal": "reveal",
+};
+
 export default function GameLayout({ children }: { children: ReactNode }) {
   const { phase, allowedActions, backToLobby } = useGame();
+  const pathname = usePathname();
+  const tourId = pathname ? TOUR_FOR_PATH[pathname] : undefined;
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -57,6 +69,15 @@ export default function GameLayout({ children }: { children: ReactNode }) {
               <Icon name="bolt" size={13} filled />
               最终指控
             </Link>
+          )}
+          {tourId && (
+            <button
+              onClick={() => requestTour(tourId)}
+              title="新手指引"
+              className="ml-1 flex h-7 w-7 items-center justify-center rounded-full border-2 border-paper/25 text-xs font-black text-paper/70 transition-colors hover:border-amber hover:text-amber"
+            >
+              ?
+            </button>
           )}
           <button
             onClick={backToLobby}

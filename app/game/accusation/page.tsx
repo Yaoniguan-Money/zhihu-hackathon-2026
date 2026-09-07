@@ -9,6 +9,7 @@ import Mascot from "@/components/ui/Mascot";
 import ErrorPanel from "@/components/ui/ErrorPanel";
 import { Icon } from "@/components/ui/Icons";
 import { personaForRole } from "@/components/three/characters/personas";
+import GameTour from "@/components/onboarding/GameTour";
 import { DISTORTION_META, DISTORTION_ORDER } from "@/lib/distortions";
 import type { DistortionType } from "@/contracts/shared";
 
@@ -56,6 +57,7 @@ export default function AccusationPage() {
 
   return (
     <div className="mx-auto max-w-4xl px-6 py-7">
+      <GameTour tour="accusation" />
       {/* 起诉状头 */}
       <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} className="relative">
         <div className="tape" style={{ top: -10, left: "38%", transform: "rotate(2deg)" }} />
@@ -76,7 +78,7 @@ export default function AccusationPage() {
       ) : (
         <>
           {/* ① 嫌疑角色 */}
-          <section className="card-dark mt-6 p-4">
+          <section className="card-dark mt-6 p-4" data-tour="acc-role">
             <h2 className="mb-1 flex items-center gap-2 px-2 text-sm font-black text-paper">
               <span className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-amber bg-amber/20 text-xs text-amber">1</span>
               指认篡改者
@@ -106,7 +108,7 @@ export default function AccusationPage() {
           </section>
 
           {/* ② 篡改方式 */}
-          <section className="card-dark mt-4 p-4">
+          <section className="card-dark mt-4 p-4" data-tour="acc-distort">
             <h2 className="mb-3 flex items-center gap-2 px-2 text-sm font-black text-paper">
               <span className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-amber bg-amber/20 text-xs text-amber">2</span>
               篡改方式（可多选）
@@ -137,7 +139,7 @@ export default function AccusationPage() {
           </section>
 
           {/* ③ 证据链 */}
-          <section className="card-dark mt-4 p-4">
+          <section className="card-dark mt-4 p-4" data-tour="acc-evidence">
             <h2 className="mb-3 flex items-center gap-2 px-2 text-sm font-black text-paper">
               <span className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-amber bg-amber/20 text-xs text-amber">3</span>
               支撑证据（至少一件）
@@ -184,7 +186,7 @@ export default function AccusationPage() {
           </section>
 
           {/* 提交 */}
-          <div className="mt-6 flex flex-col items-center gap-3 pb-10">
+          <div className="mt-6 flex flex-col items-center gap-3 pb-10" data-tour="acc-submit">
             {actionError && <ErrorPanel error={actionError} onDismiss={clearActionError} />}
             <motion.button
               whileHover={{ scale: ready && canAccuse ? 1.04 : 1 }}

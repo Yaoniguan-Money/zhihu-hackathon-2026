@@ -12,6 +12,7 @@ import { personaForRole } from "@/components/three/characters/personas";
 import { castArtFor } from "@/components/three/characters/castArt";
 import { DISTORTION_META } from "@/lib/distortions";
 import { calcDiscernmentLevel, type ScoreCardData } from "@/lib/score-card";
+import GameTour from "@/components/onboarding/GameTour";
 
 export default function RevealPage() {
   const { casePublic, sessionView, reveal, actionError, phase, backToLobby, messages } = useGame();
@@ -122,6 +123,7 @@ export default function RevealPage() {
 
   return (
     <div ref={rootRef} className="mx-auto max-w-4xl px-6 py-8">
+      <GameTour tour="reveal" />
       {/* 判决时刻 */}
       <div className="rv-hero text-center">
         <p className="text-[10px] font-black uppercase tracking-[0.35em] text-paper/50">The Reveal</p>
@@ -176,7 +178,7 @@ export default function RevealPage() {
 
       {/* 被改变的关系 */}
       {reveal.altered_links.length > 0 && (
-        <section className="mt-8">
+        <section className="mt-8" data-tour="rev-links">
           <h3 className="mb-3 flex items-center gap-2 text-sm font-black text-paper">
             <Icon name="bolt" size={16} className="text-coral" filled />
             被改变的关系
@@ -205,7 +207,7 @@ export default function RevealPage() {
       )}
 
       {/* 真相链 */}
-      <section className="card-dark mt-8 p-5">
+      <section className="card-dark mt-8 p-5" data-tour="rev-chain">
         <h3 className="mb-4 flex items-center gap-2 text-sm font-black text-paper">
           <Icon name="link" size={16} className="text-amber" />
           完整真相链
@@ -251,7 +253,7 @@ export default function RevealPage() {
       </section>
 
       {/* 双维评分 */}
-      <section className="rv-score card-dark mt-8 grid grid-cols-2 gap-4 p-6">
+      <section className="rv-score card-dark mt-8 grid grid-cols-2 gap-4 p-6" data-tour="rev-score">
         <div className="text-center">
           <p className="text-xs font-black uppercase tracking-widest text-teal">Evidence Score</p>
           <p className="mt-1 text-5xl font-black text-teal">
@@ -271,7 +273,7 @@ export default function RevealPage() {
       </section>
 
       {/* 行动 */}
-      <div className="mt-8 flex justify-center gap-3 pb-10">
+      <div className="mt-8 flex justify-center gap-3 pb-10" data-tour="rev-actions">
         <button onClick={backToLobby} className="btn btn-amber px-8">
           <Icon name="refresh" size={16} />
           再来一局

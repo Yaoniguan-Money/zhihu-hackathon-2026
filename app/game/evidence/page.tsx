@@ -7,6 +7,7 @@ import { useGame } from "@/context/GameContext";
 import ErrorPanel from "@/components/ui/ErrorPanel";
 import Mascot from "@/components/ui/Mascot";
 import { Icon } from "@/components/ui/Icons";
+import GameTour from "@/components/onboarding/GameTour";
 import {
   BOARD_LANES,
   BOARD_LINK_META,
@@ -162,6 +163,7 @@ export default function EvidencePage() {
 
   return (
     <div className="flex h-[calc(100vh-49px)] flex-col">
+      <GameTour tour="evidence" />
       {/* 工具栏 */}
       <div className="flex items-center gap-3 border-b border-paper/10 bg-night-deep/70 px-4 py-2.5">
         <h1 className="flex items-center gap-2 text-sm font-black text-paper">
@@ -175,7 +177,7 @@ export default function EvidencePage() {
             rev {serverBoard?.revision ?? 0}{dirty ? " · 未保存" : ""}
           </span>
           {linkFrom && <span className="chip !border-indigo-soft !text-indigo-soft">连线中：再点一块证据</span>}
-          <motion.button whileTap={{ scale: 0.94 }} onClick={save} disabled={!canEdit || !dirty} className="btn btn-teal !px-4 !py-1.5 text-xs disabled:opacity-40">
+          <motion.button whileTap={{ scale: 0.94 }} onClick={save} disabled={!canEdit || !dirty} className="btn btn-teal !px-4 !py-1.5 text-xs disabled:opacity-40" data-tour="ev-save">
             <Icon name="check" size={13} /> 保存证据板
           </motion.button>
           {allowedActions.has("accuse") && (
@@ -188,7 +190,7 @@ export default function EvidencePage() {
 
       <div className="flex min-h-0 flex-1">
         {/* 证据池 */}
-        <div className="flex w-60 shrink-0 flex-col border-r border-paper/10 bg-night-deep/50">
+        <div className="flex w-60 shrink-0 flex-col border-r border-paper/10 bg-night-deep/50" data-tour="ev-pool">
           <div className="border-b border-paper/10 px-3 py-2 text-xs font-black text-paper/80">
             证据池 · {pool.length}
           </div>
@@ -226,7 +228,7 @@ export default function EvidencePage() {
         </div>
 
         {/* 板面：六泳道 */}
-        <div className="relative min-w-0 flex-1 overflow-hidden p-3">
+        <div className="relative min-w-0 flex-1 overflow-hidden p-3" data-tour="ev-board">
           <div ref={boardRef} className="relative h-full rounded-2xl border-2 border-paper/10 bg-[#221e40]/70">
             {/* 泳道背景 */}
             <div className="absolute inset-0 grid grid-cols-6">

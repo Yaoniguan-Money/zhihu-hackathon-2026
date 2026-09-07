@@ -10,6 +10,7 @@ import RecordButton from "@/components/ui/RecordButton";
 import Typewriter from "@/components/ui/Typewriter";
 import ErrorPanel from "@/components/ui/ErrorPanel";
 import Mascot from "@/components/ui/Mascot";
+import GameTour from "@/components/onboarding/GameTour";
 import { Icon } from "@/components/ui/Icons";
 import { personaForRole } from "@/components/three/characters/personas";
 import { EMOTION_META } from "@/lib/distortions";
@@ -110,6 +111,8 @@ export default function InterrogationPage() {
 
   return (
     <div className="relative h-[calc(100vh-49px)] overflow-hidden">
+      {/* 新手指引（仅审讯阶段自动弹出） */}
+      <GameTour tour="interrogation" enabled={phase === "investigation"} />
       {/* 3D 舞台 */}
       <InterrogationStage
         className="!absolute inset-0"
@@ -191,7 +194,7 @@ export default function InterrogationPage() {
       </div>
 
       {/* 右侧对话面板 */}
-      <div className="absolute bottom-[150px] right-4 top-[70px] z-10 w-[350px] max-w-[86vw] overflow-hidden rounded-2xl border-2 border-paper/10 bg-night-deep/75 backdrop-blur-md">
+      <div className="absolute bottom-[150px] right-4 top-[70px] z-10 w-[350px] max-w-[86vw] overflow-hidden rounded-2xl border-2 border-paper/10 bg-night-deep/75 backdrop-blur-md" data-tour="int-log">
         <div className="flex items-center gap-2 border-b border-paper/10 px-4 py-2.5">
           <Icon name="eye" size={15} className="text-amber" />
           <span className="text-sm font-black text-paper">审讯记录</span>
@@ -214,7 +217,7 @@ export default function InterrogationPage() {
         <div className="absolute bottom-4 left-4 right-4 z-10">
           <div className="mx-auto max-w-3xl rounded-2xl border-2 border-paper/15 bg-night-deep/85 p-3 backdrop-blur-md">
             {/* 角色选择 + 问法 */}
-            <div className="mb-2.5 flex flex-wrap items-center gap-1.5">
+            <div className="mb-2.5 flex flex-wrap items-center gap-1.5" data-tour="int-role">
               {roles.map((role) => {
                 const look = personaForRole(role);
                 const emotion = emotionOf(role.role_id);
@@ -249,7 +252,7 @@ export default function InterrogationPage() {
               ))}
             </div>
 
-            <div className="flex items-center gap-2.5">
+            <div className="flex items-center gap-2.5" data-tour="int-input">
               <RecordButton
                 disabled={!canAsk}
                 onTranscript={(t) => setInput((prev) => (prev ? `${prev} ${t.text}` : t.text))}

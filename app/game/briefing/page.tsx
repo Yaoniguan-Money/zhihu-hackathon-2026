@@ -10,6 +10,7 @@ import { useGame } from "@/context/GameContext";
 import Mascot from "@/components/ui/Mascot";
 import ErrorPanel from "@/components/ui/ErrorPanel";
 import { Icon } from "@/components/ui/Icons";
+import GameTour from "@/components/onboarding/GameTour";
 import { personaForRole } from "@/components/three/characters/personas";
 import { castArtFor, SCENE_ART } from "@/components/three/characters/castArt";
 
@@ -125,6 +126,7 @@ export default function BriefingPage() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
         className="card mt-6 px-7 py-6"
+        data-tour="briefing-file"
       >
         <h2 className="flex items-center gap-2 text-sm font-black text-ink">
           <Icon name="file" size={16} /> 案情来源（原文节选）
@@ -155,6 +157,7 @@ export default function BriefingPage() {
             onClick={startGame}
             disabled={!canStart}
             className="btn btn-amber px-12 py-4 text-lg disabled:opacity-40"
+            data-tour="briefing-start"
           >
             <Icon name="play" size={20} filled />
             开庭 · 听五条开场陈述
@@ -163,6 +166,7 @@ export default function BriefingPage() {
         <p className="text-xs text-paper/50">
           开庭后 AI 将依次呈上五条开场陈述，其中已经藏好了篡改。
         </p>
+        <GameTour tour="briefing" />
       </div>
     </div>
   );
