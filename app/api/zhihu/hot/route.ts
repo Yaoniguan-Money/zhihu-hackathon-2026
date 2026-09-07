@@ -8,7 +8,8 @@ export async function GET(_req: NextRequest) {
   try {
     const secret = process.env.ZHIHU_ACCESS_SECRET;
     if (!secret) {
-      return NextResponse.json({ error: 'ZHIHU_ACCESS_SECRET not set' }, { status: 500 });
+      // 玩家可见文案：不暴露内部环境变量名（运维排查看服务端日志即可定位）。
+      return NextResponse.json({ error: '知乎热榜服务未配置，暂不可用' }, { status: 503 });
     }
     if (cache && Date.now() - cache.ts < CACHE_TTL_MS) {
       return NextResponse.json({ ...cache.data, cached: true });
