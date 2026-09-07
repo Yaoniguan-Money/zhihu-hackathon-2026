@@ -1,7 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import ZhihuShell from '@/components/zhihu/Shell';
+import Mascot from '@/components/ui/Mascot';
+import { Icon } from '@/components/ui/Icons';
 
 interface ScoreCardData {
   caseTitle: string;
@@ -14,6 +17,14 @@ interface ScoreCardData {
   discernmentLevel: number;
   timestamp: number;
 }
+
+const LEVEL_LABELS: Record<number, string> = {
+  5: 'Lv.5 · 明察秋毫',
+  4: 'Lv.4 · 洞察真伪',
+  3: 'Lv.3 · 初见端倪',
+  2: 'Lv.2 · 尚需修炼',
+  1: 'Lv.1 · 雾里看花',
+};
 
 export default function ScoreCardPage() {
   const [data, setData] = useState<ScoreCardData | null>(null);
@@ -57,105 +68,125 @@ export default function ScoreCardPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#0a0a1a] text-white flex items-center justify-center">
-        <div className="animate-spin w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full" />
-      </div>
+      <ZhihuShell icon="scale" title="辨别力战绩卡" subtitle="正在调取上一局的合议结果…">
+        <div className="flex justify-center py-16">
+          <Mascot motion="computer" size={110} caption="成绩单装订中…" />
+        </div>
+      </ZhihuShell>
     );
   }
 
   if (!data) {
     return (
-      <div className="min-h-screen bg-[#0a0a1a] text-white flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-gray-400 mb-4">还没有游戏记录</p>
-          <Link href="/" className="text-blue-400 hover:underline">返回首页</Link>
+      <ZhihuShell icon="scale" title="辨别力战绩卡" subtitle="对局结束后这里会生成可分享的成绩">
+        <div className="card-dark mx-auto max-w-md py-10 text-center">
+          <Mascot motion="sleep" size={120} caption="档案室还没有你的成绩单。" />
+          <p className="mt-3 text-sm font-bold text-paper/70">先回事务所开一局，抓出篡改者！</p>
+          <Link href="/" className="btn btn-amber mt-5 inline-flex items-center gap-2">
+            <Icon name="home" size={15} />
+            回大厅开一局
+          </Link>
         </div>
-      </div>
+      </ZhihuShell>
     );
   }
 
-  const levelLabels: Record<number, string> = {
-    5: 'Lv.5 · 明察秋毫',
-    4: 'Lv.4 · 洞察真伪',
-    3: 'Lv.3 · 初见端倪',
-    2: 'Lv.2 · 尚需修炼',
-    1: 'Lv.1 · 雾里看花',
-  };
-  const level = data.totalScore >= 90 ? 5 : data.totalScore >= 75 ? 4 : data.totalScore >= 60 ? 3 : data.totalScore >= 40 ? 2 : 1;
+  const level = data.discernmentLevel;
   const mins = Math.floor(data.timeUsed / 60);
   const secs = data.timeUsed % 60;
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#0a0a1a] via-[#111827] to-[#0a0a1a] text-white">
-      <div className="max-w-2xl mx-auto px-4 py-8">
-        <h1 className="text-2xl font-bold mb-6 text-center">辨别力战绩卡</h1>
-
-        <div className="bg-white/5 border border-white/10 rounded-2xl p-6 mb-6">
-          <div className="text-center mb-6">
-            <div className="text-4xl mb-2">
-              {level === 5 ? '🎯' : level === 4 ? '🔍' : level === 3 ? '👁️' : level === 2 ? '🌫️' : '🤔'}
-            </div>
-            <p className="text-lg font-bold" style={{ color: data.isCorrect ? '#10B981' : '#EF4444' }}>
-              {data.isCorrect ? '指控成功' : '指控失败'}
-            </p>
-            <p className="text-sm text-gray-400 mt-1">{levelLabels[level]}</p>
-          </div>
-
-          <div className="grid grid-cols-2 gap-3 mb-4">
-            <div className="bg-white/5 rounded-xl p-3 text-center">
-              <p className="text-xs text-gray-400">总分</p>
-              <p className="text-xl font-bold">{data.totalScore}<span className="text-xs text-gray-500">/100</span></p>
-            </div>
-            <div className="bg-white/5 rounded-xl p-3 text-center">
-              <p className="text-xs text-gray-400">用时</p>
-              <p className="text-xl font-bold">{mins}'{String(secs).padStart(2,'0')}"</p>
-            </div>
-            <div className="bg-white/5 rounded-xl p-3 text-center">
-              <p className="text-xs text-gray-400">证据分</p>
-              <p className="text-xl font-bold">{data.evidenceScore}<span className="text-xs text-gray-500">/40</span></p>
-            </div>
-            <div className="bg-white/5 rounded-xl p-3 text-center">
-              <p className="text-xs text-gray-400">审讯分</p>
-              <p className="text-xl font-bold">{data.questioningScore}<span className="text-xs text-gray-500">/35</span></p>
-            </div>
-          </div>
-
-          <p className="text-center text-sm text-gray-400">{data.caseTitle}</p>
-        </div>
-
-        <div className="bg-white/5 border border-white/10 rounded-2xl p-6 mb-6">
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-sm font-medium text-gray-300">可分享文案</h2>
-            <button
-              onClick={copyShareText}
-              className="text-xs px-3 py-1 bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
-            >
-              {copied ? '已复制!' : '复制文案'}
-            </button>
-          </div>
-          <pre className="text-xs text-gray-300 whitespace-pre-wrap bg-black/30 rounded-lg p-3 max-h-48 overflow-y-auto">
-{shareText}
-          </pre>
-          <p className="text-xs text-gray-500 mt-2">
-            复制后粘贴到知乎想法/回答中即可分享
+    <ZhihuShell icon="scale" title="辨别力战绩卡" subtitle="把你的侦查成绩分享到知乎">
+      {/* 成绩总览 */}
+      <div className="card-dark p-6">
+        <div className="text-center">
+          <p className="text-lg font-black" style={{ color: data.isCorrect ? '#34d399' : '#fb7185' }}>
+            {data.isCorrect ? '指控成功 · 真相被你钉死了' : '指控失败 · 被篡改者骗过了'}
           </p>
+          <p className="mt-1 text-xs font-bold text-amber">{LEVEL_LABELS[level]}</p>
         </div>
 
-        <div className="flex gap-3 justify-center">
-          <Link
-            href="/"
-            className="px-4 py-2 bg-white/5 hover:bg-white/10 rounded-xl text-sm transition-colors"
-          >
-            返回首页
-          </Link>
-          <Link
-            href="/zhihu/hot"
-            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-xl text-sm transition-colors"
-          >
-            挑战新案件 →
-          </Link>
+        <div className="mt-5 grid grid-cols-2 gap-3">
+          <div className="rounded-2xl border-2 border-paper/10 bg-night-deep/60 p-3 text-center">
+            <p className="text-[11px] font-black uppercase tracking-widest text-paper/45">总分</p>
+            <p className="mt-1 text-2xl font-black text-amber">
+              {data.totalScore}
+              <span className="text-sm text-paper/35"> /100</span>
+            </p>
+          </div>
+          <div className="rounded-2xl border-2 border-paper/10 bg-night-deep/60 p-3 text-center">
+            <p className="text-[11px] font-black uppercase tracking-widest text-paper/45">用时</p>
+            <p className="mt-1 text-2xl font-black text-paper">
+              {mins}&apos;{String(secs).padStart(2, '0')}&quot;
+            </p>
+          </div>
+          <div className="rounded-2xl border-2 border-paper/10 bg-night-deep/60 p-3 text-center">
+            <p className="text-[11px] font-black uppercase tracking-widest text-teal">证据分</p>
+            <p className="mt-1 text-2xl font-black text-teal">
+              {data.evidenceScore}
+              <span className="text-sm text-paper/35"> /100</span>
+            </p>
+          </div>
+          <div className="rounded-2xl border-2 border-paper/10 bg-night-deep/60 p-3 text-center">
+            <p className="text-[11px] font-black uppercase tracking-widest text-indigo-soft">审讯分</p>
+            <p className="mt-1 text-2xl font-black text-indigo-soft">
+              {data.questioningScore}
+              <span className="text-sm text-paper/35"> /100</span>
+            </p>
+          </div>
         </div>
+
+        <p className="mt-4 text-center text-xs font-bold text-paper/50">
+          {data.caseTitle} · {data.roundsPlayed} 轮审讯
+        </p>
       </div>
-    </div>
+
+      {/* 战绩卡预览 */}
+      {html && (
+        <div className="card-dark mt-4 overflow-hidden p-4">
+          <p className="mb-3 flex items-center gap-2 text-xs font-black uppercase tracking-widest text-paper/60">
+            <Icon name="file" size={14} className="text-amber" />
+            分享图预览
+          </p>
+          <iframe
+            title="战绩卡预览"
+            srcDoc={html}
+            className="h-[420px] w-full rounded-xl border-2 border-paper/10 bg-night-deep"
+          />
+        </div>
+      )}
+
+      {/* 可分享文案 */}
+      <div className="card-dark mt-4 p-5">
+        <div className="mb-3 flex items-center justify-between">
+          <p className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-paper/60">
+            <Icon name="quote" size={14} className="text-amber" />
+            可分享文案
+          </p>
+          <button onClick={copyShareText} className="btn btn-amber !px-3 !py-1 text-xs">
+            <Icon name="file" size={13} />
+            {copied ? '已复制！' : '复制文案'}
+          </button>
+        </div>
+        <pre className="max-h-48 overflow-y-auto whitespace-pre-wrap rounded-xl border-2 border-paper/10 bg-night-deep/60 p-3 text-xs leading-relaxed text-paper/75">
+{shareText}
+        </pre>
+        <p className="mt-2 text-[11px] text-paper/40">
+          复制后粘贴到知乎想法 / 回答中即可分享。
+        </p>
+      </div>
+
+      {/* 行动 */}
+      <div className="mt-6 flex justify-center gap-3">
+        <Link href="/" className="btn btn-ghost px-6">
+          <Icon name="home" size={15} />
+          回到事务所
+        </Link>
+        <Link href="/zhihu/hot" className="btn btn-amber px-6">
+          <Icon name="bolt" size={15} />
+          去热榜挑新案
+        </Link>
+      </div>
+    </ZhihuShell>
   );
 }

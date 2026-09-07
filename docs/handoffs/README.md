@@ -109,3 +109,4 @@ docs/handoffs/<ticket-or-stage-id>.md
 | ART-CHR-shen-qingwu Blender 角色 | complete | [2026-09-06-art-chr-shen-qingwu](./2026-09-06-art-chr-shen-qingwu.md) |
 | ART-CHR-ji-yunting Blender 角色 | complete | [2026-09-06-art-chr-ji-yunting](./2026-09-06-art-chr-ji-yunting.md) |
 | ART-ENV-detective-room Blender 场景 | complete | [2026-09-07-art-env-detective-room](./2026-09-07-art-env-detective-room.md) |
+| MERGE-REPAIR-home-flow 合并损伤修复+大厅动线重整 | complete | [2026-09-08-merge-repair-home-flow](./2026-09-08-merge-repair-home-flow.md) |

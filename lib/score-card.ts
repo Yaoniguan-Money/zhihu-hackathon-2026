@@ -60,7 +60,7 @@ export function generateShareText(data: ScoreCardData): string {
     `${resultText}！`,
     `辨别力评分: ${data.totalScore}/100 · ${label}`,
     `用时 ${mins}分${secs}秒 · ${data.roundsPlayed}轮审讯`,
-    `证据 ${data.evidenceScore}/40 · 审讯 ${data.questioningScore}/35`,
+    `证据 ${data.evidenceScore}/100 · 审讯 ${data.questioningScore}/100`,
     '',
     '#知乎黑客松 #证据链狼人杀 #AI游戏 #辨别力挑战',
   ].join('\n');
@@ -146,11 +146,11 @@ export function generateScoreCardHTML(data: ScoreCardData): string {
     </div>
     <div class="stat-item">
       <div class="stat-label">证据分</div>
-      <div class="stat-value">${data.evidenceScore}<span style="font-size:12px;color:rgba(255,255,255,0.4)">/40</span></div>
+      <div class="stat-value">${data.evidenceScore}<span style="font-size:12px;color:rgba(255,255,255,0.4)">/100</span></div>
     </div>
     <div class="stat-item">
       <div class="stat-label">审讯分</div>
-      <div class="stat-value">${data.questioningScore}<span style="font-size:12px;color:rgba(255,255,255,0.4)">/35</span></div>
+      <div class="stat-value">${data.questioningScore}<span style="font-size:12px;color:rgba(255,255,255,0.4)">/100</span></div>
     </div>
   </div>
   <div class="footer">知乎黑客松 2026 · 证据链狼人杀</div>

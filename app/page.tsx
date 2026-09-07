@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import dynamic from "next/dynamic";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "motion/react";
 import { useQuery, useAction } from "convex/react";
 import { api } from "../convex/_generated/api";
@@ -30,6 +30,7 @@ function StageFallback() {
 /** 自定义建案：URL + 完整正文 + 邀请码 → durable 编译 → 进度观察。 */
 function CustomCaseForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { selectCase } = useGame();
   const createFromSource = useAction(api.cases.createFromSource);
   const [open, setOpen] = useState(false);
@@ -38,6 +39,15 @@ function CustomCaseForm() {
   const [invite, setInvite] = useState("");
   const [caseId, setCaseId] = useState<string | null>(null);
   const [error, setError] = useState<CaseCompilationStatusPublic["error"] | { code: string; message: string } | null>(null);
+
+  // 知乎支线（热榜/搜索）带链接跳回：预填来源 URL 并展开表单。
+  useEffect(() => {
+    const prefill = searchParams.get("prefill_url");
+    if (prefill) {
+      setUrl(prefill);
+      setOpen(true);
+    }
+  }, [searchParams]);
 
   // durable 编译进度：直接订阅公开查询。
   const compilation = useQuery(
@@ -145,6 +155,7 @@ export default function Home() {
   const router = useRouter();
   const { catalog, catalogError, retryCatalog, selectCase, actionError, clearActionError, booted } = useGame();
   const [activeIdx, setActiveIdx] = useState(-1);
+  const [howtoOpen, setHowtoOpen] = useState(false);
   useEffect(() => {
     retryCatalog();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -201,13 +212,17 @@ export default function Home() {
 
       {/* 右侧面板 */}
       <div className="absolute bottom-4 right-4 top-4 z-10 flex w-[420px] max-w-[92vw] flex-col gap-3 overflow-y-auto rounded-3xl border-2 border-paper/10 bg-night-deep/70 p-4 backdrop-blur-md">
+        {/* ① 开始一局：案件目录 */}
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-black text-paper">
             <Icon name="mask" size={20} className="mr-2 inline text-amber" />
-            选择案件
+            ① 开始一局
           </h2>
           {!booted && <span className="text-xs text-paper/50">建立身份中…</span>}
         </div>
+        <p className="-mt-2 text-[11px] leading-relaxed text-paper/45">
+          从档案室挑一件案件，点击即可进入案情简报并开庭。
+        </p>
 
         {catalogError && <ErrorPanel error={catalogError} onRetry={retryCatalog} />}
 
@@ -243,37 +258,69 @@ export default function Home() {
           ))}
         </AnimatePresence>
 
-        <CustomCaseForm />
+        {/* ② 带一篇知乎文章来：正式建案（Suspense 包裹 useSearchParams） */}
+        <SectionLabel index="②" icon="link" title="带一篇知乎文章来" />
+        <Suspense fallback={null}>
+          <CustomCaseForm />
+        </Suspense>
 
-        {/* 知乎社区集成入口 */}
+        {/* ③ 从知乎找选题：热榜 / 搜索 */}
+        <SectionLabel index="③" icon="magnifier" title="从知乎找选题" />
+        <p className="-mt-2 text-[11px] leading-relaxed text-paper/45">
+          先用热榜、搜索物色题材；正式开局仍回到 ②，粘贴文章完整正文与邀请码。
+        </p>
         <div className="grid grid-cols-2 gap-3">
           <a href="/zhihu/hot" className="card-dark flex flex-col items-center gap-1 p-4 text-center transition-colors hover:border-amber/40">
-            <span className="text-2xl">🔥</span>
+            <Icon name="bolt" size={22} className="text-amber" />
             <span className="text-xs font-black text-paper">今日热案</span>
-            <span className="text-[10px] text-paper/50">知乎热榜生成</span>
+            <span className="text-[10px] text-paper/50">知乎热榜找题材</span>
           </a>
           <a href="/zhihu/search" className="card-dark flex flex-col items-center gap-1 p-4 text-center transition-colors hover:border-amber/40">
-            <span className="text-2xl">🔍</span>
+            <Icon name="magnifier" size={22} className="text-amber" />
             <span className="text-xs font-black text-paper">知乎搜索</span>
-            <span className="text-[10px] text-paper/50">搜索知乎内容</span>
+            <span className="text-[10px] text-paper/50">搜文章与答主</span>
           </a>
         </div>
 
-        <a href="/zhihu/score-card" className="card-dark flex items-center gap-3 p-4 text-center transition-colors hover:border-amber/40">
-          <span className="text-2xl">🏆</span>
-          <div className="flex-1 text-left">
+        {/* ④ 我的战绩：成绩卡 */}
+        <SectionLabel index="④" icon="scale" title="我的战绩" />
+        <a href="/zhihu/score-card" className="card-dark -mt-2 flex items-center gap-3 p-4 text-left transition-colors hover:border-amber/40">
+          <Icon name="pin" size={22} className="text-amber" />
+          <div className="flex-1">
             <span className="block text-xs font-black text-paper">辨别力战绩卡</span>
-            <span className="block text-[10px] text-paper/50">查看上次成绩 · 分享到知乎</span>
+            <span className="block text-[10px] text-paper/50">对局结束后生成成绩 · 分享到知乎</span>
           </div>
+          <Icon name="next" size={14} className="text-paper/40" />
         </a>
 
-        <div className="card-dark p-4 text-xs leading-relaxed text-paper/60">
-          <p className="mb-1 font-black text-paper/80">玩法 · 90 秒看懂</p>
-          <p>① 五个 AI 角色围绕圆桌各自开场，只有一人篡改了原文。</p>
-          <p>② 温和/直接/施压三种问法审讯，把发言存成录音证据对质。</p>
-          <p>③ 在证据板上拼出「来源事实 → 角色转述 → 被改变的关系」。</p>
-          <p>④ 提交指控：篡改者 + 篡改方式 + 证据链。</p>
-        </div>
+        {/* 玩法说明：默认折叠 */}
+        <button
+          onClick={() => setHowtoOpen((o) => !o)}
+          className="card-dark flex items-center gap-2 px-4 py-3 text-left transition-colors hover:border-amber/40"
+        >
+          <Icon name="quote" size={16} className="text-amber" />
+          <span className="flex-1 text-xs font-black text-paper">玩法 · 90 秒看懂</span>
+          <motion.span animate={{ rotate: howtoOpen ? 90 : 0 }} className="text-paper/50">
+            <Icon name="next" size={14} />
+          </motion.span>
+        </button>
+        <AnimatePresence>
+          {howtoOpen && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              className="-mt-1 overflow-hidden"
+            >
+              <div className="card-dark p-4 text-xs leading-relaxed text-paper/60">
+                <p>① 五个 AI 角色围绕圆桌各自开场，只有一人篡改了原文。</p>
+                <p>② 温和/直接/施压三种问法审讯，把发言存成录音证据对质。</p>
+                <p>③ 在证据板上拼出「来源事实 → 角色转述 → 被改变的关系」。</p>
+                <p>④ 提交指控：篡改者 + 篡改方式 + 证据链。</p>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {actionError && <ErrorPanel error={actionError} onDismiss={clearActionError} />}
       </div>
@@ -282,6 +329,30 @@ export default function Home() {
         知乎黑客松 2026 · 跨次元游乐场赛道
       </footer>
     </main>
+  );
+}
+
+/** 右栏小节标题：编号 + 图标 + 标题 + 延伸线，统一动线语言。 */
+function SectionLabel({
+  index,
+  icon,
+  title,
+}: {
+  index: string;
+  icon: React.ComponentProps<typeof Icon>["name"];
+  title: string;
+}) {
+  return (
+    <div className="mt-1 flex items-center gap-2">
+      <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-amber/20 text-[10px] font-black text-amber">
+        {index}
+      </span>
+      <span className="text-xs font-black uppercase tracking-widest text-paper/70">
+        <Icon name={icon} size={13} className="mr-1 inline text-amber/80" />
+        {title}
+      </span>
+      <span className="h-px flex-1 bg-paper/10" />
+    </div>
   );
 }
 

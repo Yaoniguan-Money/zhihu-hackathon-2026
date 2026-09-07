@@ -11,9 +11,10 @@ import { Icon } from "@/components/ui/Icons";
 import { personaForRole } from "@/components/three/characters/personas";
 import { castArtFor } from "@/components/three/characters/castArt";
 import { DISTORTION_META } from "@/lib/distortions";
+import { calcDiscernmentLevel, type ScoreCardData } from "@/lib/score-card";
 
 export default function RevealPage() {
-  const { casePublic, sessionView, reveal, actionError, phase, backToLobby } = useGame();
+  const { casePublic, sessionView, reveal, actionError, phase, backToLobby, messages } = useGame();
   const rootRef = useRef<HTMLDivElement>(null);
   const scoreEvidenceRef = useRef<HTMLSpanElement>(null);
   const scoreQuestioningRef = useRef<HTMLSpanElement>(null);
@@ -57,6 +58,27 @@ export default function RevealPage() {
     }, rootRef);
     return () => ctx.revert();
   }, [reveal]);
+
+  // 战绩回流：揭晓后把本局结果写入 localStorage，供 /zhihu/score-card 生成战绩卡。
+  const savedSessionRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (!reveal || !casePublic || !sessionView) return;
+    if (savedSessionRef.current === sessionView.session_id) return;
+    savedSessionRef.current = sessionView.session_id;
+    const totalScore = Math.round((reveal.evidence_score + reveal.questioning_score) / 2);
+    const result: ScoreCardData = {
+      caseTitle: casePublic.title,
+      isCorrect: reveal.player_correct,
+      timeUsed: Math.max(0, Math.round((Date.now() - Date.parse(sessionView.created_at)) / 1000)),
+      roundsPlayed: messages.filter((m) => m.speaker_type === "role").length,
+      evidenceScore: reveal.evidence_score,
+      questioningScore: reveal.questioning_score,
+      totalScore,
+      discernmentLevel: calcDiscernmentLevel(totalScore),
+      timestamp: Date.now(),
+    };
+    localStorage.setItem("lastGameResult", JSON.stringify(result));
+  }, [reveal, casePublic, sessionView, messages]);
 
   if (phase !== "revealed") {
     return (
@@ -254,6 +276,10 @@ export default function RevealPage() {
           <Icon name="refresh" size={16} />
           再来一局
         </button>
+        <Link href="/zhihu/score-card" className="btn btn-coral px-8">
+          <Icon name="pin" size={16} />
+          生成战绩卡
+        </Link>
         <Link href="/" className="btn btn-ghost px-8">
           <Icon name="home" size={16} />
           回到事务所

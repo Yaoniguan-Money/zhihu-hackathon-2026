@@ -2,6 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import ZhihuShell from '@/components/zhihu/Shell';
+import Mascot from '@/components/ui/Mascot';
+import { Icon } from '@/components/ui/Icons';
 
 interface HotCandidate {
   title: string;
@@ -24,17 +27,19 @@ export default function ZhihuHotPage() {
   const [error, setError] = useState<string | null>(null);
   const [generating, setGenerating] = useState<string | null>(null);
   const [generatedCase, setGeneratedCase] = useState<Record<string, unknown> | null>(null);
+  const [generatedFrom, setGeneratedFrom] = useState<HotCandidate | null>(null);
 
   useEffect(() => {
     fetch('/api/zhihu/hot')
-      .then(r => r.json())
-      .then(data => {
+      .then(async r => {
+        const data = await r.json();
+        if (!r.ok || data.error) throw new Error(data.error ?? `热榜接口异常（${r.status}）`);
         setCandidates(data.candidates ?? []);
         setRaw(data.raw ?? []);
         setLoading(false);
       })
       .catch(err => {
-        setError(err.message);
+        setError(err instanceof Error ? err.message : '热榜拉取失败');
         setLoading(false);
       });
   }, []);
@@ -42,6 +47,8 @@ export default function ZhihuHotPage() {
   async function generateCase(item: HotCandidate) {
     setGenerating(item.title);
     setGeneratedCase(null);
+    setGeneratedFrom(null);
+    setError(null);
     try {
       const resp = await fetch('/api/zhihu/generate-case', {
         method: 'POST',
@@ -57,6 +64,7 @@ export default function ZhihuHotPage() {
         setError(data.error);
       } else {
         setGeneratedCase(data.case);
+        setGeneratedFrom(item);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : '生成失败');
@@ -67,116 +75,111 @@ export default function ZhihuHotPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#0a0a1a] text-white flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full mx-auto mb-4" />
-          <p className="text-gray-400">正在拉取知乎热榜...</p>
+      <ZhihuShell icon="bolt" title="今日热案" subtitle="从知乎热榜物色建案题材">
+        <div className="flex justify-center py-16">
+          <Mascot motion="computer" size={110} caption="正在翻阅知乎热榜…" />
         </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="min-h-screen bg-[#0a0a1a] text-white flex items-center justify-center">
-        <div className="text-center max-w-md">
-          <p className="text-red-400 mb-4">{error}</p>
-          <Link href="/" className="text-blue-400 hover:underline">返回首页</Link>
-        </div>
-      </div>
+      </ZhihuShell>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#0a0a1a] via-[#111827] to-[#0a0a1a] text-white">
-      <div className="max-w-3xl mx-auto px-4 py-8">
-        <div className="flex items-center gap-3 mb-8">
-          <span className="text-3xl">🔥</span>
-          <div>
-            <h1 className="text-2xl font-bold">今日热案</h1>
-            <p className="text-sm text-gray-400">从知乎热榜生成证据链案件</p>
-          </div>
+    <ZhihuShell icon="bolt" title="今日热案" subtitle="从知乎热榜物色建案题材">
+      {error && (
+        <div className="card-dark mb-4 border-coral/50 p-4">
+          <p className="flex items-start gap-2 text-sm font-bold text-coral">
+            <Icon name="alert" size={16} className="mt-0.5 shrink-0" />
+            {error}
+          </p>
         </div>
+      )}
 
-        <div className="space-y-3 mb-8">
-          {candidates.length === 0 && raw.length === 0 && (
-            <p className="text-gray-400 text-center py-8">暂无热榜数据</p>
-          )}
-          {candidates.map((item, i) => (
-            <div
-              key={i}
-              className="bg-white/5 border border-white/10 rounded-xl p-4 hover:bg-white/10 transition-colors"
-            >
-              <div className="flex gap-3">
-                {item.thumbnailUrl && (
-                      <img
-                        src={item.thumbnailUrl}
-                        alt=""
-                        className="w-16 h-16 rounded-lg object-cover flex-shrink-0"
-                      />
-                )}
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-medium text-sm leading-snug mb-1">{item.title}</h3>
-                  {item.summary && (
-                    <p className="text-xs text-gray-400 line-clamp-2">{item.summary}</p>
-                  )}
-                  <button
-                    onClick={() => generateCase(item)}
-                    disabled={generating === item.title}
-                    className="mt-2 px-3 py-1 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-xs rounded-lg transition-colors"
-                  >
-                    {generating === item.title ? '生成中...' : '生成案件 →'}
-                  </button>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {generatedCase && (
-          <div className="bg-green-500/10 border border-green-500/30 rounded-xl p-6 mb-8">
-            <h2 className="text-lg font-bold text-green-400 mb-3">案件生成成功</h2>
-            <div className="space-y-3 text-sm">
-              <p><span className="text-gray-400">标题:</span> {String(generatedCase.case_title ?? '')}</p>
-              <p><span className="text-gray-400">简介:</span> {String(generatedCase.case_summary ?? '')}</p>
-              <div>
-                <p className="text-gray-400 mb-1">原文事实:</p>
-                {(Array.isArray(generatedCase.original_facts) ? generatedCase.original_facts : []).map(
-                  (fact: Record<string, string>, i: number) => (
-                    <p key={i} className="ml-4 text-gray-300">• {fact.content ?? String(fact)}</p>
-                  )
-                )}
-              </div>
-            </div>
-            <Link
-              href="/game/briefing"
-              className="inline-block mt-4 px-4 py-2 bg-green-600 hover:bg-green-700 text-sm rounded-lg transition-colors"
-            >
-              进入审讯 →
-            </Link>
-          </div>
+      {/* 热榜候选 */}
+      <div className="space-y-3">
+        {candidates.length === 0 && raw.length === 0 && (
+          <Mascot motion="sleep" size={110} caption="热榜暂时空着，稍后再来。" />
         )}
-
-        {raw.length > 0 && (
-          <details className="mt-8">
-            <summary className="text-sm text-gray-500 cursor-pointer hover:text-gray-300">
-              查看原始热榜（未筛选）
-            </summary>
-            <div className="mt-4 space-y-2">
-              {raw.map((item, i) => (
-                <div key={i} className="text-xs text-gray-500 border-l-2 border-gray-700 pl-3">
-                  {item.title}
-                </div>
-              ))}
+        {candidates.map((item, i) => (
+          <div key={i} className="card-dark flex gap-3 p-4 transition-colors hover:border-amber/40">
+            {item.thumbnailUrl && (
+              // eslint-disable-next-line @next/next/no-img-element -- 热榜外链缩略图，域名不定
+              <img
+                src={item.thumbnailUrl}
+                alt=""
+                className="h-16 w-16 flex-shrink-0 rounded-xl border-2 border-paper/10 object-cover"
+              />
+            )}
+            <div className="min-w-0 flex-1">
+              <h3 className="text-sm font-black leading-snug text-paper">{item.title}</h3>
+              {item.summary && (
+                <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-paper/50">{item.summary}</p>
+              )}
+              <button
+                onClick={() => generateCase(item)}
+                disabled={generating === item.title}
+                className="btn btn-amber mt-3 !px-3 !py-1 text-xs disabled:opacity-40"
+              >
+                <Icon name="sparkle" size={13} filled />
+                {generating === item.title ? '生成中…' : '生成案件预览'}
+              </button>
             </div>
-          </details>
-        )}
-
-        <div className="mt-8 flex gap-3">
-          <Link href="/" className="text-sm text-gray-400 hover:text-white">← 返回首页</Link>
-          <Link href="/game/evidence" className="text-sm text-gray-400 hover:text-white">证据板 →</Link>
-        </div>
+          </div>
+        ))}
       </div>
-    </div>
+
+      {/* 生成结果：仅作选题预览，正式开局回大厅建案 */}
+      {generatedCase && (
+        <div className="card mt-6 border-teal p-6">
+          <h2 className="flex items-center gap-2 text-sm font-black text-ink">
+            <Icon name="check" size={16} className="text-teal" />
+            案件选题预览已生成
+          </h2>
+          <p className="mt-3 text-base font-black text-ink">{String(generatedCase.case_title ?? '')}</p>
+          <p className="mt-1 text-sm leading-relaxed text-ink/70">{String(generatedCase.case_summary ?? '')}</p>
+          {Array.isArray(generatedCase.original_facts) && generatedCase.original_facts.length > 0 && (
+            <div className="mt-3">
+              <p className="text-xs font-black uppercase tracking-widest text-coral-deep">AI 提炼的事实点</p>
+              <ul className="mt-1 space-y-1">
+                {(generatedCase.original_facts as Array<Record<string, string>>).map((fact, i) => (
+                  <li key={i} className="flex gap-2 text-sm leading-relaxed text-ink/75">
+                    <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-amber-deep" />
+                    {fact.content ?? String(fact)}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          <div className="dashed-divider my-4" />
+          <p className="text-xs leading-relaxed text-ink/60">
+            这只是<b>选题预览</b>。正式开局需要文章的<b>完整正文</b>：回事务所把这篇粘贴进「带一篇知乎文章来」，
+            配上邀请码，AI 会把它编译成一局可回溯的对局。
+          </p>
+          <Link
+            href={generatedFrom ? `/?prefill_url=${encodeURIComponent(generatedFrom.url)}` : '/'}
+            className="btn btn-amber mt-4 inline-flex items-center gap-2"
+          >
+            <Icon name="send" size={14} />
+            带着这篇回大厅建案
+          </Link>
+        </div>
+      )}
+
+      {/* 原始热榜：默认折叠 */}
+      {raw.length > 0 && (
+        <details className="mt-6">
+          <summary className="cursor-pointer text-xs font-black uppercase tracking-widest text-paper/40 hover:text-paper/60">
+            查看原始热榜（未筛选）
+          </summary>
+          <div className="mt-3 space-y-2">
+            {raw.map((item, i) => (
+              <div key={i} className="border-l-2 border-paper/15 pl-3 text-xs leading-relaxed text-paper/45">
+                {item.title}
+              </div>
+            ))}
+          </div>
+        </details>
+      )}
+    </ZhihuShell>
   );
 }
