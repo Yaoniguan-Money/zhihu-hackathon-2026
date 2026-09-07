@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { motion } from "motion/react";
 import { useGame } from "@/context/GameContext";
 import Mascot from "@/components/ui/Mascot";
@@ -19,6 +20,7 @@ const PortraitRow = dynamic(() => import("@/components/three/PortraitRow"), {
 });
 
 export default function AccusationPage() {
+  const router = useRouter();
   const {
     casePublic,
     sessionView,
@@ -31,6 +33,11 @@ export default function AccusationPage() {
     clearActionError,
     backToLobby,
   } = useGame();
+
+  // 判决就绪后自动带玩家进揭底页，避免停在指控表单上找不到入口。
+  useEffect(() => {
+    if (phase === "revealed") router.replace("/game/reveal");
+  }, [phase, router]);
 
   const [suspect, setSuspect] = useState<string | null>(null);
   const [types, setTypes] = useState<DistortionType[]>([]);

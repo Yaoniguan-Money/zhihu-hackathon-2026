@@ -14,9 +14,30 @@ import { DISTORTION_META } from "@/lib/distortions";
 import { calcDiscernmentLevel, type ScoreCardData } from "@/lib/score-card";
 import GameTour from "@/components/onboarding/GameTour";
 
+/**
+ * 判词玩家化：内部标识符（role-*、cl-*、篡改枚举名）不面向玩家，
+ * 渲染前替换为角色名/原文要点编号/中文名。只改展示文本，不改 reveal 数据。
+ */
+function humanizeVerdict(
+  text: string,
+  roles: Array<{ role_id: string; display_name: string }>,
+): string {
+  let out = text;
+  for (const role of roles) {
+    if (out.includes(role.role_id)) {
+      out = out.replaceAll(role.role_id, role.display_name.split(" · ")[0]);
+    }
+  }
+  out = out.replace(/\brole-[a-z0-9-]+\b/g, "该角色");
+  out = out.replace(/\bcl-(\d+)\b/g, "原文要点$1");
+  for (const [key, meta] of Object.entries(DISTORTION_META)) {
+    out = out.replaceAll(key, meta.name);
+  }
+  return out;
+}
+
 export default function RevealPage() {
-  const { casePublic, sessionView, reveal, actionError, phase, backToLobby, messages } = useGame();
-  const rootRef = useRef<HTMLDivElement>(null);
+  const { casePublic, sessionView, reveal, actionError, phase, backToLobby, messages } = useGame();  const rootRef = useRef<HTMLDivElement>(null);
   const scoreEvidenceRef = useRef<HTMLSpanElement>(null);
   const scoreQuestioningRef = useRef<HTMLSpanElement>(null);
 
@@ -233,7 +254,9 @@ export default function RevealPage() {
           <Icon name="scale" size={16} />
           合议庭判词
         </h3>
-        <p className="rv-note mt-3 text-sm leading-relaxed text-ink/80">{reveal.explanation}</p>
+        <p className="rv-note mt-3 text-sm leading-relaxed text-ink/80">
+          {humanizeVerdict(reveal.explanation, casePublic.roles)}
+        </p>
         {reveal.reality_mapping.length > 0 && (
           <>
             <div className="dashed-divider my-4" />
@@ -244,7 +267,7 @@ export default function RevealPage() {
               {reveal.reality_mapping.map((m, i) => (
                 <li key={i} className="flex gap-2 text-sm leading-relaxed text-ink/75">
                   <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-amber-deep" />
-                  {m}
+                  {humanizeVerdict(m, casePublic.roles)}
                 </li>
               ))}
             </ul>
