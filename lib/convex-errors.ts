@@ -50,9 +50,11 @@ export function errorCodeHint(code: PublicError["code"]): string {
       return "当前阶段不允许这个操作。";
     case "VOICE_ASR_FAILED":
     case "VOICE_TTS_FAILED":
+      return "语音服务暂时不可用，可以继续使用键盘输入。";
     case "VOICE_NO_SPEECH":
+      return "没听到说话内容，请靠近麦克风再试一次。";
     case "VOICE_AUDIO_TOO_LONG":
-      return "语音服务不可用，可以继续使用键盘输入。";
+      return "录音超过 30 秒上限，请把问题说短一点。";
     case "SERVICE_NOT_CONFIGURED":
       return "服务端尚未配置模型，暂时无法进行该操作。";
     case "RATE_LIMITED":
