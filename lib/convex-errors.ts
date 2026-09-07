@@ -41,7 +41,7 @@ export function errorCodeHint(code: PublicError["code"]): string {
     case "ROLE_TURN_BUSY":
       return "该案件正在回应另一个问题，等当前回应结束后再操作。";
     case "ROLE_TURN_FAILED":
-      return "这条回应失败了，可以换一种问法重新提问。";
+      return "这条发言没有生成成功，可以重试一次；若反复失败，回到大厅重新开局。";
     case "BOARD_REVISION_CONFLICT":
       return "证据板在别处被修改过，刷新后重新调整再保存。";
     case "EVIDENCE_UNAVAILABLE":
@@ -60,6 +60,6 @@ export function errorCodeHint(code: PublicError["code"]): string {
     case "AUTH_REQUIRED":
       return "身份建立失败，请刷新页面重试。";
     default:
-      return "请稍后重试，或返回首页重新开始。";
+      return "请稍后重试；若反复出现，回到大厅重开一局。";
   }
 }

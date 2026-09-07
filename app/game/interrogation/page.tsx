@@ -73,6 +73,17 @@ export default function InterrogationPage() {
     const t = setInterval(() => setGateSeconds((s) => s + 1), 1000);
     return () => clearInterval(t);
   }, [gateWaiting]);
+
+  // 角色回合在途时，在记录面板显示已等待秒数（Validator 常需 1~2 分钟，玩家需要反馈）。
+  const [answerSeconds, setAnswerSeconds] = useState(0);
+  useEffect(() => {
+    if (!thinking) {
+      setAnswerSeconds(0);
+      return;
+    }
+    const t = setInterval(() => setAnswerSeconds((s) => s + 1), 1000);
+    return () => clearInterval(t);
+  }, [thinking?.requestId]); // eslint-disable-line react-hooks/exhaustive-deps
   const latestRole = roleMessages[roleMessages.length - 1] as
     | Extract<MessagePublic, { speaker_type: "role" }>
     | undefined;
@@ -215,6 +226,11 @@ export default function InterrogationPage() {
         <div className="flex items-center gap-2 border-b border-paper/10 px-4 py-2.5">
           <Icon name="eye" size={15} className="text-amber" />
           <span className="text-sm font-black text-paper">审讯记录</span>
+          {thinking && (
+            <span className="chip !border-amber/60 !bg-amber/10 !text-[10px] !text-amber">
+              正在回答… {answerSeconds}s
+            </span>
+          )}
           <span className="ml-auto chip !border-paper/30 !bg-transparent !text-[10px] !text-paper/60">
             {messages.length} 条
           </span>

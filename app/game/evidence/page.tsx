@@ -56,9 +56,38 @@ export default function EvidencePage() {
   const serverBoard = sessionView?.board;
   useEffect(() => {
     if (!serverBoard || dirty) return;
+    // 草稿恢复：路由切换会重挂载本页并丢掉本地编辑，先找回未保存草稿。
+    let draft: { placements: typeof placements; links: typeof links } | null = null;
+    try {
+      const raw = sessionStorage.getItem(`ecw.board.draft.${serverBoard.session_id}`);
+      if (raw) draft = JSON.parse(raw);
+    } catch {
+      draft = null;
+    }
+    if (draft && (draft.placements.length > 0 || draft.links.length > 0)) {
+      setPlacements(draft.placements);
+      setLinks(draft.links);
+      setDirty(true);
+      return;
+    }
     setPlacements(serverBoard.placements);
     setLinks(serverBoard.links);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [serverBoard, dirty]);
+
+  // 有未保存改动时写入草稿；保存成功时在 save() 内清除，避免恢复回环。
+  const draftSessionId = serverBoard?.session_id;
+  useEffect(() => {
+    if (!draftSessionId || !dirty) return;
+    try {
+      sessionStorage.setItem(
+        `ecw.board.draft.${draftSessionId}`,
+        JSON.stringify({ placements, links }),
+      );
+    } catch {
+      /* 隐私模式等场景下忽略 */
+    }
+  }, [placements, links, dirty, draftSessionId]);
 
   const placed = new Set(placements.map((p) => p.evidence_id));
   const pool = evidences.filter((e) => !placed.has(e.evidence_id));
@@ -152,6 +181,13 @@ export default function EvidencePage() {
 
   const save = () => {
     saveBoard(placements, links);
+    if (draftSessionId) {
+      try {
+        sessionStorage.removeItem(`ecw.board.draft.${draftSessionId}`);
+      } catch {
+        /* ignore */
+      }
+    }
     setDirty(false);
   };
 
