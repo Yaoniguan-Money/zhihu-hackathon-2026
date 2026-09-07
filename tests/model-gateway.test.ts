@@ -2,8 +2,11 @@ import { describe, expect, test } from "bun:test";
 import {
   AI_CONFIG_KEYS,
   ModelConfigMissingError,
+  legacyEnvToRegistry,
   loadModelGatewayConfig,
   modelIdForTask,
+  providerForTask,
+  resolveRegistryDoc,
 } from "@server/model-gateway/config.js";
 import {
   OpenAICompatibleModelGateway,
@@ -139,5 +142,130 @@ describe("Scripted Adapter（仅测试组合根）", () => {
     };
     await expect(gateway.generateStructured(call)).rejects.toThrow();
     await expect(gateway.generateStructured(call)).rejects.toThrow();
+  });
+});
+
+describe("多供应商注册表（ADR 0003 补充决议）", () => {
+  const REGISTRY_DOC = {
+    providers: [
+      {
+        name: "zhipu",
+        base_url: "https://open.bigmodel.example/api/v4",
+        api_key: "glm-key-1",
+        enabled: true,
+        model: "glm-flash",
+      },
+      {
+        name: "deepseek",
+        base_url: "https://api.deepseek.example/v1",
+        api_key: "ds-key-2",
+        enabled: true,
+        model: "deepseek-chat",
+        models: { role: "deepseek-reasoner" },
+      },
+      {
+        name: "offline",
+        base_url: "https://offline.example/v1",
+        api_key: "",
+        enabled: false,
+      },
+    ],
+    routing: {
+      claim: "zhipu",
+      case: "zhipu",
+      role: "deepseek",
+      validator: "zhipu",
+      reveal: "deepseek",
+    },
+  };
+
+  test("注册表文档解析：每任务路由到对应供应商与模型", () => {
+    const config = resolveRegistryDoc(REGISTRY_DOC);
+    const role = providerForTask(config, "role");
+    expect(role.provider.name).toBe("deepseek");
+    expect(role.modelId).toBe("deepseek-reasoner");
+    const claim = providerForTask(config, "claim");
+    expect(claim.provider.name).toBe("zhipu");
+    expect(claim.modelId).toBe("glm-flash"); // 回退到供应商默认模型（显式配置值）
+    const reveal = providerForTask(config, "reveal");
+    expect(reveal.provider.name).toBe("deepseek");
+    expect(reveal.modelId).toBe("deepseek-chat"); // 未显式配置的任务回退供应商默认模型
+  });
+
+  test("路由到未登记供应商 → MODEL_CONFIG_MISSING", () => {
+    const doc = {
+      ...REGISTRY_DOC,
+      routing: { ...REGISTRY_DOC.routing, validator: "ghost" },
+    };
+    try {
+      resolveRegistryDoc(doc);
+      throw new Error("应当失败");
+    } catch (error) {
+      expect(error).toBeInstanceOf(ModelConfigMissingError);
+      expect((error as ModelConfigMissingError).failure.detail).toContain("ghost");
+    }
+  });
+
+  test("路由到禁用供应商 → MODEL_CONFIG_MISSING", () => {
+    const config = resolveRegistryDoc(REGISTRY_DOC);
+    const disabled: typeof config = {
+      providers: config.providers,
+      routing: { ...config.routing, reveal: "offline" },
+    };
+    try {
+      providerForTask(disabled, "reveal");
+      throw new Error("应当失败");
+    } catch (error) {
+      expect(error).toBeInstanceOf(ModelConfigMissingError);
+      expect((error as ModelConfigMissingError).failure.detail).toContain("禁用");
+    }
+  });
+
+  test("启用供应商缺 Key → MODEL_CONFIG_MISSING；禁用供应商可缺 Key", () => {
+    const bad = {
+      providers: REGISTRY_DOC.providers.map((p) =>
+        p.name === "zhipu" ? { ...p, api_key: "" } : p,
+      ),
+      routing: REGISTRY_DOC.routing,
+    };
+    expect(() => resolveRegistryDoc(bad)).toThrow(ModelConfigMissingError);
+    // 禁用的 offline（空 Key）不阻塞解析
+    expect(() => resolveRegistryDoc(REGISTRY_DOC)).not.toThrow();
+  });
+
+  test("路由任务缺模型 ID → MODEL_CONFIG_MISSING", () => {
+    const doc = {
+      providers: [
+        {
+          name: "bare",
+          base_url: "https://bare.example/v1",
+          api_key: "k",
+          enabled: true,
+        },
+      ],
+      routing: {
+        claim: "bare",
+        case: "bare",
+        role: "bare",
+        validator: "bare",
+        reveal: "bare",
+      },
+    };
+    const config = resolveRegistryDoc(doc);
+    try {
+      providerForTask(config, "claim");
+      throw new Error("应当失败");
+    } catch (error) {
+      expect(error).toBeInstanceOf(ModelConfigMissingError);
+      expect((error as ModelConfigMissingError).failure.detail).toContain("claim");
+    }
+  });
+
+  test("八项 env 是注册表的回退路径：单供应商路由全部任务", () => {
+    const config = legacyEnvToRegistry(loadModelGatewayConfig(FULL_ENV));
+    const claim = providerForTask(config, "claim");
+    expect(claim.provider.name).toBe("deepseek");
+    expect(claim.modelId).toBe("max-model");
+    expect(providerForTask(config, "role").modelId).toBe("flash-model");
   });
 });

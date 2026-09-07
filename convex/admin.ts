@@ -514,13 +514,10 @@ export const seedSystemCase = internalMutation({
 export const debugModelProbe = internalAction({
   args: {},
   handler: async (ctx) => {
-    void ctx;
-    const { OpenAICompatibleModelGateway } = await import(
-      "@server/model-gateway/openai-compatible-gateway.js"
-    );
+    const { modelGatewayFor } = await import("./aiRuntime");
     const { z: zod } = await import("zod");
     try {
-      const gateway = OpenAICompatibleModelGateway.fromEnv();
+      const gateway = await modelGatewayFor(ctx);
       const result = await gateway.generateStructured({
         task: "role",
         schemaName: "probe",

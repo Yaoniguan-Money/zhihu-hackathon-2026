@@ -5,6 +5,7 @@ import {
   signInAnonymous,
   waitForTerminal,
 } from "./helpers/convex-local.js";
+import { clearAiProviderRegistry } from "./helpers/convex-local.js";
 
 /**
  * P1-3b 编译 lease 自愈（本地后端，无模型）：
@@ -39,6 +40,9 @@ async function createInvite(): Promise<string> {
 }
 
 describe("P1-3b 编译 lease 自愈（本地后端，无模型）", () => {
+  test("前置：清空 AI 供应商注册表覆盖层", async () => {
+    expect(await clearAiProviderRegistry()).toBe(true);
+  });
   beforeAll(async () => {
     await callConvex("mutation", "admin:resetQuotaState", {}, { admin: true });
   });

@@ -49,11 +49,9 @@ import {
   payloadHashForCreateFromSource,
 } from "@server/cases/idempotency.js";
 import { sha256Hex } from "@server/cases/hash.js";
-import {
-  ModelRequestFailedError,
-  OpenAICompatibleModelGateway,
-} from "@server/model-gateway/openai-compatible-gateway.js";
+import { ModelRequestFailedError } from "@server/model-gateway/openai-compatible-gateway.js";
 import { ModelConfigMissingError } from "@server/model-gateway/config.js";
+import { modelGatewayFor } from "./aiRuntime";
 import {
   candidateClaimGraphSchema,
   claimExtractionSystemPrompt,
@@ -542,7 +540,7 @@ export const compileCaseWorker = internalAction({
       );
 
       // 2) 模型候选（真实外部 Seam；maxRetries=0，无修复无重试）
-      const gateway = OpenAICompatibleModelGateway.fromEnv();
+      const gateway = await modelGatewayFor(ctx);
       const claimCallStart = Date.now();
       await audit("model_call_started", { task: "claim" });
       let candidate;

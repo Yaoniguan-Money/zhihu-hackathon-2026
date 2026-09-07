@@ -3,15 +3,18 @@ import { generateObject } from "ai";
 import type { z } from "zod";
 import type { PrivateFailure } from "@contracts/private/index.js";
 import {
+  legacyEnvToRegistry,
   loadModelGatewayConfig,
-  modelIdForTask,
+  providerForTask,
   type ModelGatewayConfig,
   type ModelTask,
+  type ResolvedGatewayConfig,
 } from "./config.js";
 
 /**
- * Model Gateway（ENGINEERING_SPEC 第 6 节 / ADR 0003）：真实外部 Seam。
- * 生产 Adapter 使用 AI SDK 的 OpenAI-compatible provider 与结构化输出。
+ * Model Gateway（ENGINEERING_SPEC 第 6 节 / ADR 0003 + 补充决议）：真实外部 Seam。
+ * 生产 Adapter 使用 AI SDK 的 OpenAI-compatible provider 与结构化输出；
+ * 支持多供应商注册表与每任务显式路由（配置驱动，非失败恢复）。
  * SDK/provider 自动重试固定为 0；协议或 schema 错误是 typed failure，
  * 不得抽取自然语言代码块、补括号、修 JSON 或切换供应商。
  */
@@ -46,12 +49,15 @@ function newIncidentId(): string {
   return `inc:${Date.now().toString(36)}:${Math.random().toString(36).slice(2, 10)}`;
 }
 
-/** 生产 Adapter：显式配置的 OpenAI-compatible 网关。 */
+/** 生产 Adapter：显式配置的 OpenAI-compatible 网关（多供应商注册表 + 每任务路由）。 */
 export class OpenAICompatibleModelGateway implements ModelGateway {
-  private readonly config: ModelGatewayConfig;
+  private readonly config: ResolvedGatewayConfig;
 
-  constructor(config: ModelGatewayConfig) {
-    this.config = config;
+  constructor(config: ResolvedGatewayConfig | ModelGatewayConfig) {
+    this.config =
+      "providers" in config
+        ? config
+        : legacyEnvToRegistry(config as ModelGatewayConfig);
   }
 
   static fromEnv(
@@ -63,12 +69,13 @@ export class OpenAICompatibleModelGateway implements ModelGateway {
   async generateStructured<TSchema extends z.ZodType>(
     call: StructuredModelCall<TSchema>,
   ): Promise<z.infer<TSchema>> {
-    const provider = createOpenAICompatible({
-      name: this.config.providerName,
-      baseURL: this.config.baseUrl,
-      apiKey: this.config.apiKey,
+    const { provider, modelId } = providerForTask(this.config, call.task);
+    const aiProvider = createOpenAICompatible({
+      name: provider.name,
+      baseURL: provider.baseUrl,
+      apiKey: provider.apiKey,
     });
-    const model = provider(modelIdForTask(this.config, call.task));
+    const model = aiProvider(modelId);
 
     let result;
     try {
@@ -85,7 +92,7 @@ export class OpenAICompatibleModelGateway implements ModelGateway {
         {
           code: "MODEL_REQUEST_FAILED",
           incident_id: newIncidentId(),
-          detail: `任务 ${call.task} 的模型请求失败`,
+          detail: `任务 ${call.task} 的模型请求失败（provider=${provider.name}）`,
         },
         error,
       );
@@ -98,7 +105,7 @@ export class OpenAICompatibleModelGateway implements ModelGateway {
       throw new ModelRequestFailedError({
         code: "MODEL_PROTOCOL_INVALID",
         incident_id: newIncidentId(),
-        detail: `任务 ${call.task} 的模型输出不符合 schema`,
+        detail: `任务 ${call.task} 的模型输出不符合 schema（provider=${provider.name}）`,
       });
     }
     return parsed.data;

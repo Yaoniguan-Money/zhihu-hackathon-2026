@@ -16,10 +16,8 @@ import {
 } from "@contracts/private/index.js";
 import { sha256Hex } from "@server/cases/hash.js";
 import { canonicalJson } from "@server/cases/idempotency.js";
-import {
-  ModelRequestFailedError,
-  OpenAICompatibleModelGateway,
-} from "@server/model-gateway/openai-compatible-gateway.js";
+import { ModelRequestFailedError } from "@server/model-gateway/openai-compatible-gateway.js";
+import { modelGatewayFor } from "./aiRuntime";
 import { ModelConfigMissingError as ConfigMissingError } from "@server/model-gateway/config.js";
 import {
   REVEAL_SCHEMA_VERSION,
@@ -118,7 +116,7 @@ export const accuseCore = internalAction({
     }
 
     try {
-      const gateway = OpenAICompatibleModelGateway.fromEnv();
+      const gateway = await modelGatewayFor(ctx);
       const context = await ctx.runQuery(internal.reveal.revealContextInternal, {
         session_id: args.session_id,
       });

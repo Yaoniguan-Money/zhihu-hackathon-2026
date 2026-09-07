@@ -27,10 +27,8 @@ import {
 import { evidenceGraphPrivateSchema } from "@contracts/private/index.js";
 import { sha256Hex } from "@server/cases/hash.js";
 import { canonicalJson } from "@server/cases/idempotency.js";
-import {
-  OpenAICompatibleModelGateway,
-  ModelRequestFailedError,
-} from "@server/model-gateway/openai-compatible-gateway.js";
+import { ModelRequestFailedError } from "@server/model-gateway/openai-compatible-gateway.js";
+import { modelGatewayFor } from "./aiRuntime";
 import { ModelConfigMissingError as ConfigMissingError } from "@server/model-gateway/config.js";
 import {
   runGenerationAttempts,
@@ -679,7 +677,7 @@ export const roleTurnWorker = internalAction({
       });
     };
     try {
-      const gateway = OpenAICompatibleModelGateway.fromEnv();
+      const gateway = await modelGatewayFor(ctx);
       const outcome = await runGenerationAttempts(
         gateway,
         {

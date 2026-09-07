@@ -42,3 +42,4 @@ art/blender/characters/*/v*_clothing.blend
 art/blender/characters/*/v*_accessories.blend
 *.blend1
 __MACOSX/
+.env.selfhosted-local

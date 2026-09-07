@@ -6,6 +6,7 @@ import {
   errorText,
   signInAnonymous,
 } from "./helpers/convex-local.js";
+import { clearAiProviderRegistry } from "./helpers/convex-local.js";
 import { seedGoldenCaseViaAdmin } from "./helpers/golden-seed.js";
 
 /**
@@ -123,6 +124,9 @@ async function getAllowedActions(
 }
 
 describe("P1-1 Recording 与对质（本地后端，无模型）", () => {
+  test("前置：清空 AI 供应商注册表覆盖层", async () => {
+    expect(await clearAiProviderRegistry()).toBe(true);
+  });
   beforeAll(async () => {
     await seedGoldenCaseViaAdmin();
     await callConvex("mutation", "admin:resetQuotaState", {}, { admin: true });

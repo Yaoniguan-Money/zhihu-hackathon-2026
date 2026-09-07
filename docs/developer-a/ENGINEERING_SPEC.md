@@ -194,6 +194,8 @@ AI_REVEAL_MODEL
 
 不同任务可以显式填相同模型 ID，但不得通过代码默认继承。不得自动读取 `DEEPSEEK_API_KEY`、`DASHSCOPE_API_KEY` 或其他工具的环境变量。配置缺失返回 `SERVICE_NOT_CONFIGURED`；SDK/provider 自动重试固定为 0。
 
+**多供应商注册表与运行时配置覆盖层（ADR 0003 补充决议，2026-09-07）**：网关配置允许登记 N 个 OpenAI-compatible 供应商（name / Base URL / API Key / enabled / 任务模型表），并为五个任务显式路由到某个已启用供应商。注册表存于 Convex 表 `ai_provider_config`（单例），由 `AI_ADMIN_SECRET` 口令门控的管理接口读写，管理界面展示的 API Key 一律掩码；表为空时回退到上述八项环境变量。网关在每次模型调用时解析配置，管理页保存后下一次任务调用即生效。路由是配置驱动的选择，不是失败恢复：供应商失败仍是 typed failure（detail 携带 `provider=<name>`），请求内静默切换、隐藏重试或请求另一个模型仍然禁止。
+
 结构化输出先经过严格运行时 schema：未知字段、未知枚举、越界数字、缺失引用均失败。模型协议错误不是语义重写机会；不得抽取自然语言代码块、补括号、修 JSON 或请求另一个模型。参考：[AI SDK OpenAI-compatible providers](https://ai-sdk.dev/providers/openai-compatible-providers)、[AI SDK structured Output](https://ai-sdk.dev/docs/reference/ai-sdk-core/output)。
 
 Scripted Adapter 只存在于测试组合根，由测试显式注入；生产配置和构建路径不得引用它。
