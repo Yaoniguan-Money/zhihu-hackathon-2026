@@ -252,7 +252,15 @@ export default function EvidencePage() {
           <div className="flex-1 space-y-2 overflow-y-auto p-2.5">
             {pool.length === 0 && (
               <p className="px-2 py-6 text-center text-[11px] leading-relaxed text-paper/40">
-                证据都已上板。<br />继续审讯解锁更多证据。
+                {evidences.length === 0 ? (
+                  <>
+                    还没有解锁证据。<br />先去审讯盘问角色吧。
+                  </>
+                ) : (
+                  <>
+                    证据都已上板。<br />继续审讯解锁更多证据。
+                  </>
+                )}
               </p>
             )}
             {pool.map((e) => (

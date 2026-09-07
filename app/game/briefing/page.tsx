@@ -111,7 +111,7 @@ export default function BriefingPage() {
                       style={{ background: personaForRole(role).outfit }}
                     />
                   )}
-                  <p className="truncate text-xs font-black text-paper">{role.display_name}</p>
+                  <p className="line-clamp-2 text-xs font-black leading-snug text-paper">{role.display_name}</p>
                 </div>
                 <p className="mt-1 line-clamp-2 text-[11px] leading-snug text-paper/55">{role.public_bio}</p>
               </div>
