@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useRef } from "react";
+import { useFrame } from "@react-three/fiber";
 import { Sparkles } from "@react-three/drei";
 import * as THREE from "three";
 import { woodFloorTexture } from "../characters/canvasTextures";
@@ -34,6 +35,38 @@ function seededBooks(): Array<{ x: number; y: number; h: number; w: number; colo
     }
   }
   return books;
+}
+
+/** 吊灯微风摆动：极低幅度绕 z 的正弦摆（视觉上像气流，不干扰阅读）。 */
+function SwingingChandelier({ children }: { children: React.ReactNode }) {
+  const group = useRef<THREE.Group>(null);
+  useFrame((state) => {
+    if (!group.current) return;
+    const t = state.clock.elapsedTime;
+    group.current.rotation.z = Math.sin(t * 0.7) * 0.018;
+    group.current.rotation.x = Math.sin(t * 0.53 + 1.2) * 0.012;
+  });
+  return <group ref={group}>{children}</group>;
+}
+
+/** 台灯灯丝偶发闪烁：intensity 低频噪声抖动（暖光"呼吸"）。 */
+function FlickerLight({
+  base,
+  spread = 0.35,
+  speed = 1.7,
+}: {
+  base: number;
+  spread?: number;
+  speed?: number;
+}) {
+  const light = useRef<THREE.PointLight>(null);
+  useFrame((state) => {
+    if (!light.current) return;
+    const t = state.clock.elapsedTime * speed;
+    const noise = Math.sin(t * 3.1) * Math.sin(t * 1.7 + 0.6);
+    light.current.intensity = base * (1 + noise * spread * 0.18);
+  });
+  return <pointLight ref={light} intensity={base} distance={3.4} color="#c8e8a8" />;
 }
 
 export default function InterrogationRoom() {
@@ -151,7 +184,8 @@ export default function InterrogationRoom() {
         </group>
       </group>
 
-      {/* 吊灯 */}
+      {/* 吊灯（带微风摆动） */}
+      <SwingingChandelier>
       <group position={[0, 2.32, 0]}>
         <mesh position={[0, 0.78, 0]}>
           <cylinderGeometry args={[0.008, 0.008, 1.56, 6]} />
@@ -183,6 +217,7 @@ export default function InterrogationRoom() {
           shadow-bias={-0.0004}
         />
       </group>
+      </SwingingChandelier>
 
       {/* 月夜窗（挂墙内侧）：月亮 + 城市剪影 + 窗框 + 窗帘 */}
       <group position={[0, 2.2, -9.3]}>
@@ -360,7 +395,7 @@ export default function InterrogationRoom() {
             <sphereGeometry args={[0.035, 10, 10]} />
             <meshBasicMaterial color="#ffedbb" />
           </mesh>
-          <pointLight position={[0, 0.32, 0]} intensity={2.2} distance={3.4} color="#c8e8a8" />
+          <FlickerLight base={2.2} />
         </group>
         {/* 文件盒 */}
         <mesh position={[0.4, 0.98, 0]} castShadow>
