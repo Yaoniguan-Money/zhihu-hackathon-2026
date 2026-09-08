@@ -30,7 +30,7 @@ export const CAST_ART: Record<string, { portrait: string; fourView: string; name
   },
 };
 
-export const SCENE_ART = "/assets/scenes/detective-room.png";
+export const SCENE_ART = "/assets/scenes/detective-room-3d.png";
 
 export function castArtFor(personaKey: string): { portrait: string; fourView: string; name: string } | null {
   return CAST_ART[personaKey] ?? null;
