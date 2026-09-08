@@ -418,6 +418,33 @@ export default function InterrogationRoom() {
         </mesh>
       </group>
 
+      {/* 前景案卷篮（大厅机位左下入画；审讯机位在镜头后方不干扰） */}
+      <group position={[-2.1, 0, 5.4]} rotation={[0, 0.7, 0]}>
+        <mesh position={[0, 0.16, 0]} castShadow>
+          <cylinderGeometry args={[0.34, 0.26, 0.32, 18]} />
+          <meshStandardMaterial color="#7a5a38" roughness={0.8} />
+        </mesh>
+        <mesh position={[0, 0.33, 0]} rotation={[Math.PI / 2, 0, 0]}>
+          <torusGeometry args={[0.3, 0.02, 8, 24]} />
+          <meshStandardMaterial color={BRASS} roughness={0.4} metalness={0.6} />
+        </mesh>
+        {/* 篮内卷宗卷轴 */}
+        {[0, 1, 2].map((k) => (
+          <group key={k} position={[k * 0.1 - 0.08, 0.3, (k % 2) * 0.06 - 0.03]} rotation={[0, 0.5 + k * 0.4, Math.PI / 2]}>
+            <mesh castShadow>
+              <cylinderGeometry args={[0.035, 0.035, 0.42, 10]} />
+              <meshStandardMaterial color={k === 1 ? "#e2d7bc" : "#d5c8a8"} roughness={0.85} />
+            </mesh>
+            {[-0.18, 0.18].map((y) => (
+              <mesh key={y} position={[0, y, 0]}>
+                <cylinderGeometry args={[0.045, 0.045, 0.03, 10]} />
+                <meshStandardMaterial color="#8a6a44" roughness={0.7} />
+              </mesh>
+            ))}
+          </group>
+        ))}
+      </group>
+
       {/* 灯下漂浮尘埃 */}
       <Sparkles count={46} scale={[3.4, 2.6, 3.4]} position={[0, 1.7, 0]} size={2.4} speed={0.25} color="#ffd98a" opacity={0.5} />
 

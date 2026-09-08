@@ -14,16 +14,20 @@ interface CameraRigProps {
   intro?: boolean;
   /** 慢速自动环绕（大厅模式）。 */
   autoRotate?: boolean;
+  /** 无聚焦时注视点的横向偏移：正值把主体推到画面左侧（给右侧 UI 面板让位）。 */
+  targetBiasX?: number;
 }
 
 const DEFAULT_POS = new THREE.Vector3(0, 5.1, 8.8);
 const DEFAULT_TARGET = new THREE.Vector3(0, 0.75, -0.1);
 
-export default function CameraRig({ focus, intro = true, autoRotate = false }: CameraRigProps) {
+export default function CameraRig({ focus, intro = true, autoRotate = false, targetBiasX = 0 }: CameraRigProps) {
   const controlsRef = useRef<OrbitControlsImpl>(null);
   const { camera } = useThree();
   const targetPos = useRef(DEFAULT_POS.clone());
   const targetLook = useRef(DEFAULT_TARGET.clone());
+  const bias = useRef(targetBiasX);
+  bias.current = targetBiasX;
   const userGrabbed = useRef(false);
 
   useEffect(() => {
@@ -46,7 +50,7 @@ export default function CameraRig({ focus, intro = true, autoRotate = false }: C
   useEffect(() => {
     const focusTarget = focus
       ? new THREE.Vector3(focus[0] * 0.38, 1.22, focus[2] * 0.38)
-      : DEFAULT_TARGET.clone();
+      : new THREE.Vector3(DEFAULT_TARGET.x + bias.current, DEFAULT_TARGET.y, DEFAULT_TARGET.z);
     targetLook.current.copy(focusTarget);
     if (focus) {
       const dir = new THREE.Vector3(focus[0], 0, focus[2]).normalize();
