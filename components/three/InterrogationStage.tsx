@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, Suspense } from "react";
+import { useEffect, useMemo, useRef, useState, Suspense } from "react";
 import { Canvas } from "@react-three/fiber";
 import { ContactShadows, Environment, Lightformer, Preload } from "@react-three/drei";
 import * as THREE from "three";
@@ -50,6 +50,25 @@ export function seatTransform(index: number, total: number): {
   return { position: [x, 0, z], rotationY };
 }
 
+/**
+ * WebGL 上下文丢失自愈：GPU 回收上下文时 preventDefault 并重挂 Canvas。
+ */
+function useGlRecovery() {
+  const [epoch, setEpoch] = useState(0);
+  const wrapRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = wrapRef.current;
+    if (!el) return;
+    const onLost = (e: Event) => {
+      e.preventDefault();
+      setEpoch((n) => n + 1);
+    };
+    el.addEventListener("webglcontextlost", onLost, true);
+    return () => el.removeEventListener("webglcontextlost", onLost, true);
+  }, []);
+  return { epoch, wrapRef };
+}
+
 export default function InterrogationStage({
   roles,
   bubble,
@@ -64,6 +83,8 @@ export default function InterrogationStage({
     return seatTransform(idx, roles.length).position;
   }, [focusRoleId, roles]);
 
+  const { epoch, wrapRef } = useGlRecovery();
+
   const bubbleSeat = useMemo(() => {
     if (!bubble) return null;
     const idx = roles.findIndex((r) => r.role.role_id === bubble.roleId);
@@ -72,17 +93,18 @@ export default function InterrogationStage({
   }, [bubble, roles]);
 
   return (
-    <Canvas
-      shadows
-      dpr={[1, 1.75]}
-      camera={{ position: [0, 7.8, 10.8], fov: 42, near: 0.1, far: 60 }}
-      gl={{ antialias: true }}
-      onCreated={({ gl }) => {
-        gl.toneMapping = THREE.ACESFilmicToneMapping;
-        gl.toneMappingExposure = 1.12;
-      }}
-      className={className}
-    >
+    <div ref={wrapRef} className={className}>
+      <Canvas
+        key={epoch}
+        shadows
+        dpr={[1, 1.75]}
+        camera={{ position: [0, 7.8, 10.8], fov: 42, near: 0.1, far: 60 }}
+        gl={{ antialias: true }}
+        onCreated={({ gl }) => {
+          gl.toneMapping = THREE.ACESFilmicToneMapping;
+          gl.toneMappingExposure = 1.12;
+        }}
+      >
       <color attach="background" args={["#171430"]} />
       <fog attach="fog" args={["#171430", 11, 20]} />
 
@@ -145,6 +167,7 @@ export default function InterrogationStage({
       />
 
       <Preload all />
-    </Canvas>
+      </Canvas>
+    </div>
   );
 }
