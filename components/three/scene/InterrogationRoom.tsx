@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef } from "react";
+import { useLayoutEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import { Sparkles } from "@react-three/drei";
 import * as THREE from "three";
@@ -67,6 +67,59 @@ function FlickerLight({
     light.current.intensity = base * (1 + noise * spread * 0.18);
   });
   return <pointLight ref={light} intensity={base} distance={3.4} color="#c8e8a8" />;
+}
+
+/** 护墙板：环墙条纹合批为单个 InstancedMesh（28 drawcall → 1）。 */
+function Wainscoting() {
+  const mesh = useRef<THREE.InstancedMesh>(null);
+  const count = 28;
+  useLayoutEffect(() => {
+    if (!mesh.current) return;
+    const m = new THREE.Matrix4();
+    const color = new THREE.Color();
+    for (let i = 0; i < count; i++) {
+      const a = (i / count) * Math.PI * 2;
+      m.makeRotationY(a);
+      m.setPosition(Math.sin(a) * 9.32, 1.35, Math.cos(a) * 9.32);
+      mesh.current.setMatrixAt(i, m);
+      mesh.current.setColorAt(i, color.set(i % 2 ? "#463d5c" : "#3f3754"));
+    }
+    mesh.current.instanceMatrix.needsUpdate = true;
+    if (mesh.current.instanceColor) mesh.current.instanceColor.needsUpdate = true;
+  }, []);
+  return (
+    <instancedMesh ref={mesh} args={[undefined, undefined, count]}>
+      <boxGeometry args={[0.16, 1.7, 0.06]} />
+      <meshStandardMaterial roughness={0.85} />
+    </instancedMesh>
+  );
+}
+
+/** 书架书籍：单层书脊合批（~30 drawcall → 1）。geometry 基准 0.05×0.3×0.26，按数据缩放。 */
+function BookRow({ books }: { books: Array<{ x: number; y: number; h: number; w: number; color: string }> }) {
+  const ref = useRef<THREE.InstancedMesh>(null);
+  const useRef_BookRow = ref;
+  useLayoutEffect(() => {
+    const mesh = useRef_BookRow.current;
+    if (!mesh) return;
+    const dummy = new THREE.Object3D();
+    const color = new THREE.Color();
+    books.forEach((b, i) => {
+      dummy.position.set(b.x, b.y, 0.02);
+      dummy.scale.set(b.w / 0.05, b.h / 0.3, 1);
+      dummy.updateMatrix();
+      mesh.setMatrixAt(i, dummy.matrix);
+      mesh.setColorAt(i, color.set(b.color));
+    });
+    mesh.instanceMatrix.needsUpdate = true;
+    if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
+  }, [books]);
+  return (
+    <instancedMesh ref={ref} args={[undefined, undefined, books.length]}>
+      <boxGeometry args={[0.05, 0.3, 0.26]} />
+      <meshStandardMaterial roughness={0.7} />
+    </instancedMesh>
+  );
 }
 
 export default function InterrogationRoom() {
@@ -385,12 +438,7 @@ export default function InterrogationRoom() {
           <boxGeometry args={[1.9, 2.1, 0.36]} />
           <meshStandardMaterial color={WOOD} roughness={0.75} />
         </mesh>
-        {books.map((b, i) => (
-          <mesh key={i} position={[b.x, b.y, 0.02]}>
-            <boxGeometry args={[b.w, b.h, 0.26]} />
-            <meshStandardMaterial color={b.color} roughness={0.7} />
-          </mesh>
-        ))}
+        <BookRow books={books} />
       </group>
 
       {/* 软木板证据墙：照片/纸条 + 红线 */}
@@ -562,15 +610,8 @@ export default function InterrogationRoom() {
       {/* 灯下漂浮尘埃 */}
       <Sparkles count={46} scale={[3.4, 2.6, 3.4]} position={[0, 1.7, 0]} size={2.4} speed={0.25} color="#ffd98a" opacity={0.5} />
 
-      {/* 护墙板：环墙木条纹 + 黄铜腰线（打破大平面，给墙面节奏） */}
-      {Array.from({ length: 28 }, (_, i) => i * (Math.PI * 2 / 28)).map((a, i) => (
-        <group key={i} position={[Math.sin(a) * 9.32, 1.35, Math.cos(a) * 9.32]} rotation={[0, a, 0]}>
-          <mesh>
-            <boxGeometry args={[0.16, 1.7, 0.06]} />
-            <meshStandardMaterial color={i % 2 ? "#463d5c" : "#3f3754"} roughness={0.85} />
-          </mesh>
-        </group>
-      ))}
+      {/* 护墙板：环墙木条纹合批 + 黄铜腰线圆环（打破大平面，给墙面节奏） */}
+      <Wainscoting />
       <mesh position={[0, 2.28, 0]}>
         <cylinderGeometry args={[9.4, 9.4, 0.05, 48, 1, true]} />
         <meshStandardMaterial color={BRASS} side={THREE.BackSide} roughness={0.4} metalness={0.65} />
