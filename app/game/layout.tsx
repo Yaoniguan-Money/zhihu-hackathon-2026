@@ -7,7 +7,8 @@ import { useGame } from "@/context/GameContext";
 import { Icon } from "@/components/ui/Icons";
 import { requestTour, type TourId } from "@/components/onboarding/GameTour";
 import SoundToggle from "@/components/ui/SoundToggle";
-import { playSfx } from "@/lib/sfx";
+import { playSfx, primeSfx, isSfxMuted } from "@/lib/sfx";
+import { startBgm, setBgmMood } from "@/lib/bgm";
 
 const go = () => playSfx("click");
 
@@ -41,6 +42,24 @@ export default function GameLayout({ children }: { children: ReactNode }) {
       router.replace("/");
     }
   }, [booted, matchesLobby, pathname, router]);
+
+  // BGM：首次手势解锁后启动；指控页用紧张情绪，其余页面用 calm。
+  useEffect(() => {
+    const kick = () => {
+      primeSfx();
+      startBgm(pathname?.startsWith("/game/accusation") ? "tension" : "calm");
+    };
+    window.addEventListener("pointerdown", kick, { once: true });
+    window.addEventListener("keydown", kick, { once: true });
+    return () => {
+      window.removeEventListener("pointerdown", kick);
+      window.removeEventListener("keydown", kick);
+    };
+  }, [pathname]);
+
+  useEffect(() => {
+    setBgmMood(pathname?.startsWith("/game/accusation") ? "tension" : "calm");
+  }, [pathname]);
 
   return (
     <div className="flex min-h-screen flex-col">
