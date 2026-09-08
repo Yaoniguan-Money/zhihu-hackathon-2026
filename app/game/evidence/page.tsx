@@ -39,6 +39,8 @@ export default function EvidencePage() {
   const [links, setLinks] = useState<BoardLink[]>([]);
   const [linkFrom, setLinkFrom] = useState<string | null>(null);
   const [linkPending, setLinkPending] = useState<string | null>(null);
+  // 草稿恢复提示：恢复后短暂展示一次，保存后自然消失
+  const [restoredInfo, setRestoredInfo] = useState<{ chips: number; links: number } | null>(null);
   const [linkTarget, setLinkTarget] = useState<string | null>(null);
   const [dirty, setDirty] = useState(false);
   const [confrontTarget, setConfrontTarget] = useState<string | null>(null); // evidence_id
@@ -69,6 +71,7 @@ export default function EvidencePage() {
       setPlacements(draft.placements);
       setLinks(draft.links);
       setDirty(true);
+      setRestoredInfo({ chips: draft.placements.length, links: draft.links.length });
       return;
     }
     setPlacements(serverBoard.placements);
@@ -185,6 +188,7 @@ export default function EvidencePage() {
 
   const save = () => {
     saveBoard(placements, links);
+    setRestoredInfo(null);
     if (draftSessionId) {
       try {
         sessionStorage.removeItem(`ecw.board.draft.${draftSessionId}`);
@@ -303,6 +307,18 @@ export default function EvidencePage() {
                   连线中：再点目标证据的「连线」按钮完成关系，Esc 取消
                 </div>
               </div>
+            )}
+            {/* 草稿恢复提示：一次性展示未保存编辑的规模 */}
+            {restoredInfo && !linkFrom && (
+              <motion.div
+                initial={{ opacity: 0, y: -12 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="pointer-events-none absolute left-1/2 top-2 z-30 -translate-x-1/2"
+              >
+                <div className="card-dark !border-amber px-4 py-1.5 text-xs font-black text-paper shadow-[var(--shadow-sticker-sm)]">
+                  已恢复上次的未保存编辑 · {restoredInfo.chips} 块证据 {restoredInfo.links} 条连线，记得保存
+                </div>
+              </motion.div>
             )}
             {/* 泳道背景：顶部色晕 + 虚线分隔 */}
             <div className="absolute inset-0 grid grid-cols-6">
