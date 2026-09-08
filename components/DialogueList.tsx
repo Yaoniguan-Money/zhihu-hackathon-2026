@@ -37,6 +37,18 @@ export default function DialogueList({ messages, roles, speakingMessageId, onSpe
 
   return (
     <div className="flex h-full flex-col gap-3 overflow-y-auto px-3 py-3">
+      {messages.length === 0 && (
+        <div className="flex flex-col items-center gap-2 px-4 py-10 text-center">
+          <span className="flex h-9 w-9 animate-pulse items-center justify-center rounded-full border-2 border-paper/25 text-paper/50">
+            <Icon name="quote" size={16} />
+          </span>
+          <p className="text-xs font-bold leading-relaxed text-paper/45">
+            审讯记录为空。
+            <br />
+            五名角色正在准备开场陈述…
+          </p>
+        </div>
+      )}
       {messages.map((m) => {
         if (m.speaker_type === "player") {
           return (

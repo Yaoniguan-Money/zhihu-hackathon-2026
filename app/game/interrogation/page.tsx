@@ -736,7 +736,19 @@ function OpeningTheater({
             className="text-[15px] leading-relaxed text-ink/90"
           />
         ) : (
-          <p className="animate-pulse text-sm font-bold text-ink/50">开场陈述正在生成…</p>
+          <div className="space-y-2.5" aria-label="开场陈述正在生成">
+            <div className="flex items-center gap-2">
+              <span className="h-2 w-2 animate-pulse rounded-full bg-coral" />
+              <p className="text-sm font-black text-ink/55">陈述人正在走向证言席…</p>
+            </div>
+            {[92, 78, 60].map((w, i) => (
+              <div
+                key={i}
+                className="h-3 animate-pulse rounded-full bg-ink/10"
+                style={{ width: `${w}%`, animationDelay: `${i * 0.22}s` }}
+              />
+            ))}
+          </div>
         )}
       </div>
       {nextPending ? (
