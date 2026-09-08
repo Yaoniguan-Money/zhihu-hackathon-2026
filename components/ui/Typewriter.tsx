@@ -25,15 +25,18 @@ interface TypewriterProps {
 export default function Typewriter({ text, prosody, keepCaret = false, onDone, className }: TypewriterProps) {
   const [count, setCount] = useState(0);
   const doneRef = useRef(false);
+  const countRef = useRef(0);
 
   const reduced =
     typeof window !== "undefined" &&
     window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   useEffect(() => {
+    countRef.current = 0;
     setCount(0);
     doneRef.current = false;
     if (reduced || !text) {
+      countRef.current = text.length;
       setCount(text.length);
       return;
     }
@@ -41,17 +44,20 @@ export default function Typewriter({ text, prosody, keepCaret = false, onDone, c
     let cancelled = false;
     const timer = setInterval(() => {
       if (cancelled) return;
-      setCount((c) => {
-        if (c + 1 >= text.length) {
-          clearInterval(timer);
-          if (!doneRef.current) {
-            doneRef.current = true;
-            onDone?.();
-          }
-          return text.length;
+      // 计数经 ref 推进，setCount 只收终值：禁止在 updater 内调用 onDone（渲染期 setState）。
+      const next = countRef.current + 1;
+      if (next >= text.length) {
+        countRef.current = text.length;
+        setCount(text.length);
+        clearInterval(timer);
+        if (!doneRef.current) {
+          doneRef.current = true;
+          onDone?.();
         }
-        return c + 1;
-      });
+      } else {
+        countRef.current = next;
+        setCount(next);
+      }
     }, speed);
     return () => {
       cancelled = true;

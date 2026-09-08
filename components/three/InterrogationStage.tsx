@@ -123,7 +123,7 @@ export default function InterrogationStage({
 
       {bubble && bubbleSeat && (
         <SpeechBubble
-          position={[bubbleSeat[0], 2.35, bubbleSeat[2]]}
+          position={[bubbleSeat[0] * 0.78, 2.05, bubbleSeat[2] * 0.78]}
           name={bubble.name}
           color={bubble.color}
           text={bubble.text}

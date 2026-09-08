@@ -22,7 +22,7 @@ export default function SpeechBubble({
   thinking = false,
 }: SpeechBubbleProps) {
   return (
-    <Html position={position} center distanceFactor={8} zIndexRange={[20, 0]} className="select-none">
+    <Html position={position} center distanceFactor={6.5} zIndexRange={[20, 0]} className="select-none">
       <AnimatePresence mode="wait">
         <motion.div
           key={bubbleKey}
