@@ -132,9 +132,9 @@ cases.createFromSource
 
 ### 5.2 开场与审讯
 
-1. `game.start` 原子改变 Session 阶段并按 `CasePublic.roles` 固定顺序串行调度五条 `opening_statement`：一次只存在一个活动 Ticket，前一条成功后才创建下一条，禁止预建队列。
+1. `game.start` 原子改变 Session 阶段并按 `CasePublic.roles` 固定顺序创建五条 `opening_statement` Ticket（各自独立 lease，错峰调度）：五条并行生成，每条开场的上下文只含该角色自身的 Role Policy 与可见 Claim，不含其他开场（自我介绍式开场）。并行把对局可玩延迟从 Σ(五条) 降为 max(五条)。
 2. 每条开场陈述经过与普通角色回合相同的生成、Validator 和批准流程。
-3. 五条全部批准后 Session 才进入调查阶段；任一失败则 Session 进入显式 `failed`。
+3. 五条全部批准后 Session 才进入调查阶段；任一失败则 Session 进入显式 `failed`（其余在飞 Ticket 的成功落库保留为真实历史；阶段翻转与失败均幂等）。
 4. `roleTurns.ask` 先执行幂等、阶段、Role、`mode`、`source` 和并发检查，再原子保存玩家消息、`accepted` Ticket、公开事件与 Session 排他锁。
 5. worker 将 Ticket 改为 `working`，读取对应 Role Policy 和可见 Claim，生成候选并调用 Validator。
 6. 只有 Approved Role Message、私有 Validation Audit、公开事件和由服务器计算的 Evidence 解锁可以一起提交；之后 Ticket 才成为 `succeeded`。

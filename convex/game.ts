@@ -32,10 +32,10 @@ import { throwPublicError, convexErrorCode } from "./publicErrors.js";
 
 /**
  * TB7：game.start 与五条开场（CONTRACTS 11，ENGINEERING_SPEC 5.2）。
- * briefing → opening_statements：按 CasePublic.roles 固定顺序串行五条开场；
- * 一次只存在一个活动 Ticket：worker 成功后才创建下一条（禁止预建队列）；
- * 五条全部批准才进入 investigation；任一失败 Session 进入 failed，历史保留。
- * TB10：开场 Ticket 同样持有 lease 并写入私有审计。
+ * briefing → opening_statements：按 CasePublic.roles 固定顺序一次创建五条
+ * 开场 Ticket 并错峰调度，五条并行生成（每条上下文只含自身 Policy 与可见
+ * Claim，自我介绍式开场）；五条全部批准才进入 investigation；任一失败
+ * Session 进入 failed，历史保留。TB10：开场 Ticket 同样持有 lease 并写入私有审计。
  */
 
 const OPERATION_START = "game.start";
@@ -126,18 +126,24 @@ export const start = mutation({
     });
     await insertEvent(ctx, args.session_id, { type: "game_started" });
 
-    // 第一条开场 Ticket；后续由 worker 链式创建（一次只有一个活动 Ticket）。
-    const requestId = `req-${crypto.randomUUID()}`;
-    await ctx.db.insert("role_turn_tickets", {
-      request_id: requestId,
-      session_id: args.session_id,
-      role_id: casePublic.roles[0]!.role_id,
-      kind: "opening_statement",
-      status: "accepted",
-      lease_expires_at_ms: nowMs + TICKET_LEASE_MS,
-      created_at_ms: nowMs,
-      updated_at_ms: nowMs,
-    });
+    // 五条开场 Ticket 一次创建、错峰并行调度（契约 §11：并行生成，各自独立 lease）。
+    for (let roleIndex = 0; roleIndex < casePublic.roles.length; roleIndex += 1) {
+      const requestId = `req-${crypto.randomUUID()}`;
+      await ctx.db.insert("role_turn_tickets", {
+        request_id: requestId,
+        session_id: args.session_id,
+        role_id: casePublic.roles[roleIndex]!.role_id,
+        kind: "opening_statement",
+        status: "accepted",
+        lease_expires_at_ms: nowMs + TICKET_LEASE_MS,
+        created_at_ms: nowMs,
+        updated_at_ms: nowMs,
+      });
+      await ctx.scheduler.runAfter(roleIndex * 1000, internal.game.openingWorker, {
+        request_id: requestId,
+        role_index: roleIndex,
+      });
+    }
 
     const result = { session_id: args.session_id, phase: "opening_statements" };
     await ctx.db.insert("idempotency_records", {
@@ -149,27 +155,22 @@ export const start = mutation({
       result_json: JSON.stringify(result),
       created_at_ms: nowMs,
     });
-    await ctx.scheduler.runAfter(0, internal.game.openingWorker, {
-      request_id: requestId,
-      role_index: 0,
-    });
     return result;
   },
 });
 
 // ---------------------------------------------------------------------------
-// 内部：开场 Ticket 链与 worker
+// 内部：开场进度检查与 worker
 
-export const openingTicketFor = internalMutation({
-  args: { session_id: v.string(), role_index: v.number() },
+/** 五条开场全部 succeeded 才进入 investigation（幂等：phase 守卫）。 */
+export const openingsProgressCheck = internalMutation({
+  args: { session_id: v.string() },
   handler: async (ctx, args) => {
     const session = await ctx.db
       .query("sessions")
       .withIndex("by_session_key", (q) => q.eq("session_key", args.session_id))
       .unique();
-    if (!session || session.phase !== "opening_statements") {
-      return null; // Session 已终结或被推进：不再创建
-    }
+    if (!session || session.phase !== "opening_statements") return; // 幂等/已终结
     const caseDoc = await ctx.db
       .query("cases")
       .withIndex("by_case_key", (q) => q.eq("case_key", session.case_id))
@@ -177,25 +178,20 @@ export const openingTicketFor = internalMutation({
     const casePublic = caseDoc?.public_json
       ? (JSON.parse(caseDoc.public_json) as { roles: { role_id: string }[] })
       : null;
-    const role = casePublic?.roles[args.role_index];
-    if (!role) return null;
-    const nowMs = Date.now();
-    const requestId = `req-${crypto.randomUUID()}`;
-    await ctx.db.insert("role_turn_tickets", {
-      request_id: requestId,
-      session_id: args.session_id,
-      role_id: role.role_id,
-      kind: "opening_statement",
-      status: "accepted",
-      lease_expires_at_ms: nowMs + TICKET_LEASE_MS,
-      created_at_ms: nowMs,
-      updated_at_ms: nowMs,
-    });
-    await ctx.scheduler.runAfter(0, internal.game.openingWorker, {
-      request_id: requestId,
-      role_index: args.role_index,
-    });
-    return { request_id: requestId };
+    if (!casePublic) return;
+    const tickets = await ctx.db
+      .query("role_turn_tickets")
+      .withIndex("by_session_status", (q) =>
+        q.eq("session_id", args.session_id).eq("status", "succeeded"),
+      )
+      .collect();
+    const openingSucceeded = tickets.filter((t) => t.kind === "opening_statement");
+    if (openingSucceeded.length >= casePublic.roles.length) {
+      await ctx.db.patch(session._id, {
+        phase: "investigation",
+        updated_at_ms: Date.now(),
+      });
+    }
   },
 });
 
@@ -336,7 +332,8 @@ export const openingWorker = internalAction({
           displayName: context.displayName,
           visibleClaims: context.visibleClaims,
           history: context.history,
-          question: "（开场陈述）请向玩家做一段符合你身份与立场的开场陈述。",
+          question:
+            "（开场陈述）请向玩家做一段符合你身份与立场的开场陈述，控制在 120 字以内。",
           mode: "opening",
           incidentRef: args.request_id,
         },
@@ -381,16 +378,10 @@ export const openingWorker = internalAction({
         }),
       });
 
-      if (args.role_index + 1 < 5) {
-        await ctx.runMutation(internal.game.openingTicketFor, {
-          session_id: context.session_id,
-          role_index: args.role_index + 1,
-        });
-      } else {
-        await ctx.runMutation(internal.game.enterInvestigation, {
-          session_id: context.session_id,
-        });
-      }
+      // 并行模式：本条成功后检查是否五条全部完成（幂等；其余在飞/失败不阻塞本条落库）。
+      await ctx.runMutation(internal.game.openingsProgressCheck, {
+        session_id: context.session_id,
+      });
       void roleMessage;
     } catch (error) {
       await failSessionAndTicket(ctx, args, toPrivateFailure(error));
@@ -440,21 +431,6 @@ export const failSessionInternal = internalMutation({
     await insertEvent(ctx, session.session_key, {
       type: "session_failed",
       error: publicError,
-    });
-  },
-});
-
-export const enterInvestigation = internalMutation({
-  args: { session_id: v.string() },
-  handler: async (ctx, args) => {
-    const session = await ctx.db
-      .query("sessions")
-      .withIndex("by_session_key", (q) => q.eq("session_key", args.session_id))
-      .unique();
-    if (!session || session.phase !== "opening_statements") return; // 幂等
-    await ctx.db.patch(session._id, {
-      phase: "investigation",
-      updated_at_ms: Date.now(),
     });
   },
 });

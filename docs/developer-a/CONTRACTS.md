@@ -484,7 +484,7 @@ export interface SessionView {
 ### 7.2 公开查询与开场编排
 
 - `messages.listPublic` 的 v1 返回当前 Session 的全部公开消息，按 `created_at` + `message_id` 稳定排序；不提供 `after` 参数。增量恢复仅使用 `events.listPublic(after_sequence)`。
-- `game.start` 按 `CasePublic.roles` 的固定顺序串行执行五条开场：一次只存在一个活动 Ticket，前一条成功后才创建下一条，禁止预建队列。五条全部批准后进入 `investigation`；任一失败 Session 进入 `failed`，已发布消息与事件保留为真实历史。
+- `game.start` 按 `CasePublic.roles` 的固定顺序原子创建五条 `opening_statement` Ticket（各自独立 lease，错峰调度），五条并行生成；每条开场的上下文只含该角色自身的 Role Policy 与可见 Claim，不含其他开场（自我介绍式开场）。五条全部批准后进入 `investigation`；任一失败 Session 进入 `failed`，已发布消息与事件保留为真实历史。
 
 ```ts
 export type GameEventPayload =

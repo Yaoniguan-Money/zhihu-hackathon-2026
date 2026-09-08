@@ -102,11 +102,18 @@ export function validatorUserPrompt(input: {
   speech: string;
   supportClaimIds: string[];
 }): string {
+  // 提示词瘦身（Round 10 既定合规修法）：候选声称引用的 claim 给全文；
+  // 其余可见 claim 只列 ID——大幅压缩大 claim 图案件的请求 token，
+  // 降低供应商对大请求的过载/限流拒绝（unsupported_spans 与篡改判定依赖所引 claim 全文，不受影响）。
+  const cited = new Set(input.supportClaimIds);
+  const citedClaims = input.visibleClaims.filter((c) => cited.has(c.claim_id));
+  const otherIds = input.visibleClaims
+    .filter((c) => !cited.has(c.claim_id))
+    .map((c) => c.claim_id);
   return [
-    "可见事实：",
-    ...input.visibleClaims.map(
-      (claim) => `- ${claim.claim_id}: ${claim.proposition}`,
-    ),
+    "可见事实（候选声称引用的给全文，其余仅列 ID）：",
+    ...citedClaims.map((claim) => `- ${claim.claim_id}: ${claim.proposition}`),
+    ...(otherIds.length > 0 ? [`- 其余可见事实 ID（不展开）：${otherIds.join(", ")}`] : []),
     "",
     `候选发言：${input.speech}`,
     `候选声称的支持事实：${input.supportClaimIds.join(", ") || "（无）"}`,

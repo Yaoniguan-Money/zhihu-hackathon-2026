@@ -95,6 +95,10 @@ export default function InterrogationPage() {
   const openings = roleMessages.slice(0, 5);
   const inOpening = phase === "opening_statements";
 
+  // 开场剧场浏览位：-1 = 尚未初始化（恢复会话时定位到最新一条）。
+  const [viewingIndex, setViewingIndex] = useState(-1);
+  const [awaitingNext, setAwaitingNext] = useState(false);
+
   const { fetchAccessToken } = useConvexAuth();
   const spokenIdsRef = useRef<Set<string>>(new Set());
   const mountedRef = useRef(false);
@@ -124,16 +128,32 @@ export default function InterrogationPage() {
     }
   }, []);
 
-  const finishVoice = useCallback((messageId: string) => {
-    if (voiceQueueRef.current?.messageId !== messageId) return;
-    voiceQueueRef.current = null;
-    setVoiceActiveMessageId((cur) => (cur === messageId ? null : cur));
-    setSpeakingMessageId((cur) => (cur === messageId ? null : cur));
-    if (speakTimer.current) {
-      clearTimeout(speakTimer.current);
-      speakTimer.current = null;
+  /** 开场前进：下一条已到达则切换（触发自动朗读）；未到达则标记等待，到达后自动接上。 */
+  const advanceOpening = useCallback(() => {
+    const next = viewingIndex + 1;
+    if (next < openings.length) {
+      setViewingIndex(next);
+      setAwaitingNext(false);
+    } else if (next < 5) {
+      setAwaitingNext(true);
     }
-  }, []);
+  }, [viewingIndex, openings.length]);
+
+  const finishVoice = useCallback(
+    (messageId: string) => {
+      if (voiceQueueRef.current?.messageId !== messageId) return;
+      voiceQueueRef.current = null;
+      setVoiceActiveMessageId((cur) => (cur === messageId ? null : cur));
+      setSpeakingMessageId((cur) => (cur === messageId ? null : cur));
+      if (speakTimer.current) {
+        clearTimeout(speakTimer.current);
+        speakTimer.current = null;
+      }
+      // 开场阶段：本条播完自动切下一条（未到达则进入等待，到达后自动接上）。
+      if (inOpening) advanceOpening();
+    },
+    [inOpening, advanceOpening],
+  );
 
   // 自动朗读新到达的已批准角色发言：分段流水线（CONTRACTS 14 分段 transport）。
   // 服务端按句切分，客户端按段请求/播放——首段（第一句）约 2~4 秒即可出声，
@@ -246,25 +266,47 @@ export default function InterrogationPage() {
   // 卸载时停掉朗读。
   useEffect(() => stopVoice, [stopVoice]);
 
-  // 最新角色消息 → 打字机口型同步 + 自动朗读；超时兜底关闭。
-  // 恢复会话（挂载时已存在的消息）不自动朗读，只播新到达的。
+  // 开场浏览位初始化：消息首次到达时定位到最新一条（恢复会话不自动朗读）。
   useEffect(() => {
-    if (!latestRole) return;
-    const isNew = mountedRef.current && !spokenIdsRef.current.has(latestRole.message_id);
+    if (viewingIndex < 0 && openings.length > 0) {
+      setViewingIndex(openings.length - 1);
+    }
+  }, [openings.length, viewingIndex]);
+
+  // 等待中的下一条到达 → 自动前进（由 currentMessage 变化触发自动朗读）。
+  useEffect(() => {
+    if (awaitingNext && viewingIndex + 1 < openings.length) {
+      setViewingIndex(viewingIndex + 1);
+      setAwaitingNext(false);
+    }
+  }, [openings.length, awaitingNext, viewingIndex]);
+
+  // 当前应朗读/打字的消息：开场阶段 = 浏览位上的那条；审讯阶段 = 最新回应。
+  const currentMessage = inOpening
+    ? (openings[viewingIndex >= 0 ? viewingIndex : openings.length - 1] as
+        | Extract<MessagePublic, { speaker_type: "role" }>
+        | undefined)
+    : latestRole;
+
+  // 当前查看/到达消息 → 打字机口型同步 + 自动朗读；超时兜底关闭。
+  // 恢复会话（挂载时已存在的消息）不自动朗读，只播新到达/前进到的。
+  useEffect(() => {
+    if (!currentMessage) return;
+    const isNew = mountedRef.current && !spokenIdsRef.current.has(currentMessage.message_id);
     mountedRef.current = true;
     if (isNew) {
-      spokenIdsRef.current.add(latestRole.message_id);
-      void speakMessage(latestRole.message_id);
+      spokenIdsRef.current.add(currentMessage.message_id);
+      void speakMessage(currentMessage.message_id);
     }
     if (speakTimer.current) clearTimeout(speakTimer.current);
-    setSpeakingMessageId(latestRole.message_id);
+    setSpeakingMessageId(currentMessage.message_id);
     // 兜底：语音队列正常时由 finishVoice 清除；此处防 onended 丢失导致口型悬挂。
-    const cap = latestRole.exact_text.length * 200 + 15000;
+    const cap = currentMessage.exact_text.length * 200 + 15000;
     speakTimer.current = setTimeout(() => setSpeakingMessageId(null), cap);
     return () => {
       if (speakTimer.current) clearTimeout(speakTimer.current);
     };
-  }, [latestRole?.message_id, speakMessage]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [currentMessage?.message_id, speakMessage]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!casePublic || !sessionView) {
     return (
@@ -331,13 +373,13 @@ export default function InterrogationPage() {
                 key: `thinking-${thinking.requestId}`,
                 thinking: true,
               }
-            : latestRole && speakingMessageId === latestRole.message_id
+            : currentMessage && speakingMessageId === currentMessage.message_id
               ? {
-                  roleId: latestRole.speaker_id,
-                  name: roles.find((r) => r.role_id === latestRole.speaker_id)?.display_name ?? "",
-                  color: personaForRole(roles.find((r) => r.role_id === latestRole.speaker_id)!).outfit,
-                  text: latestRole.exact_text.slice(0, 60),
-                  key: latestRole.message_id,
+                  roleId: currentMessage.speaker_id,
+                  name: roles.find((r) => r.role_id === currentMessage.speaker_id)?.display_name ?? "",
+                  color: personaForRole(roles.find((r) => r.role_id === currentMessage.speaker_id)!).outfit,
+                  text: currentMessage.exact_text.slice(0, 60),
+                  key: currentMessage.message_id,
                 }
               : null
         }
@@ -491,11 +533,17 @@ export default function InterrogationPage() {
             className="absolute inset-0 z-30 flex items-end justify-center bg-night-deep/45 pb-24"
           >
             <OpeningTheater
-              openings={openings}
+              viewing={currentMessage && currentMessage.speaker_type === "role" ? currentMessage : null}
+              stepNumber={Math.max(viewingIndex, 0) + 1}
+              arrivedCount={openings.length}
               roles={roles}
               done={openings.length >= 5}
+              nextPending={awaitingNext}
               voiceActive={voiceActiveMessageId !== null}
-              onSkipVoice={stopVoice}
+              onSkip={() => {
+                stopVoice();
+                advanceOpening();
+              }}
             />
           </motion.div>
         )}
@@ -598,19 +646,28 @@ export default function InterrogationPage() {
 // ---------------------------------------------------------------------------
 
 function OpeningTheater({
-  openings,
+  viewing,
+  stepNumber,
+  arrivedCount,
   roles,
   done,
+  nextPending,
   voiceActive,
-  onSkipVoice,
+  onSkip,
 }: {
-  openings: Extract<MessagePublic, { speaker_type: "role" }>[];
+  viewing: Extract<MessagePublic, { speaker_type: "role" }> | null;
+  /** 当前正在看第几条（1-based，浏览位）。 */
+  stepNumber: number;
+  /** 已到达的开场陈述条数。 */
+  arrivedCount: number;
   roles: import("@/contracts/public").RolePublic[];
   done: boolean;
+  /** 本条已播完/跳过且下一条尚未到达。 */
+  nextPending: boolean;
   voiceActive: boolean;
-  onSkipVoice: () => void;
+  onSkip: () => void;
 }) {
-  const current = openings[openings.length - 1];
+  const current = viewing;
   const role = roles.find((r) => r.role_id === current?.speaker_id);
   const look = role ? personaForRole(role) : null;
 
@@ -626,11 +683,11 @@ function OpeningTheater({
         <motion.button
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          onClick={onSkipVoice}
-          title="停止本条语音，剩余部分不再朗读"
+          onClick={onSkip}
+          title="停止本条语音并进入下一条"
           className="absolute right-5 top-5 z-10 flex items-center gap-1.5 rounded-full border-2 border-ink bg-paper px-3 py-1 text-xs font-black text-ink hover:bg-amber/50"
         >
-          跳过朗读 <Icon name="next" size={12} />
+          跳过 <Icon name="next" size={12} />
         </motion.button>
       )}
       <div className="tape" style={{ top: -10, left: 40, transform: "rotate(-5deg)" }} />
@@ -639,11 +696,11 @@ function OpeningTheater({
           className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-ink text-lg text-paper"
           style={{ background: look?.outfit ?? "#888" }}
         >
-          {openings.length}
+          {stepNumber}
         </span>
         <div>
           <p className="text-[10px] font-black uppercase tracking-[0.25em] text-coral-deep">
-            Opening Statement {openings.length} / 5
+            Opening Statement {stepNumber} / 5
           </p>
           <h3 className="text-lg font-black text-ink">{role?.display_name ?? "…"}</h3>
         </div>
@@ -652,7 +709,7 @@ function OpeningTheater({
             <span
               key={r.role_id}
               className={`h-2.5 w-2.5 rounded-full border border-ink/60 ${
-                openings.length > i ? "bg-teal" : "bg-paper-dim"
+                arrivedCount > i ? "bg-teal" : "bg-paper-dim"
               }`}
             />
           ))}
@@ -667,13 +724,18 @@ function OpeningTheater({
             className="text-[15px] leading-relaxed text-ink/90"
           />
         ) : (
-          <p className="animate-pulse text-sm font-bold text-ink/50">第一位角色正在起身…</p>
+          <p className="animate-pulse text-sm font-bold text-ink/50">开场陈述正在生成…</p>
         )}
       </div>
-      {!done ? (
+      {nextPending ? (
+        <p className="mt-3 flex items-center gap-2 text-xs font-black text-coral-deep">
+          <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-coral" />
+          第 {stepNumber + 1} 条正在生成，完成后自动开始朗读…
+        </p>
+      ) : !done ? (
         <p className="mt-3 flex items-center gap-2 text-xs font-black text-ink/45">
           <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-coral" />
-          下一位角色正在准备（每条约需 30~120 秒，到达后自动朗读；可点「跳过朗读」停止本条语音）
+          五条开场正在并行生成，完成后自动呈堂；「跳过」可停本条语音并切下一条
         </p>
       ) : (
         <motion.p
