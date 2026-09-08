@@ -53,11 +53,46 @@ const STANCE_GESTURE: Record<RoleStance, "nod" | "shake" | "leanFwd" | "tilt" | 
   evade: "shrug",
 };
 
+/** 选中指示环：呼吸脉冲实环 + 缓转缺口弧（比静态圆环更有"正在交谈"的指向性）。 */
+function SelectionRing() {
+  const pulse = useRef<THREE.Mesh>(null);
+  const arc = useRef<THREE.Mesh>(null);
+  useFrame((state) => {
+    const t = state.clock.elapsedTime;
+    if (pulse.current) {
+      const m = pulse.current.material as THREE.MeshBasicMaterial;
+      m.opacity = 0.55 + Math.sin(t * 2.6) * 0.25;
+      pulse.current.scale.setScalar(1 + Math.sin(t * 2.6) * 0.03);
+    }
+    if (arc.current) arc.current.rotation.z = t * 0.9;
+  });
+  return (
+    <group position={[0, 0.02, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+      <mesh ref={pulse}>
+        <ringGeometry args={[0.46, 0.55, 40]} />
+        <meshBasicMaterial color="#ffb84d" transparent opacity={0.8} side={THREE.DoubleSide} />
+      </mesh>
+      <mesh ref={arc} position={[0, 0, 0.004]}>
+        <ringGeometry args={[0.6, 0.66, 40, 1, 0, Math.PI * 0.55]} />
+        <meshBasicMaterial color="#ffd98a" transparent opacity={0.5} side={THREE.DoubleSide} />
+      </mesh>
+    </group>
+  );
+}
+
 const EMOTION_TREMBLE: Record<RoleEmotion, number> = {
   calm: 0,
   uneasy: 0.0016,
   defensive: 0.0022,
   agitated: 0.005,
+};
+
+// 情绪姿态层：spine 后仰/前倾、头部低垂、呼吸速率——让情绪不止靠抖动表达
+const EMOTION_POSE: Record<RoleEmotion, { lean: number; headDrop: number; breathRate: number; breathAmp: number }> = {
+  calm: { lean: 0.02, headDrop: 0, breathRate: 2.1, breathAmp: 0.016 },
+  uneasy: { lean: -0.03, headDrop: 0.03, breathRate: 2.8, breathAmp: 0.022 },
+  defensive: { lean: -0.07, headDrop: 0.045, breathRate: 3.3, breathAmp: 0.028 },
+  agitated: { lean: 0.06, headDrop: -0.02, breathRate: 4.2, breathAmp: 0.036 },
 };
 
 export interface GlbCharacterProps {
@@ -112,6 +147,7 @@ export default function GlbCharacter({
     lookTimer: 3,
     gesture: null as null | "nod" | "shake" | "leanFwd" | "tilt" | "shrug" | "wave",
     gestureT: 0,
+    gestureIdle: false,
     lastSeed: gestureSeed,
     randomized: false,
     idleLeanZ: 0,
@@ -262,8 +298,10 @@ export default function GlbCharacter({
       if (idx !== undefined) m.morphTargetInfluences![idx] = lid;
     }
 
-    // —— 口型（morph）——
-    const talk = speaking ? 0.25 + Math.abs(Math.sin(t * 9.5)) * 0.75 : 0;
+    // —— 口型（morph）：短语化包络，避免机械匀速开合 ——
+    // gate 在 0.15~1 间以"说话-停顿"节奏起伏，模拟分句换气
+    const phraseGate = 0.575 + 0.425 * Math.sin(t * 2.3) * Math.sin(t * 3.7 + 1.3);
+    const talk = speaking ? (0.25 + Math.abs(Math.sin(t * 9.5)) * 0.75) * (0.35 + 0.65 * phraseGate) : 0;
     r.mouth += (talk - r.mouth) * lerp;
     for (const m of r.mouthTargets) {
       const idx = m.morphTargetDictionary?.["MouthOpen"];
@@ -315,9 +353,22 @@ export default function GlbCharacter({
     } else if (speaking && Math.random() < delta * 0.25) {
       r.gesture = Math.random() < 0.5 ? "tilt" : "nod";
       r.gestureT = 0;
+    } else if (!speaking && Math.random() < delta * 0.06) {
+      // 待机微动作：非说话角色偶发小点头/歪头（8~16s 一次的量级），消除静止感
+      r.gesture = Math.random() < 0.6 ? "tilt" : "nod";
+      r.gestureT = 0;
+      r.gestureIdle = true;
     }
+    const idleGestureScale = r.gestureIdle ? 0.4 : 1;
+    if (r.gesture && r.gestureT >= 1.2) r.gestureIdle = false;
+    gNod *= idleGestureScale;
+    gYaw *= idleGestureScale;
+    gTilt *= idleGestureScale;
+    gLean *= idleGestureScale;
+    gArm *= idleGestureScale;
 
-    const breath = Math.sin(t * (speaking ? 4.6 : 2.1)) * (speaking ? 0.03 : 0.016);
+    const ePose = EMOTION_POSE[emotion];
+    const breath = Math.sin(t * (speaking ? ePose.breathRate + 2.2 : ePose.breathRate)) * (speaking ? 0.03 : ePose.breathAmp);
 
     // 动画 = 静息四元数 × 附加小旋转（绝不覆写静息姿态）
     const _e = new THREE.Euler();
@@ -331,10 +382,10 @@ export default function GlbCharacter({
       b.quaternion.copy(q0).multiply(_q);
     };
 
-    pose("Head", Math.sin(t * (speaking ? 3.1 : 1.6)) * (speaking ? 0.05 : 0.02) + gNod, r.lookYaw + gYaw, gTilt + r.idleHeadZ);
-    pose("Neck", 0, r.lookYaw * 0.4, r.idleHeadZ * 0.4);
-    pose("Chest", 0.05 + r.idleLeanX + breath * 0.6 + gLean * 0.5, 0, Math.sin(t * 1.15) * 0.02 + r.idleLeanZ);
-    pose("Spine_01", gLean + 0.02, 0, Math.sin(t * 1.15 + 0.8) * 0.015 + r.idleLeanZ * 0.5);
+    pose("Head", Math.sin(t * (speaking ? 3.1 : 1.6)) * (speaking ? 0.05 : 0.02) + gNod + ePose.headDrop, r.lookYaw + gYaw, gTilt + r.idleHeadZ);
+    pose("Neck", ePose.headDrop * 0.5, r.lookYaw * 0.4, r.idleHeadZ * 0.4);
+    pose("Chest", 0.05 + r.idleLeanX + breath * 0.6 + gLean * 0.5 + ePose.lean * 0.6, 0, Math.sin(t * 1.15) * 0.02 + r.idleLeanZ);
+    pose("Spine_01", gLean + 0.02 + ePose.lean * 0.4, 0, Math.sin(t * 1.15 + 0.8) * 0.015 + r.idleLeanZ * 0.5);
     pose("UpperArm_R", -gArm * 0.8, 0, -gArm * 0.25);
     pose("ForeArm_R", -gArm * 1.1 - (speaking ? Math.sin(t * 5.2) * 0.08 : 0) - 0.08, 0, 0);
     pose("Clavicle_L", 0, 0, gArm * 0.1);
@@ -383,10 +434,7 @@ export default function GlbCharacter({
       }
     >
       {selected && (
-        <mesh position={[0, 0.02, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-          <ringGeometry args={[0.46, 0.55, 40]} />
-          <meshBasicMaterial color="#ffb84d" transparent opacity={0.85} side={THREE.DoubleSide} />
-        </mesh>
+        <SelectionRing />
       )}
       {withStool && (
         <group position={[0, 0, -0.06]}>
