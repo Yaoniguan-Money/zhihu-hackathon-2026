@@ -469,7 +469,7 @@ export default function InterrogationPage() {
 
       {/* 底部输入区 */}
       {phase === "investigation" && (
-        <div className="absolute bottom-4 left-4 right-4 z-10">
+        <div className="absolute bottom-4 left-4 right-4 z-10 pb-[env(safe-area-inset-bottom)]">
           <div className="mx-auto max-w-3xl rounded-2xl border-2 border-paper/15 bg-night-deep/85 p-3 backdrop-blur-md">
             {/* 角色选择 + 问法 */}
             <div className="mb-2.5 flex flex-wrap items-center gap-1.5" data-tour="int-role">
