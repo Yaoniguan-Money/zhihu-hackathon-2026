@@ -3,6 +3,7 @@
 import { useMemo, Suspense } from "react";
 import { Canvas } from "@react-three/fiber";
 import { ContactShadows, Environment, Lightformer, Preload } from "@react-three/drei";
+import * as THREE from "three";
 import GlbCharacter from "./characters/GlbCharacter";
 import InterrogationRoom from "./scene/InterrogationRoom";
 import CameraRig from "./CameraRig";
@@ -76,24 +77,28 @@ export default function InterrogationStage({
       dpr={[1, 1.75]}
       camera={{ position: [0, 7.8, 10.8], fov: 42, near: 0.1, far: 60 }}
       gl={{ antialias: true }}
+      onCreated={({ gl }) => {
+        gl.toneMapping = THREE.ACESFilmicToneMapping;
+        gl.toneMappingExposure = 1.12;
+      }}
       className={className}
     >
       <color attach="background" args={["#171430"]} />
       <fog attach="fog" args={["#171430", 11, 20]} />
 
-      {/* 基础夜色光 */}
-      <ambientLight intensity={0.5} color="#8f8ac2" />
-      <hemisphereLight args={["#5d5a8c", "#2a2038", 0.55]} />
-      {/* 面部补光：暖色正面软光，保证表情可读 */}
-      <directionalLight position={[2.5, 4.5, 6.5]} intensity={0.9} color="#ffe7c4" />
-      {/* 窗侧冷色轮廓光 */}
-      <directionalLight position={[-4, 3, -5]} intensity={0.35} color="#7f9bff" />
+      {/* 基础夜色光：低强度紫灰底，让位给实用灯具的暖光池 */}
+      <ambientLight intensity={0.38} color="#9a92c8" />
+      <hemisphereLight args={["#565383", "#3a2b26", 0.5]} />
+      {/* Key 补光：暖色正面软光（吊灯为主光时的面部填充），保证表情可读 */}
+      <directionalLight position={[2.5, 4.5, 6.5]} intensity={0.85} color="#ffe7c4" />
+      {/* Rim：窗侧冷色轮廓光，从后侧勾角色肩线 */}
+      <directionalLight position={[-4, 5, -6.5]} intensity={0.55} color="#7f9bff" />
 
-      {/* 程序化环境反射（无网络依赖） */}
+      {/* 程序化环境反射（无网络依赖）：暖顶 + 冷左 + 暖右，给金属与头发高光 */}
       <Environment resolution={64} frames={1} background={false}>
-        <Lightformer intensity={0.7} position={[0, 5, 0]} scale={[10, 10, 1]} rotation-x={Math.PI / 2} color="#fff4e0" />
-        <Lightformer intensity={0.35} position={[-5, 1, -1]} scale={[6, 3, 1]} rotation-y={Math.PI / 2} color="#8890ff" />
-        <Lightformer intensity={0.3} position={[5, 2, 1]} scale={[6, 3, 1]} rotation-y={-Math.PI / 2} color="#ffd9a0" />
+        <Lightformer intensity={1.1} position={[0, 5, 0]} scale={[10, 10, 1]} rotation-x={Math.PI / 2} color="#fff4e0" />
+        <Lightformer intensity={0.45} position={[-5, 1, -1]} scale={[6, 3, 1]} rotation-y={Math.PI / 2} color="#8890ff" />
+        <Lightformer intensity={0.4} position={[5, 2, 1]} scale={[6, 3, 1]} rotation-y={-Math.PI / 2} color="#ffd9a0" />
       </Environment>
 
       <InterrogationRoom />
@@ -119,7 +124,7 @@ export default function InterrogationStage({
         })}
       </Suspense>
 
-      <ContactShadows position={[0, 0.01, 0]} opacity={0.45} scale={12} blur={2.4} far={2.4} color="#120f1e" />
+      <ContactShadows position={[0, 0.01, 0]} opacity={0.52} scale={12} blur={2.2} far={2.6} color="#0f0c1a" />
 
       {bubble && bubbleSeat && (
         <SpeechBubble
