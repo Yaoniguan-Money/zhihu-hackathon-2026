@@ -362,7 +362,13 @@ export default function InterrogationPage() {
             onClick: () => setSelectedRoleId(role.role_id),
           };
         })}
-        focusRoleId={selectedRoleId ?? thinking?.roleId ?? null}
+        focusRoleId={
+          selectedRoleId ??
+          thinking?.roleId ??
+          (speakingMessageId !== null && currentMessage
+            ? currentMessage.speaker_id
+            : null)
+        }
         bubble={
           thinking
             ? {

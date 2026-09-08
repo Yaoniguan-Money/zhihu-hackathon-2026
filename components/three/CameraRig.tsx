@@ -16,8 +16,8 @@ interface CameraRigProps {
   autoRotate?: boolean;
 }
 
-const DEFAULT_POS = new THREE.Vector3(0, 3.5, 7.0);
-const DEFAULT_TARGET = new THREE.Vector3(0, 1.0, 0);
+const DEFAULT_POS = new THREE.Vector3(0, 5.1, 8.8);
+const DEFAULT_TARGET = new THREE.Vector3(0, 0.75, -0.1);
 
 export default function CameraRig({ focus, intro = true, autoRotate = false }: CameraRigProps) {
   const controlsRef = useRef<OrbitControlsImpl>(null);
@@ -45,16 +45,17 @@ export default function CameraRig({ focus, intro = true, autoRotate = false }: C
 
   useEffect(() => {
     const focusTarget = focus
-      ? new THREE.Vector3(focus[0] * 0.92, 1.3, focus[2] * 0.92)
+      ? new THREE.Vector3(focus[0] * 0.38, 1.22, focus[2] * 0.38)
       : DEFAULT_TARGET.clone();
     targetLook.current.copy(focusTarget);
     if (focus) {
       const dir = new THREE.Vector3(focus[0], 0, focus[2]).normalize();
-      // 站到角色外侧斜上方，看向桌心
+      // 相机放到说话者对面桌沿的斜上方：正视其面部，桌沿作前景，邻座退到画框边缘。
+      const perp = new THREE.Vector3(-dir.z, 0, dir.x);
       targetPos.current.set(
-        focus[0] * 0.55 - dir.z * 2.5,
-        2.1,
-        focus[2] * 0.55 + dir.x * 2.5,
+        -focus[0] * 1.35 + perp.x * 1.2,
+        2.75,
+        -focus[2] * 1.35 + perp.z * 1.2,
       );
     } else {
       targetPos.current.copy(DEFAULT_POS);
@@ -87,10 +88,10 @@ export default function CameraRig({ focus, intro = true, autoRotate = false }: C
         userGrabbed.current = true;
       }}
       onEnd={() => {
-        // 用户松手后延迟恢复程序运镜权限
+        // 用户松手后延迟恢复程序运镜权限，给观察留出时间
         setTimeout(() => {
           userGrabbed.current = false;
-        }, 400);
+        }, 2500);
       }}
     />
   );
