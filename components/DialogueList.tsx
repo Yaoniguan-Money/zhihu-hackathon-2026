@@ -80,7 +80,10 @@ export default function DialogueList({ messages, roles, speakingMessageId, onSpe
               animate={{ opacity: 1, x: 0 }}
               className="max-w-[92%]"
             >
-              <div className="rounded-2xl rounded-bl-sm border-2 border-ink bg-paper px-3.5 py-2.5 text-sm leading-relaxed text-ink shadow-[var(--shadow-sticker-sm)]">
+              <div
+                className="rounded-2xl rounded-bl-sm border-2 border-ink bg-paper px-3.5 py-2.5 text-sm leading-relaxed text-ink shadow-[var(--shadow-sticker-sm)]"
+                style={{ borderLeft: `6px solid ${look?.outfit ?? "#999"}` }}
+              >
                 <div className="mb-1 flex items-center gap-1.5">
                   <span
                     className="h-2.5 w-2.5 rounded-full border border-ink/70"
