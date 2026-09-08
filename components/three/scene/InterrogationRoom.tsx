@@ -182,6 +182,85 @@ export default function InterrogationRoom() {
             <meshStandardMaterial color="#2c2830" roughness={0.4} />
           </mesh>
         </group>
+
+        {/* 档案袋（牛皮纸 + 绕绳扣） */}
+        <group position={[0.02, 0, 0.02]} rotation={[0, -0.35, 0]}>
+          <mesh position={[0, 0.815, -0.1]} castShadow>
+            <boxGeometry args={[0.4, 0.02, 0.3]} />
+            <meshStandardMaterial color="#c9a86a" roughness={0.85} />
+          </mesh>
+          <mesh position={[0, 0.825, -0.21]} rotation={[0, 0, 0]}>
+            <boxGeometry args={[0.4, 0.02, 0.08]} />
+            <meshStandardMaterial color="#b8944f" roughness={0.85} />
+          </mesh>
+          <mesh position={[0.12, 0.832, -0.1]}>
+            <torusGeometry args={[0.03, 0.008, 6, 14]} />
+            <meshStandardMaterial color="#8a6838" roughness={0.5} />
+          </mesh>
+          {/* 袋口露出的纸页 */}
+          <mesh position={[-0.05, 0.832, -0.19]} rotation={[-Math.PI / 2, 0, 0.15]}>
+            <planeGeometry args={[0.24, 0.16]} />
+            <meshStandardMaterial color="#efe6d0" roughness={0.9} />
+          </mesh>
+        </group>
+
+        {/* 钢笔（笔身+笔尖+笔夹） */}
+        <group position={[-0.62, 0, 0.16]} rotation={[0, 0.5, 0]}>
+          <mesh position={[0, 0.803, 0]} rotation={[0, 0, Math.PI / 2]} castShadow>
+            <cylinderGeometry args={[0.012, 0.012, 0.22, 10]} />
+            <meshStandardMaterial color="#26222e" roughness={0.3} />
+          </mesh>
+          <mesh position={[0.13, 0.803, 0]} rotation={[0, 0, Math.PI / 2]}>
+            <coneGeometry args={[0.012, 0.05, 10]} />
+            <meshStandardMaterial color={BRASS} roughness={0.3} metalness={0.7} />
+          </mesh>
+          <mesh position={[0.02, 0.812, 0]} rotation={[0, 0, Math.PI / 2]}>
+            <cylinderGeometry args={[0.013, 0.013, 0.05, 8]} />
+            <meshStandardMaterial color={BRASS} roughness={0.35} metalness={0.6} />
+          </mesh>
+        </group>
+
+        {/* 墨水瓶（玻璃瓶+墨水面+瓶盖垫） */}
+        <group position={[-0.78, 0, -0.2]}>
+          <mesh position={[0, 0.83, 0]} castShadow>
+            <cylinderGeometry args={[0.05, 0.058, 0.06, 16]} />
+            <meshStandardMaterial color="#2a2e3e" roughness={0.15} metalness={0.1} />
+          </mesh>
+          <mesh position={[0, 0.864, 0]}>
+            <cylinderGeometry args={[0.052, 0.052, 0.006, 16]} />
+            <meshStandardMaterial color="#151827" roughness={0.25} />
+          </mesh>
+          <mesh position={[0, 0.838, 0]}>
+            <torusGeometry args={[0.058, 0.004, 6, 18]} />
+            <meshStandardMaterial color={BRASS} roughness={0.4} metalness={0.6} />
+          </mesh>
+        </group>
+
+        {/* 怀表（黄铜壳+表链，放在桌沿） */}
+        <group position={[0.85, 0, 0.45]} rotation={[0, -0.5, 0]}>
+          <mesh position={[0, 0.8, 0]} rotation={[-Math.PI / 2, 0, 0]} castShadow>
+            <cylinderGeometry args={[0.075, 0.075, 0.02, 24]} />
+            <meshStandardMaterial color={BRASS} roughness={0.3} metalness={0.75} />
+          </mesh>
+          <mesh position={[0, 0.812, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+            <cylinderGeometry args={[0.06, 0.06, 0.004, 24]} />
+            <meshStandardMaterial color="#efe6d0" roughness={0.4} />
+          </mesh>
+          {/* 表针 */}
+          <mesh position={[0, 0.815, 0.02]} rotation={[-Math.PI / 2, 0, 0.7]}>
+            <planeGeometry args={[0.006, 0.05]} />
+            <meshStandardMaterial color="#26222e" roughness={0.5} />
+          </mesh>
+          <mesh position={[0.015, 0.815, -0.01]} rotation={[-Math.PI / 2, 0, -1.1]}>
+            <planeGeometry args={[0.006, 0.04]} />
+            <meshStandardMaterial color="#26222e" roughness={0.5} />
+          </mesh>
+          {/* 表链拖到桌沿 */}
+          <mesh position={[0.1, 0.802, 0.1]} rotation={[0, 0.4, Math.PI / 2]}>
+            <torusGeometry args={[0.05, 0.008, 6, 20, Math.PI * 1.3]} />
+            <meshStandardMaterial color={BRASS} roughness={0.35} metalness={0.7} />
+          </mesh>
+        </group>
       </group>
 
       {/* 吊灯（带微风摆动） */}
