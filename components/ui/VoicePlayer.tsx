@@ -76,6 +76,7 @@ export default function VoicePlayer({ messageId, sessionId, onError }: VoicePlay
       onClick={state === "playing" ? stop : play}
       disabled={state === "loading"}
       title="播放这条发言的语音"
+      aria-label="播放这条发言的语音"
       className={`flex h-7 w-7 items-center justify-center rounded-full border-2 border-ink transition-colors ${
         state === "playing"
           ? "bg-coral text-paper"

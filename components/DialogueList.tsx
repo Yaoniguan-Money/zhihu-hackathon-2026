@@ -107,6 +107,7 @@ export default function DialogueList({ messages, roles, speakingMessageId, onSpe
                           whileTap={{ scale: 0.85 }}
                           onClick={() => saveRecording(m.message_id)}
                           title="把这条发言存为录音证据"
+                          aria-label="把这条发言存为录音证据"
                           className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-ink bg-teal text-ink hover:brightness-105"
                         >
                           <Icon name="quote" size={13} filled />

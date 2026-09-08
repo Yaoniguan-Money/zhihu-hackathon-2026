@@ -116,6 +116,7 @@ export default function RecordButton({ onTranscript, onError, disabled }: Record
         onClick={recording ? stop : start}
         disabled={disabled}
         title={recording ? "停止并识别" : "按住说出你的问题（识别后需确认发送）"}
+        aria-label={recording ? "停止录音并识别" : "按住录音提问"}
         className={`flex h-11 w-11 items-center justify-center rounded-full border-2 border-ink shadow-[var(--shadow-sticker-sm)] transition-colors disabled:opacity-40 ${
           recording ? "bg-coral text-paper" : "bg-teal text-ink"
         }`}
