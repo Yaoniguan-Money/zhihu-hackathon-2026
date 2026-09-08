@@ -16,6 +16,7 @@ import { Icon } from "@/components/ui/Icons";
 import { personaForRole } from "@/components/three/characters/personas";
 import { EMOTION_META } from "@/lib/distortions";
 import { playSfx } from "@/lib/sfx";
+import { attachVoiceElement, resetVoiceAmp } from "@/lib/voice-amp";
 import { newClientActionId } from "@/lib/convex-client";
 import { toPublicError } from "@/lib/convex-errors";
 import type { MessagePublic, QuestionMode, RoleEmotion } from "@/contracts/public";
@@ -123,6 +124,7 @@ export default function InterrogationPage() {
     }
     const messageId = q?.messageId;
     voiceQueueRef.current = null;
+    resetVoiceAmp();
     setVoiceActiveMessageId(null);
     if (messageId) {
       setSpeakingMessageId((cur) => (cur === messageId ? null : cur));
@@ -144,6 +146,7 @@ export default function InterrogationPage() {
     (messageId: string) => {
       if (voiceQueueRef.current?.messageId !== messageId) return;
       voiceQueueRef.current = null;
+      resetVoiceAmp();
       setVoiceActiveMessageId((cur) => (cur === messageId ? null : cur));
       setSpeakingMessageId((cur) => (cur === messageId ? null : cur));
       if (speakTimer.current) {
@@ -190,6 +193,7 @@ export default function InterrogationPage() {
         if (!url) return; // 在飞段完成后会再次触发
         const audio = new Audio(url);
         state.current = audio;
+        attachVoiceElement(audio); // 实时振幅 → 角色口型
         audio.onended = () => {
           URL.revokeObjectURL(url);
           state.current = null;

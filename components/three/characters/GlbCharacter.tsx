@@ -7,6 +7,7 @@ import { SkeletonUtils } from "three-stdlib";
 import * as THREE from "three";
 import type { RoleEmotion, RolePublic, RoleStance } from "@/contracts/public";
 import { personaForRole, PERSONA_PRESETS, type PersonaLook } from "./personas";
+import { currentVoiceAmp } from "@/lib/voice-amp";
 
 /**
  * Blender GLB 角色渲染器（art/blender 交付资产）。
@@ -298,10 +299,12 @@ export default function GlbCharacter({
       if (idx !== undefined) m.morphTargetInfluences![idx] = lid;
     }
 
-    // —— 口型（morph）：短语化包络，避免机械匀速开合 ——
-    // gate 在 0.15~1 间以"说话-停顿"节奏起伏，模拟分句换气
+    // —— 口型（morph）：优先用 TTS 实时振幅，缺探针时回退短语化包络 ——
+    const amp = currentVoiceAmp();
+    const ampGate = amp > 0.006 ? Math.min(1, amp * 7) : 0;
     const phraseGate = 0.575 + 0.425 * Math.sin(t * 2.3) * Math.sin(t * 3.7 + 1.3);
-    const talk = speaking ? (0.25 + Math.abs(Math.sin(t * 9.5)) * 0.75) * (0.35 + 0.65 * phraseGate) : 0;
+    const talkBase = speaking ? (0.25 + Math.abs(Math.sin(t * 9.5)) * 0.75) * (0.35 + 0.65 * phraseGate) : 0;
+    const talk = speaking ? Math.max(talkBase * 0.55, ampGate) : 0;
     r.mouth += (talk - r.mouth) * lerp;
     for (const m of r.mouthTargets) {
       const idx = m.morphTargetDictionary?.["MouthOpen"];
