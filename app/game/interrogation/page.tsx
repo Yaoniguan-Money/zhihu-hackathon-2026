@@ -48,6 +48,7 @@ export default function InterrogationPage() {
   const {
     casePublic,
     sessionView,
+    evidences,
     messages,
     thinking,
     busyTurn,
@@ -407,6 +408,10 @@ export default function InterrogationPage() {
           <Icon name="scale" size={16} className="text-amber" />
           <span className="text-xs font-black text-paper">
             {casePublic.title.slice(0, 18)}…
+          </span>
+          <span className="ml-1 flex items-center gap-1 rounded-full bg-teal/15 px-2 py-0.5 text-[10px] font-black text-teal">
+            <Icon name="sparkle" size={11} />
+            已解锁证据 {evidences.length}
           </span>
         </div>
         <AnimatePresence>
