@@ -15,6 +15,7 @@ import GameTour from "@/components/onboarding/GameTour";
 import { Icon } from "@/components/ui/Icons";
 import { personaForRole } from "@/components/three/characters/personas";
 import { EMOTION_META } from "@/lib/distortions";
+import { playSfx } from "@/lib/sfx";
 import { newClientActionId } from "@/lib/convex-client";
 import { toPublicError } from "@/lib/convex-errors";
 import type { MessagePublic, QuestionMode, RoleEmotion } from "@/contracts/public";
@@ -296,6 +297,7 @@ export default function InterrogationPage() {
     mountedRef.current = true;
     if (isNew) {
       spokenIdsRef.current.add(currentMessage.message_id);
+      if (currentMessage.speaker_type === "role") playSfx("receive");
       void speakMessage(currentMessage.message_id);
     }
     if (speakTimer.current) clearTimeout(speakTimer.current);
@@ -336,6 +338,7 @@ export default function InterrogationPage() {
   const send = () => {
     const text = input.trim();
     if (!text || !selectedRoleId || busyTurn) return;
+    playSfx("send");
     ask(selectedRoleId, mode, text, "keyboard");
     setInput("");
   };
@@ -359,7 +362,10 @@ export default function InterrogationPage() {
             pressure: EMOTION_PRESSURE[emotionOf(role.role_id)],
             gestureSeed: latest?.message_id,
             selected: selectedRoleId === role.role_id,
-            onClick: () => setSelectedRoleId(role.role_id),
+            onClick: () => {
+              playSfx("select");
+              setSelectedRoleId(role.role_id);
+            },
           };
         })}
         focusRoleId={

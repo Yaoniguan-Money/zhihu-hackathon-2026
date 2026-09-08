@@ -14,6 +14,7 @@ import Mascot from "@/components/ui/Mascot";
 import { Icon } from "@/components/ui/Icons";
 import type { CaseCompilationStatusPublic } from "@/contracts/public";
 import GameTour, { requestTour } from "@/components/onboarding/GameTour";
+import { playSfx } from "@/lib/sfx";
 
 const InterrogationStage = dynamic(() => import("@/components/three/InterrogationStage"), {
   ssr: false,
@@ -289,7 +290,10 @@ export default function Home() {
               transition={{ delay: i * 0.08 }}
               whileHover={{ scale: 1.02, rotate: -0.4 }}
               whileTap={{ scale: 0.97 }}
-              onClick={() => start(c.case_id)}
+              onClick={() => {
+                playSfx("select");
+                start(c.case_id);
+              }}
               className="card group relative overflow-hidden p-4 text-left"
             >
               <div className="tape" style={{ top: -8, left: 18, transform: "rotate(-4deg)" }} />

@@ -6,6 +6,10 @@ import { usePathname, useRouter } from "next/navigation";
 import { useGame } from "@/context/GameContext";
 import { Icon } from "@/components/ui/Icons";
 import { requestTour, type TourId } from "@/components/onboarding/GameTour";
+import SoundToggle from "@/components/ui/SoundToggle";
+import { playSfx } from "@/lib/sfx";
+
+const go = () => playSfx("click");
 
 const PHASE_LABEL: Record<string, string> = {
   briefing: "案情简报",
@@ -60,12 +64,14 @@ export default function GameLayout({ children }: { children: ReactNode }) {
         <div className="ml-auto flex items-center gap-1.5">
           <Link
             href="/game/interrogation"
+            onClick={go}
             className="rounded-full px-3 py-1.5 text-xs font-bold text-paper/70 transition-colors hover:bg-paper/10 hover:text-paper"
           >
             审讯桌
           </Link>
           <Link
             href="/game/evidence"
+            onClick={go}
             className="rounded-full px-3 py-1.5 text-xs font-bold text-paper/70 transition-colors hover:bg-paper/10 hover:text-paper"
           >
             证据板
@@ -73,12 +79,14 @@ export default function GameLayout({ children }: { children: ReactNode }) {
           {allowedActions.has("accuse") && (
             <Link
               href="/game/accusation"
+              onClick={go}
               className="btn btn-coral !px-3.5 !py-1 text-xs"
             >
               <Icon name="bolt" size={13} filled />
               最终指控
             </Link>
           )}
+          <SoundToggle />
           {tourId && (
             <button
               onClick={() => requestTour(tourId)}
@@ -89,7 +97,10 @@ export default function GameLayout({ children }: { children: ReactNode }) {
             </button>
           )}
           <button
-            onClick={backToLobby}
+            onClick={() => {
+              playSfx("click");
+              backToLobby();
+            }}
             title="回到案件大厅"
             className="ml-1 flex h-7 w-7 items-center justify-center rounded-full border-2 border-paper/25 text-paper/70 transition-colors hover:border-coral hover:text-coral"
           >
