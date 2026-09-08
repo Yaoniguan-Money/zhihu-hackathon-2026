@@ -420,6 +420,164 @@ export default function InterrogationRoom() {
 
       {/* 灯下漂浮尘埃 */}
       <Sparkles count={46} scale={[3.4, 2.6, 3.4]} position={[0, 1.7, 0]} size={2.4} speed={0.25} color="#ffd98a" opacity={0.5} />
+
+      {/* 护墙板：环墙木条纹 + 黄铜腰线（打破大平面，给墙面节奏） */}
+      {Array.from({ length: 28 }, (_, i) => i * (Math.PI * 2 / 28)).map((a, i) => (
+        <group key={i} position={[Math.sin(a) * 9.32, 1.35, Math.cos(a) * 9.32]} rotation={[0, a, 0]}>
+          <mesh>
+            <boxGeometry args={[0.16, 1.7, 0.06]} />
+            <meshStandardMaterial color={i % 2 ? "#463d5c" : "#3f3754"} roughness={0.85} />
+          </mesh>
+        </group>
+      ))}
+      <mesh position={[0, 2.28, 0]}>
+        <cylinderGeometry args={[9.4, 9.4, 0.05, 48, 1, true]} />
+        <meshStandardMaterial color={BRASS} side={THREE.BackSide} roughness={0.4} metalness={0.65} />
+      </mesh>
+
+      {/* 挂画 ×2：剪影肖像 + 案卷编号（墙面中层兴趣点） */}
+      {([
+        { p: [-7.0, 2.3, -4.6] as [number, number, number], rot: 0.95, tone: "#8a8db4", label: "No.07" },
+        { p: [6.8, 2.45, -5.2] as [number, number, number], rot: -0.9, tone: "#b48a8a", label: "No.12" },
+      ]).map(({ p, rot, tone, label }, i) => (
+        <group key={i} position={p} rotation={[0, rot, 0]}>
+          <mesh position={[0, 0, -0.02]}>
+            <boxGeometry args={[0.94, 1.24, 0.05]} />
+            <meshStandardMaterial color={WOOD_DARK} roughness={0.65} />
+          </mesh>
+          <mesh position={[0, 0, 0.012]}>
+            <planeGeometry args={[0.82, 1.1]} />
+            <meshStandardMaterial color="#d9d2be" roughness={0.9} />
+          </mesh>
+          {/* 剪影头像 */}
+          <mesh position={[0, 0.16, 0.02]}>
+            <circleGeometry args={[0.17, 20]} />
+            <meshStandardMaterial color={tone} roughness={0.9} />
+          </mesh>
+          <mesh position={[0, -0.22, 0.02]}>
+            <circleGeometry args={[0.3, 20, Math.PI, Math.PI]} />
+            <meshStandardMaterial color={tone} roughness={0.9} />
+          </mesh>
+          <mesh position={[0, -0.48, 0.02]}>
+            <planeGeometry args={[0.4, 0.05]} />
+            <meshStandardMaterial color="#8f8776" roughness={0.9} />
+          </mesh>
+          <mesh position={[0.28, 0.47, 0.02]}>
+            <circleGeometry args={[0.018, 8]} />
+            <meshBasicMaterial color="#c9524a" />
+          </mesh>
+        </group>
+      ))}
+
+      {/* 茶几 + 茶壶 + 茶杯（back-left 中景，让空墙脚下有生活气） */}
+      <group position={[-3.6, 0, -3.2]}>
+        <mesh position={[0, 0.42, 0]} castShadow receiveShadow>
+          <cylinderGeometry args={[0.5, 0.44, 0.05, 20]} />
+          <meshStandardMaterial color="#7c5230" map={tableTex} roughness={0.6} />
+        </mesh>
+        <mesh position={[0, 0.2, 0]}>
+          <cylinderGeometry args={[0.07, 0.1, 0.4, 10]} />
+          <meshStandardMaterial color={WOOD_DARK} roughness={0.7} />
+        </mesh>
+        <mesh position={[0, 0.03, 0]}>
+          <cylinderGeometry args={[0.24, 0.28, 0.06, 14]} />
+          <meshStandardMaterial color={WOOD_DARK} roughness={0.7} />
+        </mesh>
+        {/* 茶壶 */}
+        <group position={[-0.12, 0.56, 0.05]}>
+          <mesh castShadow>
+            <sphereGeometry args={[0.11, 16, 12]} />
+            <meshStandardMaterial color="#e6dfcf" roughness={0.4} />
+          </mesh>
+          <mesh position={[0, 0.1, 0]}>
+            <cylinderGeometry args={[0.035, 0.05, 0.05, 10]} />
+            <meshStandardMaterial color="#e6dfcf" roughness={0.4} />
+          </mesh>
+          <mesh position={[0.12, 0.02, 0]} rotation={[0, 0, -0.9]}>
+            <cylinderGeometry args={[0.012, 0.016, 0.1, 8]} />
+            <meshStandardMaterial color="#e6dfcf" roughness={0.4} />
+          </mesh>
+          <mesh position={[-0.12, 0.02, 0]} rotation={[0, 0, 0.4]}>
+            <torusGeometry args={[0.045, 0.01, 8, 14, Math.PI * 1.2]} />
+            <meshStandardMaterial color="#c99a4a" roughness={0.4} metalness={0.5} />
+          </mesh>
+        </group>
+        {/* 茶杯 ×2 */}
+        {[[0.18, 0.62, -0.12], [0.26, 0.6, 0.14]].map(([x, z], ci) => (
+          <group key={ci} position={[x, 0.47, z]}>
+            <mesh castShadow>
+              <cylinderGeometry args={[0.045, 0.036, 0.06, 12]} />
+              <meshStandardMaterial color="#efe8d8" roughness={0.45} />
+            </mesh>
+            <mesh position={[0.05, 0.005, 0]} rotation={[Math.PI / 2, 0, 0]}>
+              <torusGeometry args={[0.024, 0.008, 6, 12, Math.PI]} />
+              <meshStandardMaterial color="#efe8d8" roughness={0.45} />
+            </mesh>
+          </group>
+        ))}
+      </group>
+
+      {/* 落地灯（右前暗角）：暖光池 + 灯罩 */}
+      <group position={[3.4, 0, 1.6]}>
+        <mesh position={[0, 0.03, 0]}>
+          <cylinderGeometry args={[0.22, 0.26, 0.06, 14]} />
+          <meshStandardMaterial color={BRASS} roughness={0.4} metalness={0.6} />
+        </mesh>
+        <mesh position={[0, 0.75, 0]}>
+          <cylinderGeometry args={[0.025, 0.025, 1.5, 8]} />
+          <meshStandardMaterial color={BRASS} roughness={0.4} metalness={0.6} />
+        </mesh>
+        <mesh position={[0, 1.62, 0]} castShadow>
+          <cylinderGeometry args={[0.16, 0.26, 0.3, 20, 1, true]} />
+          <meshStandardMaterial color="#c46a4a" side={THREE.DoubleSide} roughness={0.6} />
+        </mesh>
+        <mesh position={[0, 1.5, 0]}>
+          <sphereGeometry args={[0.05, 10, 10]} />
+          <meshBasicMaterial color="#ffedbb" />
+        </mesh>
+        <pointLight position={[0, 1.5, 0]} intensity={3.2} distance={4.2} color="#ffc985" />
+      </group>
+
+      {/* 档案堆（软木板墙脚下）：三摞卷宗 + 散页 */}
+      <group position={[4.5, 0, -4.4]} rotation={[0, -0.5, 0]}>
+        {[
+          [0, 0, 0, 0.1],
+          [0.3, 0, 0.16, -0.14],
+          [-0.24, 0, 0.2, 0.22],
+        ].map(([x, , z, r], si) => (
+          <group key={si} position={[x, 0, z]} rotation={[0, r, 0]}>
+            {[0, 1, 2].map((k) => (
+              <mesh key={k} position={[0, 0.035 + k * 0.05, 0]} rotation={[0, k * 0.12, 0]} castShadow>
+                <boxGeometry args={[0.34, 0.045, 0.24]} />
+                <meshStandardMaterial color={k === 1 ? "#d8cfb8" : "#c4b896"} roughness={0.85} />
+              </mesh>
+            ))}
+            <mesh position={[0, 0.14, 0]} rotation={[-Math.PI / 2, 0, 0.3]}>
+              <planeGeometry args={[0.2, 0.14]} />
+              <meshStandardMaterial color="#efe6d0" roughness={0.9} />
+            </mesh>
+          </group>
+        ))}
+      </group>
+
+      {/* 壁灯 ×3（emissive 为主，仅一盏真实点光，控制光数） */}
+      {[
+        { p: [-8.6, 2.5, 1.5] as [number, number, number], rot: 1.35, light: true },
+        { p: [8.7, 2.55, 0.2] as [number, number, number], rot: -1.4, light: false },
+        { p: [2.2, 2.5, 8.8] as [number, number, number], rot: 2.9, light: false },
+      ].map(({ p, rot, light }, i) => (
+        <group key={i} position={p} rotation={[0, rot, 0]}>
+          <mesh position={[0, 0, 0.04]}>
+            <cylinderGeometry args={[0.03, 0.04, 0.16, 8]} />
+            <meshStandardMaterial color={BRASS} roughness={0.4} metalness={0.6} />
+          </mesh>
+          <mesh position={[0, 0.1, 0.06]} rotation={[0.5, 0, 0]}>
+            <cylinderGeometry args={[0.05, 0.09, 0.09, 14, 1, true]} />
+            <meshStandardMaterial color="#e8d9a8" emissive="#ffdf9e" emissiveIntensity={light ? 1.6 : 0.9} side={THREE.DoubleSide} roughness={0.5} />
+          </mesh>
+          {light && <pointLight position={[0, 0.06, 0.1]} intensity={1.8} distance={3.6} color="#ffd9a0" />}
+        </group>
+      ))}
     </group>
   );
 }
