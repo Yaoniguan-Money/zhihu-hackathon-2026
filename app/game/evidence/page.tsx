@@ -207,8 +207,7 @@ export default function EvidencePage() {
   };
 
   // conflicts_with 高亮：双方都放置且服务端声明冲突
-  const conflictPairs: Array<[string, string]> = [];
-  for (const p of placements) {
+  const conflictPairs: Array<[string, string]> = [];  for (const p of placements) {
     const e = evidenceById.get(p.evidence_id);
     if (!e) continue;
     for (const c of e.conflicts_with) {
@@ -296,7 +295,7 @@ export default function EvidencePage() {
 
         {/* 板面：六泳道 */}
         <div className="relative min-w-0 flex-1 overflow-hidden p-3" data-tour="ev-board">
-          <div ref={boardRef} className="relative h-full rounded-2xl border-2 border-paper/10 bg-[#221e40]/70">
+          <div ref={boardRef} className="relative h-full rounded-2xl border-2 border-paper/10 bg-[#221e40]/70 bg-[radial-gradient(rgba(255,255,255,0.055)_1px,transparent_1px)] [background-size:22px_22px]">
             {/* 连线模式横幅：紧贴板面，指引下一步动作 */}
             {linkFrom && (
               <div className="pointer-events-none absolute left-1/2 top-2 z-40 -translate-x-1/2">
@@ -305,12 +304,16 @@ export default function EvidencePage() {
                 </div>
               </div>
             )}
-            {/* 泳道背景 */}
+            {/* 泳道背景：顶部色晕 + 虚线分隔 */}
             <div className="absolute inset-0 grid grid-cols-6">
               {BOARD_LANES.map((lane) => (
                 <div key={lane.id} className="relative border-r border-dashed border-paper/10">
+                  <div
+                    className="pointer-events-none absolute inset-x-0 top-0 h-24"
+                    style={{ background: `linear-gradient(to bottom, ${lane.color}1f, transparent)` }}
+                  />
                   <div className="sticky top-0 z-[1] flex flex-col items-center gap-0.5 pt-2">
-                    <span className="rounded-full px-2 py-0.5 text-[11px] font-black text-night" style={{ background: lane.color }}>
+                    <span className="rounded-full px-2 py-0.5 text-[11px] font-black text-night shadow-[0_1px_0_rgba(0,0,0,0.25)]" style={{ background: lane.color }}>
                       {lane.label}
                     </span>
                     <span className="text-[9px] font-bold text-paper/35">{lane.hint}</span>
@@ -319,16 +322,32 @@ export default function EvidencePage() {
               ))}
             </div>
 
-            {/* 关系连线 */}
+            {/* 关系连线：光晕底层 + 主线 + 端点图钉 + 关系标签（线端裁剪到芯片边缘，避免整线被芯片盖住） */}
             <svg className="pointer-events-none absolute inset-0 h-full w-full">
+              <defs>
+                <filter id="link-glow" x="-40%" y="-40%" width="180%" height="180%">
+                  <feGaussianBlur stdDeviation="3" result="b" />
+                  <feMerge>
+                    <feMergeNode in="b" />
+                    <feMergeNode in="SourceGraphic" />
+                  </feMerge>
+                </filter>
+              </defs>
               {links.map((l) => {
-                const a = endpoint(l.from_evidence_id);
-                const b = endpoint(l.to_evidence_id);
-                if (!a || !b) return null;
+                const a0 = endpoint(l.from_evidence_id);
+                const b0 = endpoint(l.to_evidence_id);
+                if (!a0 || !b0) return null;
+                // 芯片半宽约 7.75%(15.5%/2)+余量；半高以板高≈700px 估 5.2%
+                const a = edgePoint(a0, b0, 8.4, 5.6);
+                const b = edgePoint(b0, a0, 8.4, 5.6);
                 const meta = BOARD_LINK_META[l.relation];
+                const dashes = l.relation === "contradicts" ? "6 4" : undefined;
                 return (
                   <g key={l.link_id}>
-                    <line x1={`${a.x}%`} y1={`${a.y}%`} x2={`${b.x}%`} y2={`${b.y}%`} stroke={meta.color} strokeWidth={2.5} strokeDasharray={l.relation === "contradicts" ? "6 4" : undefined} />
+                    <line x1={`${a.x}%`} y1={`${a.y}%`} x2={`${b.x}%`} y2={`${b.y}%`} stroke={meta.color} strokeWidth={2.5} strokeDasharray={dashes} filter="url(#link-glow)" opacity={0.9} />
+                    <line x1={`${a.x}%`} y1={`${a.y}%`} x2={`${b.x}%`} y2={`${b.y}%`} stroke={meta.color} strokeWidth={2.5} strokeDasharray={dashes} />
+                    <circle cx={`${a.x}%`} cy={`${a.y}%`} r={3} fill={meta.color} stroke="#191631" strokeWidth={1} />
+                    <circle cx={`${b.x}%`} cy={`${b.y}%`} r={3} fill={meta.color} stroke="#191631" strokeWidth={1} />
                     <text x={`${(a.x + b.x) / 2}%`} y={`${(a.y + b.y) / 2}%`} fill={meta.color} fontSize={10} fontWeight={900} textAnchor="middle" stroke="#191631" strokeWidth={3} paintOrder="stroke">
                       {meta.label}
                     </text>
@@ -336,11 +355,13 @@ export default function EvidencePage() {
                 );
               })}
               {conflictPairs.map(([aId, bId], i) => {
-                const a = endpoint(aId);
-                const b = endpoint(bId);
-                if (!a || !b) return null;
+                const a0 = endpoint(aId);
+                const b0 = endpoint(bId);
+                if (!a0 || !b0) return null;
+                const a = edgePoint(a0, b0, 8.4, 5.6);
+                const b = edgePoint(b0, a0, 8.4, 5.6);
                 return (
-                  <line key={`conflict-${i}`} x1={`${a.x}%`} y1={`${a.y}%`} x2={`${b.x}%`} y2={`${b.y}%`} stroke="#ff5a5a" strokeWidth={2} strokeDasharray="3 5" opacity={0.8} />
+                  <line key={`conflict-${i}`} className="ev-conflict-line" x1={`${a.x}%`} y1={`${a.y}%`} x2={`${b.x}%`} y2={`${b.y}%`} stroke="#ff5a5a" strokeWidth={2} strokeDasharray="3 5" opacity={0.85} />
                 );
               })}
             </svg>
@@ -524,6 +545,22 @@ function defaultLaneFor(e: EvidenceFragmentPublic): BoardLane {
     default:
       return "source";
   }
+}
+
+/** 从 from 指向 to 的线段，裁剪到以 from 为中心、半宽 hw%/半高 hh% 的盒子边缘。 */
+function edgePoint(
+  from: { x: number; y: number },
+  to: { x: number; y: number },
+  hw: number,
+  hh: number,
+): { x: number; y: number } {
+  const dx = to.x - from.x;
+  const dy = to.y - from.y;
+  if (dx === 0 && dy === 0) return from;
+  const tx = dx !== 0 ? hw / Math.abs(dx) : Infinity;
+  const ty = dy !== 0 ? hh / Math.abs(dy) : Infinity;
+  const t = Math.min(1, Math.min(tx, ty));
+  return { x: from.x + dx * t, y: from.y + dy * t };
 }
 
 function BoardChip({

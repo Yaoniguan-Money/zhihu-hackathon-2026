@@ -293,3 +293,13 @@ body {
     animation: none;
   }
 }
+
+/* 证据板冲突线：虚线流动（提示未被连线的隐性矛盾） */
+@keyframes ev-dash-flow {
+  to {
+    stroke-dashoffset: -32;
+  }
+}
+.ev-conflict-line {
+  animation: ev-dash-flow 1.6s linear infinite;
+}
