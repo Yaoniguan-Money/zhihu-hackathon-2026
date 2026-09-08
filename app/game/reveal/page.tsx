@@ -11,6 +11,7 @@ import { Icon } from "@/components/ui/Icons";
 import { personaForRole } from "@/components/three/characters/personas";
 import { castArtFor } from "@/components/three/characters/castArt";
 import { DISTORTION_META } from "@/lib/distortions";
+import { playSfx } from "@/lib/sfx";
 import { calcDiscernmentLevel, type ScoreCardData } from "@/lib/score-card";
 import GameTour from "@/components/onboarding/GameTour";
 
@@ -40,6 +41,12 @@ export default function RevealPage() {
   const { casePublic, sessionView, reveal, actionError, phase, backToLobby, messages } = useGame();  const rootRef = useRef<HTMLDivElement>(null);
   const scoreEvidenceRef = useRef<HTMLSpanElement>(null);
   const scoreQuestioningRef = useRef<HTMLSpanElement>(null);
+
+  // 揭底进入即奏 stinger（无论是否 reduced-motion，音效只一次）
+  useEffect(() => {
+    if (phase === "revealed" && reveal) playSfx("reveal");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // 入场演出时间轴：标题 → 真相卡 → 对照卡 → 真相链 → 分数滚动。
   useEffect(() => {

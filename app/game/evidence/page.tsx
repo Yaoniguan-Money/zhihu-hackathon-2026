@@ -7,6 +7,7 @@ import { useGame } from "@/context/GameContext";
 import ErrorPanel from "@/components/ui/ErrorPanel";
 import Mascot from "@/components/ui/Mascot";
 import { Icon } from "@/components/ui/Icons";
+import { playSfx } from "@/lib/sfx";
 import GameTour from "@/components/onboarding/GameTour";
 import {
   BOARD_LANES,
@@ -114,6 +115,7 @@ export default function EvidencePage() {
   const canEdit = allowedActions.has("update_board") && !busyTurn;
 
   const addEvidence = (e: EvidenceFragmentPublic, lane: BoardLane = "source") => {
+    playSfx("unlock");
     setPlacements((prev) => {
       // 泳道内竖向排队放置，避免新芯片压住已有芯片。
       const inLane = prev.filter((p) => p.lane === lane).length;
@@ -138,6 +140,7 @@ export default function EvidencePage() {
   };
 
   const removePlacement = (evidenceId: string) => {
+    playSfx("disconnect");
     setPlacements((prev) => prev.filter((p) => p.evidence_id !== evidenceId));
     setLinks((prev) => prev.filter((l) => l.from_evidence_id !== evidenceId && l.to_evidence_id !== evidenceId));
     setDirty(true);
@@ -159,6 +162,7 @@ export default function EvidencePage() {
 
   const commitLink = (relation: BoardLink["relation"]) => {
     if (!linkPending || !linkTarget) return;
+    playSfx("connect");
     setLinks((prev) => [
       ...prev.filter(
         (l) =>

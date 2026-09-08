@@ -12,6 +12,7 @@ import { Icon } from "@/components/ui/Icons";
 import { personaForRole } from "@/components/three/characters/personas";
 import GameTour from "@/components/onboarding/GameTour";
 import { DISTORTION_META, DISTORTION_ORDER } from "@/lib/distortions";
+import { playSfx } from "@/lib/sfx";
 import type { DistortionType } from "@/contracts/shared";
 
 const PortraitRow = dynamic(() => import("@/components/three/PortraitRow"), {
@@ -198,15 +199,16 @@ export default function AccusationPage() {
             <motion.button
               whileHover={{ scale: ready && canAccuse ? 1.04 : 1 }}
               whileTap={{ scale: 0.96 }}
-              onClick={() =>
-                suspect &&
+              onClick={() => {
+                if (!suspect) return;
+                playSfx("accuse");
                 accuse({
                   suspect_role_id: suspect,
                   distortion_types: types,
                   evidence_ids: evidenceIds,
                   note: note.trim() || undefined,
-                })
-              }
+                });
+              }}
               disabled={!ready || !canAccuse}
               className="btn btn-coral px-12 py-4 text-lg"
             >
