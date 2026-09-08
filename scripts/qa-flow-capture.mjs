@@ -82,5 +82,10 @@ await page.evaluate(() => document.querySelector('[role="dialog"] button.btn-amb
 await page.waitForTimeout(1500);
 await shot("10-accusation");
 
+// 角色渲染成本隔离（5 角色立柱场景）
+await page.waitForTimeout(1000);
+const diag = await page.evaluate(() => window.__THREE_GAME_DIAGNOSTICS__ ?? null);
+console.log("portrait diagnostics:", JSON.stringify(diag));
+
 await browser.close();
 console.log("flow capture done");

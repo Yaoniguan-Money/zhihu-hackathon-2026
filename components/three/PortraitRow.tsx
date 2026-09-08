@@ -108,7 +108,29 @@ export default function PortraitRow({ roles, selectedId, onSelect, className }: 
         dpr={[1, 1.75]}
         camera={{ position: [0, 1.28, width * 0.72 + 1.35], fov: 35 }}
         gl={{ antialias: true, alpha: true }}
-        onCreated={({ camera }) => camera.lookAt(0, 0.95, 0)}
+        onCreated={({ camera, gl }) => {
+          camera.lookAt(0, 0.95, 0);
+          // 渲染诊断钩子（与 InterrogationStage 同构，便于隔离角色成本）
+          const w = window as unknown as {
+            __THREE_GAME_DIAGNOSTICS__?: { renderer: Record<string, number> };
+          };
+          w.__THREE_GAME_DIAGNOSTICS__ = {
+            renderer: {
+              get calls() {
+                return gl.info.render.calls;
+              },
+              get triangles() {
+                return gl.info.render.triangles;
+              },
+              get geometries() {
+                return gl.info.memory.geometries;
+              },
+              get textures() {
+                return gl.info.memory.textures;
+              },
+            },
+          };
+        }}
       >
         <ambientLight intensity={0.42} color="#c4bfe0" />
         <directionalLight position={[3, 6, 5]} intensity={0.9} color="#ffdcae" castShadow />
