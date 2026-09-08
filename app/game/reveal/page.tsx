@@ -12,6 +12,7 @@ import { personaForRole } from "@/components/three/characters/personas";
 import { castArtFor } from "@/components/three/characters/castArt";
 import { DISTORTION_META } from "@/lib/distortions";
 import { playSfx } from "@/lib/sfx";
+import Confetti from "@/components/ui/Confetti";
 import { calcDiscernmentLevel, type ScoreCardData } from "@/lib/score-card";
 import GameTour from "@/components/onboarding/GameTour";
 
@@ -151,6 +152,9 @@ export default function RevealPage() {
 
   return (
     <div ref={rootRef} className="mx-auto max-w-4xl px-6 py-8">
+      {correct && typeof window !== "undefined" && !window.matchMedia("(prefers-reduced-motion: reduce)").matches && (
+        <Confetti />
+      )}
       <GameTour tour="reveal" />
       {/* 判决时刻 */}
       <div className="rv-hero text-center">
