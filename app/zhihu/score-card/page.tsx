@@ -104,6 +104,17 @@ export default function ScoreCardPage() {
             {data.isCorrect ? '指控成功 · 真相被你钉死了' : '指控失败 · 被篡改者骗过了'}
           </p>
           <p className="mt-1 text-xs font-bold text-amber">{LEVEL_LABELS[level]}</p>
+          {/* 等级进度：五段条直观显示当前辨别力档位 */}
+          <div className="mx-auto mt-3 flex max-w-xs items-center gap-1.5">
+            {[1, 2, 3, 4, 5].map((lv) => (
+              <div
+                key={lv}
+                className={`h-1.5 flex-1 rounded-full ${lv <= level ? 'bg-amber' : 'bg-paper/15'}`}
+                title={`Lv.${lv}`}
+              />
+            ))}
+          </div>
+          <p className="mt-1 text-center text-[10px] font-bold text-paper/40">辨别力等级 {level} / 5</p>
         </div>
 
         <div className="mt-5 grid grid-cols-2 gap-3">
