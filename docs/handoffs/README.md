@@ -114,3 +114,4 @@ docs/handoffs/<ticket-or-stage-id>.md
 | 开庭体验与语音链路修复（401/自动朗读/提速/进度反馈） | complete | [2026-09-08-opening-voice-fixes](./2026-09-08-opening-voice-fixes.md) |
 | 语音分段流水线（首声 2~4 秒）+ 跳过朗读按钮 | complete | [2026-09-08-voice-segmented-pipeline](./2026-09-08-voice-segmented-pipeline.md) |
 | 开场五条并行生成 + 跳过即切下一条 + Validator 瘦身 | complete | [2026-09-08-openings-parallel-and-advance](./2026-09-08-openings-parallel-and-advance.md) |
+| 50 轮资产/体验升级启动：环境修复与基线走查 | complete | [2026-09-09-asset-50-rounds](./2026-09-09-asset-50-rounds.md) |
