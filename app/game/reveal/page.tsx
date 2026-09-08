@@ -288,22 +288,28 @@ export default function RevealPage() {
 
       {/* 双维评分 */}
       <section className="rv-score card-dark mt-8 grid grid-cols-2 gap-4 p-6" data-tour="rev-score">
-        <div className="text-center">
-          <p className="text-xs font-black uppercase tracking-widest text-teal">Evidence Score</p>
-          <p className="mt-1 text-5xl font-black text-teal">
-            <span ref={scoreEvidenceRef}>{reveal.evidence_score}</span>
-            <span className="text-lg text-paper/40"> / 100</span>
-          </p>
-          <p className="mt-1 text-[11px] font-bold text-paper/50">证据质量：命中真相链的程度</p>
-        </div>
-        <div className="text-center">
-          <p className="text-xs font-black uppercase tracking-widest text-indigo-soft">Questioning Score</p>
-          <p className="mt-1 text-5xl font-black text-indigo-soft">
-            <span ref={scoreQuestioningRef}>{reveal.questioning_score}</span>
-            <span className="text-lg text-paper/40"> / 100</span>
-          </p>
-          <p className="mt-1 text-[11px] font-bold text-paper/50">审讯质量：覆盖角色与追问深度</p>
-        </div>
+        {([
+          { label: "Evidence Score", cn: "证据质量：命中真相链的程度", color: "#57b8a0", value: reveal.evidence_score, ref: scoreEvidenceRef },
+          { label: "Questioning Score", cn: "审讯质量：覆盖角色与追问深度", color: "#8f9bff", value: reveal.questioning_score, ref: scoreQuestioningRef },
+        ] as const).map((s) => (
+          <div key={s.label} className="text-center">
+            <p className="text-xs font-black uppercase tracking-widest" style={{ color: s.color }}>
+              {s.label}
+            </p>
+            <p className="mt-1 text-5xl font-black" style={{ color: s.color }}>
+              <span ref={s.ref}>{s.value}</span>
+              <span className="text-lg text-paper/40"> / 100</span>
+            </p>
+            {/* 分数条：底槽 + 按分数比例的填充（入场时随时间轴一起显现） */}
+            <div className="mx-auto mt-2 h-1.5 w-4/5 overflow-hidden rounded-full bg-paper/10">
+              <div
+                className="h-full rounded-full transition-[width] duration-1000 ease-out"
+                style={{ width: `${Math.max(2, Math.min(100, s.value))}%`, background: s.color }}
+              />
+            </div>
+            <p className="mt-1 text-[11px] font-bold text-paper/50">{s.cn}</p>
+          </div>
+        ))}
         <div className="col-span-2 border-t border-paper/10 pt-3">
           <p className="text-center text-[11px] leading-relaxed text-paper/45">
             证据分秘诀：引用的证据要分别命中真相链的不同关键论断，引用多条不同类型（录音 / 原文要点 / 时间线）的证据覆盖面更广。
