@@ -110,3 +110,6 @@ docs/handoffs/<ticket-or-stage-id>.md
 | ART-CHR-ji-yunting Blender 角色 | complete | [2026-09-06-art-chr-ji-yunting](./2026-09-06-art-chr-ji-yunting.md) |
 | ART-ENV-detective-room Blender 场景 | complete | [2026-09-07-art-env-detective-room](./2026-09-07-art-env-detective-room.md) |
 | MERGE-REPAIR-home-flow 合并损伤修复+大厅动线重整 | complete | [2026-09-08-merge-repair-home-flow](./2026-09-08-merge-repair-home-flow.md) |
+| 开庭体验诊断：首句极慢/无法交互/动画卡死/语音不朗读（只记录未修复） | complete（诊断） | [2026-09-08-opening-freeze-and-voice-silent-diagnosis](./2026-09-08-opening-freeze-and-voice-silent-diagnosis.md) |
+| 开庭体验与语音链路修复（401/自动朗读/提速/进度反馈） | complete | [2026-09-08-opening-voice-fixes](./2026-09-08-opening-voice-fixes.md) |
+| 语音分段流水线（首声 2~4 秒）+ 跳过朗读按钮 | complete | [2026-09-08-voice-segmented-pipeline](./2026-09-08-voice-segmented-pipeline.md) |

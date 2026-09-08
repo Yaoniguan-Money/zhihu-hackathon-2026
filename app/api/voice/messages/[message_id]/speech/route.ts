@@ -5,6 +5,7 @@ import {
   loadVoicePack,
   requireBearer,
   requireConvexSiteUrl,
+  segmentApprovedText,
   sha256HexOf,
   workerCall,
   workerError,
@@ -12,11 +13,15 @@ import {
 } from "@/lib/voice";
 
 /**
- * P1-2：同源 TTS Route（CONTRACTS 14）。
+ * P1-2：同源 TTS Route（CONTRACTS 14，含分段 transport）。
  * 只接受 Message ID（不接受客户端 text / voice_id / prosody）；服务器读取
  * 对应 Approved Speech Envelope 并验证文本哈希，使用该 Role 的 voice 与
- * pace 调用本地 Worker；合成文本逐字等于 exact_text。
- * 幂等：重放返回首次合成的同一 WAV（Convex storage 持久化）。
+ * pace 调用本地 Worker。
+ * - 无 segment：合成文本逐字等于 exact_text（整段，手动播放路径）。
+ * - 有 segment：exact_text 由服务器确定性按句切分，仅合成该分段
+ *   （逐字为 exact_text 的连续子串）；响应带 X-Segment-Index / X-Segment-Total。
+ * 幂等：重放返回首次合成的同一 WAV（Convex storage 持久化）；分段请求的
+ * 幂等键纳入 segment 值，客户端应对每个分段使用独立 client_action_id。
  */
 
 export const runtime = "nodejs";
@@ -44,7 +49,11 @@ export async function POST(
       );
     }
     const parsed = z
-      .strictObject({ session_id: z.string().min(1), client_action_id: z.uuid() })
+      .strictObject({
+        session_id: z.string().min(1),
+        client_action_id: z.uuid(),
+        segment: z.number().int().min(0).optional(),
+      })
       .safeParse(body);
     if (!parsed.success) {
       throw new PublicHttpError(
@@ -53,28 +62,11 @@ export async function POST(
       );
     }
     const { session_id, client_action_id } = parsed.data;
-    const messageSha = `sha256:${sha256HexOf(JSON.stringify({ session_id, message_id }))}`;
-
-    // 幂等命中先于一切模型/存储动作（CONTRACTS 12）。
-    const replay = (await convexCall(
-      "query",
-      "voice:speechResult",
-      { session_id, client_action_id, message_sha256: messageSha },
-      bearer,
-    )) as { storage_id: string; content_sha256: string; duration_ms: number } | null;
-    if (replay !== null) {
-      const stored = await fetchStoredSpeech(bearer, session_id, client_action_id);
-      return new Response(stored.bytes, {
-        status: 200,
-        headers: {
-          "Content-Type": "audio/wav",
-          "X-Content-Sha256": stored.contentSha,
-          "X-Duration-Ms": String(stored.durationMs),
-        },
-      });
-    }
+    const segmentIndex = parsed.data.segment;
 
     // 读取 Approved Speech Envelope（服务器唯一合法来源）。
+    // 分段路径需先取得 exact_text 才能确定性切分与校验越界，故先于幂等查询
+    //（Envelope 读取是纯读动作，不违反 CONTRACTS 12 的"幂等先于模型/存储动作"）。
     const envelope = (await convexCall(
       "query",
       "voice:approvedEnvelope",
@@ -99,6 +91,46 @@ export async function POST(
         500,
       );
     }
+
+    const segments = segmentApprovedText(envelope.exact_text);
+    const hasSegment = segmentIndex !== undefined;
+    if (hasSegment && (segments.length === 0 || segmentIndex >= segments.length)) {
+      throw new PublicHttpError(
+        { code: "INVALID_ARGUMENT", message: "分段不存在" },
+        400,
+      );
+    }
+    const synthesisText = hasSegment ? segments[segmentIndex]! : envelope.exact_text;
+    const messageSha = `sha256:${sha256HexOf(
+      JSON.stringify(hasSegment ? { session_id, message_id, segment: segmentIndex } : { session_id, message_id }),
+    )}`;
+    const segmentHeaders: Record<string, string> = hasSegment
+      ? {
+          "X-Segment-Index": String(segmentIndex),
+          "X-Segment-Total": String(segments.length),
+        }
+      : {};
+
+    // 幂等命中先于一切模型/存储动作（CONTRACTS 12）。
+    const replay = (await convexCall(
+      "query",
+      "voice:speechResult",
+      { session_id, client_action_id, message_sha256: messageSha },
+      bearer,
+    )) as { storage_id: string; content_sha256: string; duration_ms: number } | null;
+    if (replay !== null) {
+      const stored = await fetchStoredSpeech(bearer, session_id, client_action_id);
+      return new Response(stored.bytes, {
+        status: 200,
+        headers: {
+          "Content-Type": "audio/wav",
+          "X-Content-Sha256": stored.contentSha,
+          "X-Duration-Ms": String(stored.durationMs),
+          ...segmentHeaders,
+        },
+      });
+    }
+
     // voice 与 pace 均来自显式配置的音色包；不做任何代码级默认音色。
     const pack = loadVoicePack();
     const packEntry = pack.voices[envelope.voice_id];
@@ -121,7 +153,7 @@ export async function POST(
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        text: envelope.exact_text,
+        text: synthesisText,
         voice: envelope.voice_id,
         speed: pace,
       }),
@@ -185,6 +217,7 @@ export async function POST(
         "Content-Type": "audio/wav",
         "X-Content-Sha256": contentSha,
         "X-Duration-Ms": String(durationMs),
+        ...segmentHeaders,
       },
     });
   } catch (error) {

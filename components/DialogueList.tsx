@@ -16,13 +16,15 @@ interface DialogueListProps {
   /** 正在逐字播放的 message_id（3D 角色同步口型）。 */
   speakingMessageId: string | null;
   onSpeakDone?: () => void;
+  /** 语音播放失败上抛（显式呈现，不静默）。 */
+  onVoiceError?: (error: { code: string; message: string }) => void;
 }
 
 /**
  * 对话记录：玩家消息（右）与已批准角色消息（左）。
  * 角色消息带情绪/立场徽章、语音播放与「存为录音证据」。
  */
-export default function DialogueList({ messages, roles, speakingMessageId, onSpeakDone }: DialogueListProps) {
+export default function DialogueList({ messages, roles, speakingMessageId, onSpeakDone, onVoiceError }: DialogueListProps) {
   const roleById = new Map(roles.map((r) => [r.role_id, r]));
   const { sessionId, allowedActions, saveRecording, busyTurn } = useGame();
   const bottomRef = useRef<HTMLDivElement>(null);

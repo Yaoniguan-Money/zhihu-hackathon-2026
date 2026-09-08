@@ -4,9 +4,9 @@ import { useEffect, useRef, useState } from "react";
 import type { RoleProsody } from "@/contracts/public";
 
 const PACE_MS: Record<NonNullable<RoleProsody["pace"]>, number> = {
-  slow: 95,
-  normal: 46,
-  fast: 24,
+  slow: 42,
+  normal: 20,
+  fast: 12,
 };
 
 interface TypewriterProps {

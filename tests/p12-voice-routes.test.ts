@@ -275,4 +275,96 @@ describe("P1-2 Voice Route（本地后端，无 Worker）", () => {
     // 音色包映射在 Worker 正常路径验证（p12-voice-worker）。
     expect(messageId.length).toBeGreaterThan(0);
   });
+
+  test("speech 分段：segment 越界 → INVALID_ARGUMENT；负数/非整数 → schema 拒绝；合法段在 worker 不可达时显式失败", async () => {
+    const token = await signInAnonymous();
+    const created = await callConvex<{ session_id: string }>(
+      "mutation",
+      "sessions:create",
+      { case_id: GOLDEN, client_action_id: uuid() },
+      { bearer: token },
+    );
+    expect(created.ok).toBe(true);
+    if (!created.ok) return;
+    await callConvex(
+      "mutation",
+      "admin:forcePhase",
+      { session_key: created.value.session_id, phase: "investigation" },
+      { admin: true },
+    );
+    const messageId = await seedRoleMessage(created.value.session_id, "voice-zh-01");
+
+    // schema：负数与非整数被 strict schema 拒绝。
+    for (const bad of [-1, 1.5]) {
+      const badResponse = await speechRequest(token, messageId, {
+        session_id: created.value.session_id,
+        client_action_id: uuid(),
+        segment: bad,
+      });
+      expect(badResponse.status).toBe(400);
+      expect((await badResponse.json()).code).toBe("INVALID_ARGUMENT");
+    }
+
+    // 越界（种子文本只有 1 段）→ 服务端确定性切分后判 INVALID_ARGUMENT。
+    const outOfRange = await speechRequest(token, messageId, {
+      session_id: created.value.session_id,
+      client_action_id: uuid(),
+      segment: 999,
+    });
+    expect(outOfRange.status).toBe(400);
+    expect((await outOfRange.json()).code).toBe("INVALID_ARGUMENT");
+
+    // 合法段 0：worker 不可达 → VOICE_TTS_FAILED（与整段路径同语义）。
+    const seg0 = await speechRequest(token, messageId, {
+      session_id: created.value.session_id,
+      client_action_id: uuid(),
+      segment: 0,
+    });
+    expect(seg0.status).toBe(502);
+    expect((await seg0.json()).code).toBe("VOICE_TTS_FAILED");
+  });
+
+  test("segmentApprovedText：句末切分 / 超长二次切分 / 确定性", async () => {
+    const { segmentApprovedText, SEGMENT_MAX_CHARS } = await import(
+      "../lib/voice.js"
+    );
+
+    // 按句末标点切分，标点保留在前段末尾。
+    expect(segmentApprovedText("第一句。第二句！第三句？")).toEqual([
+      "第一句。",
+      "第二句！",
+      "第三句？",
+    ]);
+
+    // 无句末标点的短文本 → 单段。
+    expect(segmentApprovedText("没有标点的一段话")).toEqual(["没有标点的一段话"]);
+
+    // 超长无标点句 → 硬切，且每段 ≤ SEGMENT_MAX_CHARS，拼接无损。
+    const longNoPunct = "长".repeat(SEGMENT_MAX_CHARS * 2 + 3);
+    const hardSplit = segmentApprovedText(longNoPunct);
+    expect(hardSplit.join("")).toBe(longNoPunct);
+    for (const seg of hardSplit) {
+      expect(seg.length).toBeLessThanOrEqual(SEGMENT_MAX_CHARS);
+    }
+
+    // 超长句按逗号二次切分：每段 ≤ 上限，丢空白后拼接等于原文本去空白。
+    const clause = "这是一个相当长的从句";
+    const longSentence = Array.from(
+      { length: 10 },
+      (_, i) => `${clause}${i}，`,
+    ).join("");
+    const commaSplit = segmentApprovedText(longSentence);
+    expect(commaSplit.length).toBeGreaterThan(1);
+    for (const seg of commaSplit) {
+      expect(seg.length).toBeLessThanOrEqual(SEGMENT_MAX_CHARS);
+    }
+    expect(commaSplit.join("")).toBe(longSentence.trim());
+
+    // 确定性：同输入两次结果一致。
+    const sample = "甲句，带逗号。乙句很长".repeat(8);
+    expect(segmentApprovedText(sample)).toEqual(segmentApprovedText(sample));
+
+    // 空文本 → 空分段。
+    expect(segmentApprovedText("")).toEqual([]);
+  });
 });

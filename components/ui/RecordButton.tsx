@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { motion } from "motion/react";
+import { useConvexAuth } from "@convex-dev/auth/react";
 import { newClientActionId } from "@/lib/convex-client";
 import { toPublicError } from "@/lib/convex-errors";
 import type { TranscriptResultPublic } from "@/contracts/public";
@@ -25,6 +26,7 @@ export default function RecordButton({ onTranscript, onError, disabled }: Record
   const recorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const { fetchAccessToken } = useConvexAuth();
 
   const cleanup = () => {
     if (timerRef.current) clearInterval(timerRef.current);
@@ -36,11 +38,26 @@ export default function RecordButton({ onTranscript, onError, disabled }: Record
   };
 
   const submit = async (blob: Blob) => {
+    let token: string | null = null;
+    try {
+      token = await fetchAccessToken({ forceRefreshToken: false });
+    } catch (err) {
+      onError(toPublicError(err));
+      return;
+    }
+    if (!token) {
+      onError({ code: "AUTH_REQUIRED", message: "需要先建立会话身份" });
+      return;
+    }
     const form = new FormData();
     form.append("audio", blob, "question.webm");
     form.append("client_action_id", newClientActionId());
     try {
-      const res = await fetch("/api/voice/transcriptions", { method: "POST", body: form });
+      const res = await fetch("/api/voice/transcriptions", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+        body: form,
+      });
       const data = await res.json().catch(() => null);
       if (!res.ok) {
         onError(toPublicError(data));

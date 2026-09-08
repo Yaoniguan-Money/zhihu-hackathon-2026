@@ -251,6 +251,50 @@ export interface VoicePack {
   pace_speed: Record<string, number>;
 }
 
+// ---------------------------------------------------------------------------
+// 分段合成（CONTRACTS 14 分段 transport）：服务端确定性切分，客户端不传文本。
+
+/** 单段最大长度；超出按逗号/顿号二次切分，仍超长则硬切。 */
+export const SEGMENT_MAX_CHARS = 64;
+
+/**
+ * 把 Approved Speech Envelope 的 exact_text 按句末标点切分为确定性分段。
+ * 每段都是 exact_text 的连续子串（按句切分处允许丢弃纯空白间隙）；
+ * 同一输入永远产出同一分段序列（幂等与重放依赖该确定性）。
+ */
+export function segmentApprovedText(text: string): string[] {
+  const trimmed = text.trim();
+  if (trimmed === "") return [];
+  const sentences = trimmed
+    .split(/(?<=[。！？；…\n])/)
+    .map((s) => s.trim())
+    .filter((s) => s.length > 0);
+  const segments: string[] = [];
+  for (const sentence of sentences) {
+    if (sentence.length <= SEGMENT_MAX_CHARS) {
+      segments.push(sentence);
+      continue;
+    }
+    let buf = "";
+    for (const part of sentence.split(/(?<=[，、])/)) {
+      const piece = part.trim();
+      if (piece === "") continue;
+      if (buf.length > 0 && buf.length + piece.length > SEGMENT_MAX_CHARS) {
+        segments.push(buf);
+        buf = piece;
+      } else {
+        buf += piece;
+      }
+      while (buf.length > SEGMENT_MAX_CHARS) {
+        segments.push(buf.slice(0, SEGMENT_MAX_CHARS));
+        buf = buf.slice(SEGMENT_MAX_CHARS);
+      }
+    }
+    if (buf.length > 0) segments.push(buf);
+  }
+  return segments;
+}
+
 /** 显式音色包配置；缺失即 SERVICE_NOT_CONFIGURED（不做默认音色兜底）。 */
 export function loadVoicePack(): VoicePack {
   try {

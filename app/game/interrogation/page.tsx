@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { AnimatePresence, motion } from "motion/react";
+import { useConvexAuth } from "@convex-dev/auth/react";
 import { useGame } from "@/context/GameContext";
 import DialogueList from "@/components/DialogueList";
 import RecordButton from "@/components/ui/RecordButton";
@@ -14,6 +15,8 @@ import GameTour from "@/components/onboarding/GameTour";
 import { Icon } from "@/components/ui/Icons";
 import { personaForRole } from "@/components/three/characters/personas";
 import { EMOTION_META } from "@/lib/distortions";
+import { newClientActionId } from "@/lib/convex-client";
+import { toPublicError } from "@/lib/convex-errors";
 import type { MessagePublic, QuestionMode, RoleEmotion } from "@/contracts/public";
 
 const InterrogationStage = dynamic(() => import("@/components/three/InterrogationStage"), {
@@ -48,6 +51,7 @@ export default function InterrogationPage() {
     busyTurn,
     allowedActions,
     phase,
+    sessionId,
     ask,
     actionError,
     clearActionError,
@@ -91,17 +95,176 @@ export default function InterrogationPage() {
   const openings = roleMessages.slice(0, 5);
   const inOpening = phase === "opening_statements";
 
-  // 最新角色消息 → 打字机口型同步；超时兜底关闭。
+  const { fetchAccessToken } = useConvexAuth();
+  const spokenIdsRef = useRef<Set<string>>(new Set());
+  const mountedRef = useRef(false);
+  const [voiceActiveMessageId, setVoiceActiveMessageId] = useState<string | null>(null);
+  const voiceQueueRef = useRef<{
+    messageId: string;
+    controller: AbortController;
+    current: HTMLAudioElement | null;
+    stopped: boolean;
+    allFetched: boolean;
+  } | null>(null);
+
+  /** 跳过/中止当前朗读：在飞分段请求一并中止，本条剩余语音不再合成不再播。 */
+  const stopVoice = useCallback(() => {
+    const q = voiceQueueRef.current;
+    if (q) {
+      q.stopped = true;
+      q.controller.abort();
+      q.current?.pause();
+      q.current = null;
+    }
+    const messageId = q?.messageId;
+    voiceQueueRef.current = null;
+    setVoiceActiveMessageId(null);
+    if (messageId) {
+      setSpeakingMessageId((cur) => (cur === messageId ? null : cur));
+    }
+  }, []);
+
+  const finishVoice = useCallback((messageId: string) => {
+    if (voiceQueueRef.current?.messageId !== messageId) return;
+    voiceQueueRef.current = null;
+    setVoiceActiveMessageId((cur) => (cur === messageId ? null : cur));
+    setSpeakingMessageId((cur) => (cur === messageId ? null : cur));
+    if (speakTimer.current) {
+      clearTimeout(speakTimer.current);
+      speakTimer.current = null;
+    }
+  }, []);
+
+  // 自动朗读新到达的已批准角色发言：分段流水线（CONTRACTS 14 分段 transport）。
+  // 服务端按句切分，客户端按段请求/播放——首段（第一句）约 2~4 秒即可出声，
+  // 之后边播边取后续段（合成速度约为播放时长的 1/5，缓冲始终领先）。
+  const speakMessage = useCallback(
+    async (messageId: string) => {
+      stopVoice();
+      const controller = new AbortController();
+      const state = {
+        messageId,
+        controller,
+        current: null as HTMLAudioElement | null,
+        stopped: false,
+        allFetched: false,
+      };
+      voiceQueueRef.current = state;
+      setVoiceActiveMessageId(messageId);
+      const buffered: string[] = [];
+
+      const failVoice = (err: { code: string; message: string }) => {
+        state.stopped = true;
+        state.current?.pause();
+        state.current = null;
+        voiceQueueRef.current = null;
+        setVoiceActiveMessageId((cur) => (cur === messageId ? null : cur));
+        setSpeakingMessageId((cur) => (cur === messageId ? null : cur));
+        setVoiceError(err);
+      };
+
+      const playNext = () => {
+        if (state.stopped) return;
+        const url = buffered.shift();
+        if (!url) return; // 在飞段完成后会再次触发
+        const audio = new Audio(url);
+        state.current = audio;
+        audio.onended = () => {
+          URL.revokeObjectURL(url);
+          state.current = null;
+          if (state.stopped) return;
+          if (buffered.length > 0) {
+            playNext();
+          } else if (state.allFetched) {
+            finishVoice(messageId);
+          }
+        };
+        audio.onerror = () => {
+          if (!state.stopped) {
+            failVoice({
+              code: "VOICE_TTS_FAILED",
+              message: "语音播放失败，文字内容不受影响",
+            });
+          }
+        };
+        void audio.play().catch(() => {
+          // 浏览器自动播放策略：显式提示手动路径，文字不受影响。
+          if (!state.stopped) {
+            failVoice({
+              code: "VOICE_TTS_FAILED",
+              message: "浏览器暂不允许自动播放语音，可点消息旁的播放按钮手动收听",
+            });
+          }
+        });
+      };
+
+      const fetchSegment = async (index: number): Promise<void> => {
+        try {
+          const token = await fetchAccessToken({ forceRefreshToken: false });
+          if (!token) {
+            throw { code: "AUTH_REQUIRED", message: "需要先建立会话身份" };
+          }
+          // 每个分段使用独立 client_action_id（分段幂等键含 segment，见 CONTRACTS 14）。
+          const res = await fetch(`/api/voice/messages/${encodeURIComponent(messageId)}/speech`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+              session_id: sessionId,
+              client_action_id: newClientActionId(),
+              segment: index,
+            }),
+            signal: controller.signal,
+          });
+          if (!res.ok) {
+            const data = await res.json().catch(() => null);
+            throw toPublicError(data);
+          }
+          const total = Number(res.headers.get("X-Segment-Total") ?? "0");
+          const blob = await res.blob();
+          if (state.stopped) return;
+          buffered.push(URL.createObjectURL(blob));
+          if (!state.current) playNext();
+          if (Number.isInteger(total) && total > 0 && index + 1 < total) {
+            void fetchSegment(index + 1);
+          } else {
+            state.allFetched = true;
+          }
+        } catch (err) {
+          if (controller.signal.aborted || state.stopped) return; // 跳过/换消息导致的中止
+          failVoice(toPublicError(err));
+        }
+      };
+
+      void fetchSegment(0);
+    },
+    [fetchAccessToken, sessionId, stopVoice, finishVoice],
+  );
+
+  // 卸载时停掉朗读。
+  useEffect(() => stopVoice, [stopVoice]);
+
+  // 最新角色消息 → 打字机口型同步 + 自动朗读；超时兜底关闭。
+  // 恢复会话（挂载时已存在的消息）不自动朗读，只播新到达的。
   useEffect(() => {
     if (!latestRole) return;
+    const isNew = mountedRef.current && !spokenIdsRef.current.has(latestRole.message_id);
+    mountedRef.current = true;
+    if (isNew) {
+      spokenIdsRef.current.add(latestRole.message_id);
+      void speakMessage(latestRole.message_id);
+    }
     if (speakTimer.current) clearTimeout(speakTimer.current);
     setSpeakingMessageId(latestRole.message_id);
-    const cap = Math.min(Math.max(latestRole.exact_text.length * 140, 3500), 20000);
+    // 兜底：语音队列正常时由 finishVoice 清除；此处防 onended 丢失导致口型悬挂。
+    const cap = latestRole.exact_text.length * 200 + 15000;
     speakTimer.current = setTimeout(() => setSpeakingMessageId(null), cap);
     return () => {
       if (speakTimer.current) clearTimeout(speakTimer.current);
     };
-  }, [latestRole?.message_id]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [latestRole?.message_id, speakMessage]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!casePublic || !sessionView) {
     return (
@@ -241,6 +404,7 @@ export default function InterrogationPage() {
             roles={roles}
             speakingMessageId={inOpening ? null : speakingMessageId}
             onSpeakDone={() => setSpeakingMessageId(null)}
+            onVoiceError={(e) => setVoiceError(e)}
           />
         </div>
       </div>
@@ -330,6 +494,8 @@ export default function InterrogationPage() {
               openings={openings}
               roles={roles}
               done={openings.length >= 5}
+              voiceActive={voiceActiveMessageId !== null}
+              onSkipVoice={stopVoice}
             />
           </motion.div>
         )}
@@ -377,6 +543,22 @@ export default function InterrogationPage() {
         </div>
       )}
 
+      {/* 审讯阶段自动朗读：跳过胶囊（本条剩余语音不再合成不再播） */}
+      <AnimatePresence>
+        {voiceActiveMessageId && phase === "investigation" && (
+          <motion.button
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 10 }}
+            onClick={stopVoice}
+            title="停止本条语音，剩余部分不再朗读"
+            className="absolute bottom-[134px] left-1/2 z-20 flex -translate-x-1/2 items-center gap-1.5 rounded-full border-2 border-ink bg-paper px-4 py-1.5 text-xs font-black text-ink shadow-[var(--shadow-sticker-sm)] hover:bg-amber/50"
+          >
+            跳过朗读 <Icon name="next" size={12} />
+          </motion.button>
+        )}
+      </AnimatePresence>
+
       {/* 提问失败显式呈现 */}
       <AnimatePresence>
         {actionError && phase === "investigation" && (
@@ -384,21 +566,23 @@ export default function InterrogationPage() {
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}
-            className="absolute bottom-[132px] left-1/2 z-20 w-[420px] max-w-[90vw] -translate-x-1/2"
+            className={`absolute left-1/2 z-20 w-[420px] max-w-[90vw] -translate-x-1/2 ${
+              voiceActiveMessageId ? "bottom-[186px]" : "bottom-[132px]"
+            }`}
           >
             <ErrorPanel error={actionError} onDismiss={clearActionError} />
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* 语音失败：显式呈现并保留键盘输入路径 */}
+      {/* 语音失败：显式呈现并保留键盘输入路径（z-40：开场 overlay 之上也可见） */}
       <AnimatePresence>
         {voiceError && (
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}
-            className="absolute bottom-[132px] left-1/2 z-20 w-[420px] max-w-[90vw] -translate-x-1/2"
+            className="absolute bottom-[132px] left-1/2 z-40 w-[420px] max-w-[90vw] -translate-x-1/2"
           >
             <ErrorPanel
               error={{ code: voiceError.code as never, message: voiceError.message }}
@@ -417,10 +601,14 @@ function OpeningTheater({
   openings,
   roles,
   done,
+  voiceActive,
+  onSkipVoice,
 }: {
   openings: Extract<MessagePublic, { speaker_type: "role" }>[];
   roles: import("@/contracts/public").RolePublic[];
   done: boolean;
+  voiceActive: boolean;
+  onSkipVoice: () => void;
 }) {
   const current = openings[openings.length - 1];
   const role = roles.find((r) => r.role_id === current?.speaker_id);
@@ -434,6 +622,17 @@ function OpeningTheater({
       transition={{ type: "spring", stiffness: 160, damping: 20 }}
       className="card relative w-[640px] max-w-[92vw] px-8 py-6"
     >
+      {voiceActive && (
+        <motion.button
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          onClick={onSkipVoice}
+          title="停止本条语音，剩余部分不再朗读"
+          className="absolute right-5 top-5 z-10 flex items-center gap-1.5 rounded-full border-2 border-ink bg-paper px-3 py-1 text-xs font-black text-ink hover:bg-amber/50"
+        >
+          跳过朗读 <Icon name="next" size={12} />
+        </motion.button>
+      )}
       <div className="tape" style={{ top: -10, left: 40, transform: "rotate(-5deg)" }} />
       <div className="flex items-center gap-3">
         <span
@@ -471,7 +670,12 @@ function OpeningTheater({
           <p className="animate-pulse text-sm font-bold text-ink/50">第一位角色正在起身…</p>
         )}
       </div>
-      {done && (
+      {!done ? (
+        <p className="mt-3 flex items-center gap-2 text-xs font-black text-ink/45">
+          <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-coral" />
+          下一位角色正在准备（每条约需 30~120 秒，到达后自动朗读；可点「跳过朗读」停止本条语音）
+        </p>
+      ) : (
         <motion.p
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}

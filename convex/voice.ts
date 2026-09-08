@@ -54,7 +54,12 @@ export const approvedEnvelope = query({
     if (!session || session.owner_identity !== identityToken) {
       throwPublicError("SESSION_NOT_FOUND", "对局不存在或不可访问");
     }
-    if (session.phase !== "investigation") {
+    // opening_statements 允许朗读开场陈述（2026-09-08 修复：自动朗读链路需要）；
+    // briefing/judging/revealed/failed 仍拒绝。
+    if (
+      session.phase !== "investigation" &&
+      session.phase !== "opening_statements"
+    ) {
       throwPublicError("SESSION_PHASE_CONFLICT", "当前阶段不能合成语音");
     }
     const tickets = await ctx.db

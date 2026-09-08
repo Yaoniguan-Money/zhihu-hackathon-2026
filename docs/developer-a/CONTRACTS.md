@@ -959,6 +959,10 @@ ASR v1 只返回最终中文文本，不流式返回中间结果。超过 30 秒
 
 TTS Route 只接受 Message ID，不接受客户端 `text`、`voice_id` 或 prosody。服务器必须读取对应 Approved Speech Envelope，验证文本哈希，使用该 Role 的 voice 与 pace；合成文本逐字等于 `exact_text`。`intensity` 仅为 UI/Rive 元数据，不进入 Kokoro 声学承诺。
 
+Approved Speech Envelope 读取在 `opening_statements` 与 `investigation` 阶段开放（开场陈述与审讯回应均可合成/自动朗读）；`briefing`、`judging`、`revealed`、`failed` 阶段返回 `SESSION_PHASE_CONFLICT`。ASR 仅在 `investigation` 阶段有意义（提问只发生在该阶段）。
+
+分段 transport（自动朗读用）：speech Route 的 JSON body 可带可选 `segment`（非负整数）。带 `segment` 时，服务器用确定性算法（`segmentApprovedText`）把 `exact_text` 按句末标点切分为分段（单段 ≤64 字，超长句按逗号/顿号二次切分，仍超长硬切），仅合成该分段——逐字为 `exact_text` 的连续子串，客户端不传任何文本。响应头 `X-Segment-Index` / `X-Segment-Total` 标注分段位置与总数（重放路径同样返回，总数由信封文本重新确定性切分得出）。`segment` 存在时幂等键纳入其值；客户端必须为每个分段请求使用独立 `client_action_id`（idempotency_records 按 action_id 唯一建档）。`segment` 越界返回 `INVALID_ARGUMENT`。无 `segment` 时行为与整段合成完全一致（手动播放路径）。
+
 ## 15. 公开与私有审计
 
 每次建案、模型调用、角色回合和 Reveal 必须关联可用的 `case_id`、`session_id`、`request_id`、`client_action_id`、任务名和 attempt index。私有事件至少覆盖：

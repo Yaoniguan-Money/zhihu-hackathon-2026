@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import { motion } from "motion/react";
+import { useConvexAuth } from "@convex-dev/auth/react";
 import { newClientActionId } from "@/lib/convex-client";
 import { toPublicError } from "@/lib/convex-errors";
 import { Icon } from "./Icons";
@@ -21,14 +22,24 @@ type VoiceState = "idle" | "loading" | "playing";
 export default function VoicePlayer({ messageId, sessionId, onError }: VoicePlayerProps) {
   const [state, setState] = useState<VoiceState>("idle");
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const { fetchAccessToken } = useConvexAuth();
 
   const play = async () => {
     if (state !== "idle") return;
     setState("loading");
     try {
+      const token = await fetchAccessToken({ forceRefreshToken: false });
+      if (!token) {
+        onError?.({ code: "AUTH_REQUIRED", message: "需要先建立会话身份" });
+        setState("idle");
+        return;
+      }
       const res = await fetch(`/api/voice/messages/${encodeURIComponent(messageId)}/speech`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
         body: JSON.stringify({ session_id: sessionId, client_action_id: newClientActionId() }),
       });
       if (!res.ok) {

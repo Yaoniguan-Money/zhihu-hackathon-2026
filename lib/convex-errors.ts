@@ -26,6 +26,21 @@ export function toPublicError(error: unknown): PublicError {
     };
   }
 
+  // 同源 Route 的 HTTP 错误体本身就是顶层 { code, message } JSON。
+  if (
+    error &&
+    typeof error === "object" &&
+    "code" in error &&
+    "message" in error &&
+    typeof (error as { code: unknown }).code === "string" &&
+    typeof (error as { message: unknown }).message === "string"
+  ) {
+    return {
+      code: (error as { code: string }).code as PublicError["code"],
+      message: (error as { message: string }).message,
+    };
+  }
+
   return {
     code: "SERVICE_UNAVAILABLE",
     message:
