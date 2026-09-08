@@ -103,6 +103,26 @@ export default function InterrogationStage({
         onCreated={({ gl }) => {
           gl.toneMapping = THREE.ACESFilmicToneMapping;
           gl.toneMappingExposure = 1.12;
+          // 渲染诊断钩子：QA 脚本（inspect-threejs-canvas.mjs）按此结构读取实时渲染统计
+          const w = window as unknown as {
+            __THREE_GAME_DIAGNOSTICS__?: { renderer: Record<string, number> };
+          };
+          w.__THREE_GAME_DIAGNOSTICS__ = {
+            renderer: {
+              get calls() {
+                return gl.info.render.calls;
+              },
+              get triangles() {
+                return gl.info.render.triangles;
+              },
+              get geometries() {
+                return gl.info.memory.geometries;
+              },
+              get textures() {
+                return gl.info.memory.textures;
+              },
+            },
+          };
         }}
       >
       <color attach="background" args={["#171430"]} />
