@@ -467,4 +467,9 @@ export default function GlbCharacter({
   );
 }
 
+// 预热全部角色 GLB：直接进入审讯室/简报页时首帧即可拿到模型
 useGLTF.preload("/models/shen-qingwu.glb");
+useGLTF.preload("/models/ji-yunting.glb");
+useGLTF.preload("/models/a-lan.glb");
+useGLTF.preload("/models/he-xu.glb");
+useGLTF.preload("/models/liu-chengyin.glb");
