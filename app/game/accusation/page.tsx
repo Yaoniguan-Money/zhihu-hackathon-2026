@@ -17,7 +17,7 @@ import type { DistortionType } from "@/contracts/shared";
 
 const PortraitRow = dynamic(() => import("@/components/three/PortraitRow"), {
   ssr: false,
-  loading: () => <div className="h-52 animate-pulse rounded-2xl bg-night-soft/60" />,
+  loading: () => <div className="h-64 animate-pulse rounded-2xl bg-night-soft/60" />,
 });
 
 export default function AccusationPage() {
@@ -91,7 +91,7 @@ export default function AccusationPage() {
               <span className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-amber bg-amber/20 text-xs text-amber">1</span>
               指认篡改者
             </h2>
-            <div className="h-52">
+            <div className="h-64">
               <PortraitRow
                 roles={casePublic.roles}
                 selectedId={suspect}

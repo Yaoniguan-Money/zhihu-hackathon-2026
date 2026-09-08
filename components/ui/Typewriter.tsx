@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { RoleProsody } from "@/contracts/public";
+import { playSfx } from "@/lib/sfx";
 
 const PACE_MS: Record<NonNullable<RoleProsody["pace"]>, number> = {
   slow: 42,
@@ -57,6 +58,8 @@ export default function Typewriter({ text, prosody, keepCaret = false, onDone, c
       } else {
         countRef.current = next;
         setCount(next);
+        // 每 3 字一枚极轻的打字音（sfx 引擎自带节流与静音）
+        if (next % 3 === 0) playSfx("type");
       }
     }, speed);
     return () => {

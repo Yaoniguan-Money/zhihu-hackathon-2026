@@ -58,8 +58,10 @@ export default function BriefingPage() {
           {/* 场景资产图横幅 */}
           <div className="relative -mx-8 -mt-7 mb-5 h-40 overflow-hidden md:h-52">
             <Image src={SCENE_ART} alt="侦探会议室 · 月下" fill sizes="(max-width: 1024px) 100vw, 960px" className="object-cover object-center" priority />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#f7f1e3] via-[#f7f1e3]/10 to-transparent" />
-            <p className="absolute bottom-2 right-4 text-[10px] font-black uppercase tracking-[0.3em] text-ink/70 drop-shadow-[0_1px_0_rgba(247,241,227,0.8)]">
+            {/* 只在底部做一条浅过渡带融进纸卡，不再整幅洗白 */}
+            <div className="absolute inset-x-0 bottom-0 h-14 bg-gradient-to-t from-[#f7f1e3] to-transparent" />
+            <div className="pointer-events-none absolute inset-0 ring-1 ring-inset ring-ink/10" />
+            <p className="absolute bottom-2 right-4 text-[10px] font-black uppercase tracking-[0.3em] text-paper/85 drop-shadow-[0_1px_2px_rgba(26,22,38,0.9)]">
               Detective Meeting Room · Moonlight
             </p>
           </div>
