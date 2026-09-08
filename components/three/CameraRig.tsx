@@ -12,8 +12,8 @@ interface CameraRigProps {
   focus?: [number, number, number] | null;
   /** 入场电影运镜（仅挂载后执行一次）。 */
   intro?: boolean;
-  /** 慢速自动环绕（大厅模式）。 */
-  autoRotate?: boolean;
+  /** 有界摇摆（大厅模式）：绕主体 ±约 28° 缓摆，替代无限环绕。 */
+  sway?: boolean;
   /** 无聚焦时注视点的横向偏移：正值把主体推到画面左侧（给右侧 UI 面板让位）。 */
   targetBiasX?: number;
 }
@@ -21,7 +21,7 @@ interface CameraRigProps {
 const DEFAULT_POS = new THREE.Vector3(0, 5.1, 8.8);
 const DEFAULT_TARGET = new THREE.Vector3(0, 0.75, -0.1);
 
-export default function CameraRig({ focus, intro = true, autoRotate = false, targetBiasX = 0 }: CameraRigProps) {
+export default function CameraRig({ focus, intro = true, sway = false, targetBiasX = 0 }: CameraRigProps) {
   const controlsRef = useRef<OrbitControlsImpl>(null);
   const { camera } = useThree();
   const targetPos = useRef(DEFAULT_POS.clone());
@@ -66,12 +66,24 @@ export default function CameraRig({ focus, intro = true, autoRotate = false, tar
     }
   }, [focus]);
 
-  useFrame((_, delta) => {
+  useFrame((state, delta) => {
     const controls = controlsRef.current;
     if (!controls) return;
     if (focus && !userGrabbed.current) {
       controls.target.lerp(targetLook.current, 1 - Math.pow(0.002, delta));
       camera.position.lerp(targetPos.current, 1 - Math.pow(0.02, delta));
+      controls.update();
+    } else if (sway && !focus && !userGrabbed.current) {
+      // 大厅有界摇摆：注视点固定在偏移后的桌心，相机绕其 ±约 28° 缓摆
+      const t = state.clock.elapsedTime;
+      const base = camera.position.clone().sub(targetLook.current);
+      const radius = base.length();
+      const theta0 = Math.atan2(base.x, base.z);
+      const phi = Math.acos(THREE.MathUtils.clamp(base.y / radius, -1, 1));
+      const theta = theta0 + Math.sin(t * 0.1) * 0.5;
+      camera.position.setFromSphericalCoords(radius, phi, theta).add(targetLook.current);
+      controls.target.copy(targetLook.current);
+      camera.lookAt(targetLook.current);
       controls.update();
     }
   });
@@ -85,7 +97,7 @@ export default function CameraRig({ focus, intro = true, autoRotate = false, tar
       minPolarAngle={Math.PI / 7}
       maxPolarAngle={Math.PI / 2.05}
       enableDamping
-      autoRotate={autoRotate && !focus}
+      autoRotate={false}
       autoRotateSpeed={0.55}
       dampingFactor={0.08}
       onStart={() => {

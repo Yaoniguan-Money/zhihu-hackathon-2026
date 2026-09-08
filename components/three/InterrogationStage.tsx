@@ -190,7 +190,7 @@ export default function InterrogationStage({
 
       <CameraRig
         focus={focus}
-        autoRotate={variant === "lobby"}
+        sway={variant === "lobby"}
         // 大厅右侧有 420px 信息面板：注视点右移，把桌面主体推到画面左侧可视区
         targetBiasX={variant === "lobby" ? 1.35 : 0}
       />
