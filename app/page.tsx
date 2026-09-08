@@ -239,7 +239,7 @@ export default function Home() {
           initial={{ opacity: 0, y: -24 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 1.2, type: "spring", stiffness: 120 }}
-          className="text-5xl font-black tracking-wide text-paper drop-shadow-[0_4px_0_rgba(26,22,38,0.8)] md:text-6xl"
+          className="text-5xl font-black tracking-[0.06em] text-paper drop-shadow-[0_4px_0_rgba(26,22,38,0.8)] drop-shadow-[0_10px_18px_rgba(10,8,20,0.55)] md:text-6xl"
         >
           证据链<span className="text-amber">狼人杀</span>
         </motion.h1>
@@ -247,7 +247,7 @@ export default function Home() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 1.6 }}
-          className="mt-2 text-sm font-bold text-paper/70"
+          className="mt-2 text-sm font-bold tracking-[0.2em] text-paper/70"
         >
           所有话语都来自原文，但有人悄悄改变了事实的关联
         </motion.p>
