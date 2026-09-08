@@ -47,10 +47,10 @@ function nameplateTexture(name: string): THREE.CanvasTexture {
   g.lineWidth = 6;
   g.strokeRect(3, 3, 250, 58);
   g.fillStyle = "#1a1626";
-  g.font = "900 26px 'PingFang SC', 'Microsoft YaHei', sans-serif";
+  g.font = "900 30px 'PingFang SC', 'Microsoft YaHei', sans-serif";
   g.textAlign = "center";
   g.textBaseline = "middle";
-  g.fillText(name.length > 7 ? `${name.slice(0, 7)}…` : name, 128, 34);
+  g.fillText(name.length > 6 ? `${name.slice(0, 6)}…` : name, 128, 34);
   const tex = new THREE.CanvasTexture(c);
   tex.colorSpace = THREE.SRGBColorSpace;
   return tex;
@@ -154,10 +154,10 @@ export default function PortraitRow({ roles, selectedId, onSelect, className }: 
                   scale={0.92}
                 />
                 <Pedestal />
-                {/* 名牌：斜立在角色脚前 */}
-                <group position={[0, 0.16, 0.42]} rotation={[-0.3, 0, 0]}>
+                {/* 名牌：斜立在角色脚前（第31轮排印：加大到 0.56 宽/字号 30） */}
+                <group position={[0, 0.17, 0.44]} rotation={[-0.3, 0, 0]}>
                   <mesh>
-                    <planeGeometry args={[0.46, 0.115]} />
+                    <planeGeometry args={[0.56, 0.14]} />
                     <meshBasicMaterial map={plates[i]} toneMapped={false} />
                   </mesh>
                 </group>
