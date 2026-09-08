@@ -102,7 +102,7 @@ export default function PortraitRow({ roles, selectedId, onSelect, className }: 
   const { epoch, wrapRef } = useGlRecovery();
 
   return (
-    <div ref={wrapRef} className={className}>
+    <div ref={wrapRef} className={className} style={{ width: "100%", height: "100%" }}>
       <Canvas
         key={epoch}
         dpr={[1, 1.75]}

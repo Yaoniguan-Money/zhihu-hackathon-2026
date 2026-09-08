@@ -93,7 +93,7 @@ export default function InterrogationStage({
   }, [bubble, roles]);
 
   return (
-    <div ref={wrapRef} className={className}>
+    <div ref={wrapRef} className={className} style={{ width: "100%", height: "100%" }}>
       <Canvas
         key={epoch}
         shadows
