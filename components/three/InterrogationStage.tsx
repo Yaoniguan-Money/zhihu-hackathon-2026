@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState, Suspense } from "react";
 import { Canvas } from "@react-three/fiber";
-import { ContactShadows, Environment, Lightformer, Preload } from "@react-three/drei";
+import { ContactShadows, Environment, Lightformer, PerformanceMonitor, Preload } from "@react-three/drei";
 import * as THREE from "three";
 import GlbCharacter from "./characters/GlbCharacter";
 import InterrogationRoom from "./scene/InterrogationRoom";
@@ -84,6 +84,8 @@ export default function InterrogationStage({
   }, [focusRoleId, roles]);
 
   const { epoch, wrapRef } = useGlRecovery();
+  // 自适应分辨率：帧率下滑先降 dpr（0.9），持续不佳退到 1；恢复则回升
+  const [dpr, setDpr] = useState(1.5);
 
   const bubbleSeat = useMemo(() => {
     if (!bubble) return null;
@@ -97,7 +99,8 @@ export default function InterrogationStage({
       <Canvas
         key={epoch}
         shadows
-        dpr={[1, 1.75]}
+        dpr={dpr}
+        performance={{ min: 0.4 }}
         camera={{ position: [0, 7.8, 10.8], fov: 42, near: 0.1, far: 60 }}
         gl={{ antialias: true }}
         onCreated={({ gl }) => {
@@ -125,6 +128,12 @@ export default function InterrogationStage({
           };
         }}
       >
+      <PerformanceMonitor
+        onIncline={() => setDpr(1.75)}
+        onDecline={() => setDpr(0.9)}
+        onFallback={() => setDpr(1)}
+        flipflops={3}
+      />
       <color attach="background" args={["#171430"]} />
       <fog attach="fog" args={["#171430", 11, 20]} />
 
