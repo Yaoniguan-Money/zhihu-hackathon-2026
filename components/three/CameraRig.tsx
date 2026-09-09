@@ -6,6 +6,7 @@ import { OrbitControls } from "@react-three/drei";
 import gsap from "gsap";
 import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 import * as THREE from "three";
+import { createSwayOrbit, getSwayCameraPosition, type SwayOrbit } from "./camera-motion";
 
 interface CameraRigProps {
   /** 聚焦的角色座位坐标（世界系）；null 表示回到全景。 */
@@ -26,15 +27,23 @@ export default function CameraRig({ focus, intro = true, sway = false, targetBia
   const { camera } = useThree();
   const targetPos = useRef(DEFAULT_POS.clone());
   const targetLook = useRef(DEFAULT_TARGET.clone());
-  const bias = useRef(targetBiasX);
-  bias.current = targetBiasX;
   const userGrabbed = useRef(false);
+  const swayOrbit = useRef<SwayOrbit | null>(null);
+  const introTimeline = useRef<gsap.core.Timeline | null>(null);
+  const introActive = useRef(false);
 
   useEffect(() => {
     if (!intro) return;
     const startPos = new THREE.Vector3(0, 7.8, 10.8);
     camera.position.copy(startPos);
-    const tl = gsap.timeline();
+    introActive.current = true;
+    const tl = gsap.timeline({
+      onComplete: () => {
+        introActive.current = false;
+        introTimeline.current = null;
+      },
+    });
+    introTimeline.current = tl;
     tl.to(camera.position, {
       x: DEFAULT_POS.x,
       y: DEFAULT_POS.y,
@@ -44,14 +53,22 @@ export default function CameraRig({ focus, intro = true, sway = false, targetBia
     });
     return () => {
       tl.kill();
+      if (introTimeline.current === tl) introTimeline.current = null;
+      introActive.current = false;
     };
   }, [camera, intro]);
 
   useEffect(() => {
+    if (focus) {
+      introTimeline.current?.kill();
+      introTimeline.current = null;
+      introActive.current = false;
+    }
     const focusTarget = focus
       ? new THREE.Vector3(focus[0] * 0.38, 1.22, focus[2] * 0.38)
-      : new THREE.Vector3(DEFAULT_TARGET.x + bias.current, DEFAULT_TARGET.y, DEFAULT_TARGET.z);
+      : new THREE.Vector3(DEFAULT_TARGET.x + targetBiasX, DEFAULT_TARGET.y, DEFAULT_TARGET.z);
     targetLook.current.copy(focusTarget);
+    if (!focus) swayOrbit.current = createSwayOrbit(DEFAULT_POS, focusTarget);
     if (focus) {
       const dir = new THREE.Vector3(focus[0], 0, focus[2]).normalize();
       // 相机放到说话者对面桌沿的斜上方：正视其面部，桌沿作前景，邻座退到画框边缘。
@@ -64,11 +81,12 @@ export default function CameraRig({ focus, intro = true, sway = false, targetBia
     } else {
       targetPos.current.copy(DEFAULT_POS);
     }
-  }, [focus]);
+  }, [focus, targetBiasX]);
 
   useFrame((state, delta) => {
     const controls = controlsRef.current;
     if (!controls) return;
+    if (introActive.current) return;
     if (focus && !userGrabbed.current) {
       controls.target.lerp(targetLook.current, 1 - Math.pow(0.002, delta));
       camera.position.lerp(targetPos.current, 1 - Math.pow(0.02, delta));
@@ -76,12 +94,9 @@ export default function CameraRig({ focus, intro = true, sway = false, targetBia
     } else if (sway && !focus && !userGrabbed.current) {
       // 大厅有界摇摆：注视点固定在偏移后的桌心，相机绕其 ±约 28° 缓摆
       const t = state.clock.elapsedTime;
-      const base = camera.position.clone().sub(targetLook.current);
-      const radius = base.length();
-      const theta0 = Math.atan2(base.x, base.z);
-      const phi = Math.acos(THREE.MathUtils.clamp(base.y / radius, -1, 1));
-      const theta = theta0 + Math.sin(t * 0.1) * 0.5;
-      camera.position.setFromSphericalCoords(radius, phi, theta).add(targetLook.current);
+      const orbit = swayOrbit.current ?? createSwayOrbit(camera.position, targetLook.current);
+      swayOrbit.current = orbit;
+      camera.position.copy(getSwayCameraPosition(orbit, t));
       controls.target.copy(targetLook.current);
       camera.lookAt(targetLook.current);
       controls.update();
