@@ -95,7 +95,11 @@ export default function InterrogationStage({
   }, [bubble, roles]);
 
   return (
-    <div ref={wrapRef} className={className} style={{ width: "100%", height: "100%" }}>
+    <div
+      ref={wrapRef}
+      className={className}
+      style={{ width: "100%", height: "100%", touchAction: variant === "lobby" ? "none" : undefined }}
+    >
       <Canvas
         key={epoch}
         shadows
@@ -191,6 +195,7 @@ export default function InterrogationStage({
       <CameraRig
         focus={focus}
         sway={variant === "lobby"}
+        interactionMode={variant === "lobby" ? "free" : "guided"}
         // 大厅右侧有 420px 信息面板：注视点右移，把桌面主体推到画面左侧可视区
         targetBiasX={variant === "lobby" ? 1.35 : 0}
       />

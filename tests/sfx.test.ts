@@ -1,4 +1,5 @@
 import { describe, test, expect, beforeEach } from "bun:test";
+import { calcDiscernmentLevel } from "../lib/score-card";
 
 /**
  * lib/sfx 音效引擎纯逻辑测试（合成/播放本体依赖 WebAudio，浏览器端人工验收）。
@@ -33,7 +34,14 @@ class FakePerformance {
 };
 
 // sfx.ts 顶层读取 window/localStorage/performance，桩必须先于导入就位
-const { isSfxMuted, setSfxMuted, toggleSfxMuted, playSfx } = await import("../lib/sfx");
+const {
+  SFX_MASTER_GAIN,
+  isSfxMuted,
+  setSfxMuted,
+  subscribeSfxMuted,
+  toggleSfxMuted,
+  playSfx,
+} = await import("../lib/sfx");
 
 describe("lib/sfx 纯逻辑", () => {
   beforeEach(() => {
@@ -50,11 +58,24 @@ describe("lib/sfx 纯逻辑", () => {
     expect(store.get("ecw.sfx.muted")).toBe("0");
   });
 
+  test("非语音音效总增益足以在普通扬声器上清晰辨认", () => {
+    expect(SFX_MASTER_GAIN).toBeGreaterThanOrEqual(0.8);
+  });
+
   test("toggleSfxMuted 返回切换后的状态", () => {
     const after1 = toggleSfxMuted();
     expect(after1).toBe(true);
     const after2 = toggleSfxMuted();
     expect(after2).toBe(false);
+  });
+
+  test("非语音音频组可以即时跟随静音状态", () => {
+    const states: boolean[] = [];
+    const unsubscribe = subscribeSfxMuted((next) => states.push(next));
+    setSfxMuted(true);
+    setSfxMuted(false);
+    unsubscribe();
+    expect(states).toEqual([false, true, false]);
   });
 
   test("静音时 playSfx 静默跳过且不抛错", () => {
@@ -79,8 +100,6 @@ describe("lib/sfx 纯逻辑", () => {
 });
 
 describe("calcDiscernmentLevel 分档", () => {
-  // 独立导入，避免与 window 桩互相影响
-  const { calcDiscernmentLevel } = require("../lib/score-card");
   test("边界分档", () => {
     expect(calcDiscernmentLevel(0)).toBe(1);
     expect(calcDiscernmentLevel(39.4)).toBe(1);

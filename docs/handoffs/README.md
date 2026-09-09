@@ -116,3 +116,4 @@ docs/handoffs/<ticket-or-stage-id>.md
 | 开场五条并行生成 + 跳过即切下一条 + Validator 瘦身 | complete | [2026-09-08-openings-parallel-and-advance](./2026-09-08-openings-parallel-and-advance.md) |
 | 50 轮资产/体验升级启动：环境修复与基线走查 | complete | [2026-09-09-asset-50-rounds](./2026-09-09-asset-50-rounds.md) |
 | CAM-ROT-01 开场 3D 相机摇摆失控修复 | complete | [2026-09-09-camera-sway-rotation-fix](./2026-09-09-camera-sway-rotation-fix.md) |
+| UX-AUDIO-INPUT-01 首屏自由环视、SFX 增益与三首游戏音乐轮换 | complete | [2026-09-09-lobby-input-sfx-and-game-music](./2026-09-09-lobby-input-sfx-and-game-music.md) |

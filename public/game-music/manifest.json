@@ -1,0 +1,31 @@
+{
+  "tracks": [
+    {
+      "file": "morgan-ambient-calm-ambient-dreamscape-529861.mp3",
+      "sha256": "88521606775C8CC0B7B0E2BDE3C48E8DE40C8E866A1F131A82553E5BA83CAE67",
+      "duration_seconds": 222.144,
+      "codec": "mp3",
+      "sample_rate_hz": 48000,
+      "channels": 2,
+      "bit_rate": 256000
+    },
+    {
+      "file": "leberch-ambient-595680.mp3",
+      "sha256": "C90C7B1945D9C6E0601292F09F80E040E1B6C543A3636EA9AEFBE966C3D8EB1F",
+      "duration_seconds": 210.050594,
+      "codec": "mp3",
+      "sample_rate_hz": 44100,
+      "channels": 2,
+      "bit_rate": 255999
+    },
+    {
+      "file": "atlasaudio-ambient-ambient-music-576612.mp3",
+      "sha256": "83091B64E6FFCF4149E02F713D2BBBA024220C278077E779B7E5869DE0025C14",
+      "duration_seconds": 124.029375,
+      "codec": "mp3",
+      "sample_rate_hz": 44100,
+      "channels": 2,
+      "bit_rate": 256000
+    }
+  ]
+}

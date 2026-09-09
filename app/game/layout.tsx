@@ -7,8 +7,8 @@ import { useGame } from "@/context/GameContext";
 import { Icon } from "@/components/ui/Icons";
 import { requestTour, type TourId } from "@/components/onboarding/GameTour";
 import SoundToggle from "@/components/ui/SoundToggle";
-import { playSfx, primeSfx, isSfxMuted } from "@/lib/sfx";
-import { startBgm, setBgmMood } from "@/lib/bgm";
+import { playSfx, primeSfx } from "@/lib/sfx";
+import { startBgm, stopBgm } from "@/lib/bgm";
 
 const go = () => playSfx("click");
 
@@ -43,23 +43,21 @@ export default function GameLayout({ children }: { children: ReactNode }) {
     }
   }, [booted, matchesLobby, pathname, router]);
 
-  // BGM：首次手势解锁后启动；指控页用紧张情绪，其余页面用 calm。
+  // BGM：首次手势解锁后启动三首上传音乐的顺序轮换。
   useEffect(() => {
     const kick = () => {
       primeSfx();
-      startBgm(pathname?.startsWith("/game/accusation") ? "tension" : "calm");
+      startBgm();
     };
-    window.addEventListener("pointerdown", kick, { once: true });
-    window.addEventListener("keydown", kick, { once: true });
+    window.addEventListener("pointerdown", kick);
+    window.addEventListener("keydown", kick);
     return () => {
       window.removeEventListener("pointerdown", kick);
       window.removeEventListener("keydown", kick);
     };
   }, [pathname]);
 
-  useEffect(() => {
-    setBgmMood(pathname?.startsWith("/game/accusation") ? "tension" : "calm");
-  }, [pathname]);
+  useEffect(() => () => stopBgm(), []);
 
   return (
     <div className="flex min-h-screen flex-col">

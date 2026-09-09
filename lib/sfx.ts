@@ -25,8 +25,11 @@ type SfxName =
 let ctx: AudioContext | null = null;
 let master: GainNode | null = null;
 let muted = false;
+const muteListeners = new Set<(muted: boolean) => void>();
 
 const MUTE_KEY = "ecw.sfx.muted";
+/** UI/游戏音效总增益；BGM 与角色语音使用独立音频链路，不受此值影响。 */
+export const SFX_MASTER_GAIN = 0.8;
 
 if (typeof window !== "undefined") {
   muted = window.localStorage.getItem(MUTE_KEY) === "1";
@@ -39,7 +42,7 @@ function ensureCtx(): AudioContext | null {
     if (!AC) return null;
     ctx = new AC();
     master = ctx.createGain();
-    master.gain.value = 0.5;
+    master.gain.value = SFX_MASTER_GAIN;
     master.connect(ctx.destination);
   }
   if (ctx.state === "suspended") void ctx.resume();
@@ -55,6 +58,14 @@ export function setSfxMuted(next: boolean): void {
   if (typeof window !== "undefined") {
     window.localStorage.setItem(MUTE_KEY, next ? "1" : "0");
   }
+  for (const listener of muteListeners) listener(next);
+}
+
+/** 让 BGM 等非语音音频组即时跟随全局音效静音；角色语音不订阅此总线。 */
+export function subscribeSfxMuted(listener: (muted: boolean) => void): () => void {
+  muteListeners.add(listener);
+  listener(muted);
+  return () => muteListeners.delete(listener);
 }
 
 export function toggleSfxMuted(): boolean {

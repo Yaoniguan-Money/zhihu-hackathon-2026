@@ -6,7 +6,13 @@ import { OrbitControls } from "@react-three/drei";
 import gsap from "gsap";
 import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 import * as THREE from "three";
-import { createSwayOrbit, getSwayCameraPosition, type SwayOrbit } from "./camera-motion";
+import {
+  createSwayOrbit,
+  getCameraInteractionPolicy,
+  getSwayCameraPosition,
+  type CameraInteractionMode,
+  type SwayOrbit,
+} from "./camera-motion";
 
 interface CameraRigProps {
   /** 聚焦的角色座位坐标（世界系）；null 表示回到全景。 */
@@ -17,20 +23,30 @@ interface CameraRigProps {
   sway?: boolean;
   /** 无聚焦时注视点的横向偏移：正值把主体推到画面左侧（给右侧 UI 面板让位）。 */
   targetBiasX?: number;
+  /** guided 会在交互后恢复程序运镜；free 由玩家持续掌控相机。 */
+  interactionMode?: CameraInteractionMode;
 }
 
 const DEFAULT_POS = new THREE.Vector3(0, 5.1, 8.8);
 const DEFAULT_TARGET = new THREE.Vector3(0, 0.75, -0.1);
 
-export default function CameraRig({ focus, intro = true, sway = false, targetBiasX = 0 }: CameraRigProps) {
+export default function CameraRig({
+  focus,
+  intro = true,
+  sway = false,
+  targetBiasX = 0,
+  interactionMode = "guided",
+}: CameraRigProps) {
   const controlsRef = useRef<OrbitControlsImpl>(null);
   const { camera } = useThree();
+  const interactionPolicy = getCameraInteractionPolicy(interactionMode);
   const targetPos = useRef(DEFAULT_POS.clone());
   const targetLook = useRef(DEFAULT_TARGET.clone());
   const userGrabbed = useRef(false);
   const swayOrbit = useRef<SwayOrbit | null>(null);
   const introTimeline = useRef<gsap.core.Timeline | null>(null);
   const introActive = useRef(false);
+  const releaseTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     if (!intro) return;
@@ -57,6 +73,13 @@ export default function CameraRig({ focus, intro = true, sway = false, targetBia
       introActive.current = false;
     };
   }, [camera, intro]);
+
+  useEffect(
+    () => () => {
+      if (releaseTimer.current) clearTimeout(releaseTimer.current);
+    },
+    [],
+  );
 
   useEffect(() => {
     if (focus) {
@@ -109,19 +132,28 @@ export default function CameraRig({ focus, intro = true, sway = false, targetBia
       enablePan={false}
       minDistance={2.4}
       maxDistance={11}
-      minPolarAngle={Math.PI / 7}
-      maxPolarAngle={Math.PI / 2.05}
+      minPolarAngle={interactionPolicy.minPolarAngle}
+      maxPolarAngle={interactionPolicy.maxPolarAngle}
       enableDamping
       autoRotate={false}
       autoRotateSpeed={0.55}
       dampingFactor={0.08}
       onStart={() => {
+        if (releaseTimer.current) {
+          clearTimeout(releaseTimer.current);
+          releaseTimer.current = null;
+        }
+        introTimeline.current?.kill();
+        introTimeline.current = null;
+        introActive.current = false;
         userGrabbed.current = true;
       }}
       onEnd={() => {
-        // 用户松手后延迟恢复程序运镜权限，给观察留出时间
-        setTimeout(() => {
+        if (!interactionPolicy.resumeProgrammaticMotion) return;
+        // guided 模式松手后延迟恢复程序运镜权限，给观察留出时间。
+        releaseTimer.current = setTimeout(() => {
           userGrabbed.current = false;
+          releaseTimer.current = null;
         }, 2500);
       }}
     />
