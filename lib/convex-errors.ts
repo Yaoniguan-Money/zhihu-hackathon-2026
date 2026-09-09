@@ -71,7 +71,9 @@ export function errorCodeHint(code: PublicError["code"]): string {
     case "VOICE_AUDIO_TOO_LONG":
       return "录音超过 30 秒上限，请把问题说短一点。";
     case "SERVICE_NOT_CONFIGURED":
-      return "服务端尚未配置模型，暂时无法进行该操作。";
+      return "你还没有配置模型服务：点右上角齿轮，填写你的模型 API（Base URL / API Key / 模型名）后再试。";
+    case "SERVICE_UNAVAILABLE":
+      return "模型服务暂时连不上；若是你自己的配置，请到设置里检查 Base URL、API Key 与模型名。";
     case "RATE_LIMITED":
       return "次数已达上限，请稍后再试。";
     case "AUTH_REQUIRED":

@@ -16,6 +16,7 @@ import type { CaseCompilationStatusPublic } from "@/contracts/public";
 import GameTour, { requestTour } from "@/components/onboarding/GameTour";
 import { playSfx } from "@/lib/sfx";
 import SoundToggle from "@/components/ui/SoundToggle";
+import { ModelSettingsButton } from "@/components/settings/ModelSettingsDialog";
 
 const InterrogationStage = dynamic(() => import("@/components/three/InterrogationStage"), {
   ssr: false,
@@ -263,6 +264,7 @@ export default function Home() {
           </h2>
           <div className="flex items-center gap-2">
             {!booted && <span className="text-xs text-paper/50">建立身份中…</span>}
+            <ModelSettingsButton className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-paper/25 text-paper/60 transition-colors hover:border-amber hover:text-amber" />
             <SoundToggle className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-paper/25 text-paper/60 transition-colors hover:border-amber hover:text-amber" />
             <button
               onClick={() => requestTour("lobby")}

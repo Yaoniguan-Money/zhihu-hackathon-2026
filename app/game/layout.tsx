@@ -7,6 +7,7 @@ import { useGame } from "@/context/GameContext";
 import { Icon } from "@/components/ui/Icons";
 import { requestTour, type TourId } from "@/components/onboarding/GameTour";
 import SoundToggle from "@/components/ui/SoundToggle";
+import { ModelSettingsButton } from "@/components/settings/ModelSettingsDialog";
 import { playSfx, primeSfx } from "@/lib/sfx";
 import { startBgm, stopBgm } from "@/lib/bgm";
 
@@ -103,6 +104,7 @@ export default function GameLayout({ children }: { children: ReactNode }) {
               最终指控
             </Link>
           )}
+          <ModelSettingsButton />
           <SoundToggle />
           {tourId && (
             <button
