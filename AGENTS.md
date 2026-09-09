@@ -5,11 +5,12 @@
 ## 事实来源与必读顺序
 
 1. 先读根目录 `CONTEXT.md`，使用其中的领域词汇。
-2. 实施冲突的优先级为：当前用户的明确决定 → `docs/adr/` 中已接受的 ADR → 《证据链狼人杀_产品技术分工开发流程与数据接口_v2.0.md》产品基线 → `docs/developer-a/CONTRACTS.md` → `docs/developer-a/ENGINEERING_SPEC.md` → 根目录 `DEVELOPER_A_IMPLEMENTATION_PLAN.md`。
-3. 只有 `docs/adr/` 中已接受的决策可以有意偏离 v2.0。
-4. 跨端数据形状、运行时校验和错误语义以 `docs/developer-a/CONTRACTS.md` 为唯一事实来源。
-5. A1–A9 行为与架构以 `docs/developer-a/ENGINEERING_SPEC.md` 为准；实施顺序以根目录 `DEVELOPER_A_IMPLEMENTATION_PLAN.md` 为准。旧 `docs/developer-a/IMPLEMENTATION_PLAN.md` 仅为迁移跳转，不能承载独立计划。
-6. 涉及官方 skill、CLI、知乎接口或刘看山素材时，读取 `docs/developer-a/OFFICIAL_RESOURCES.md`。实际调用知乎能力前还必须读取项目级 `.codex/skills/zhihu/SKILL.md`。
+2. 实施冲突的优先级为：当前用户的明确决定 → `docs/adr/` 中已接受的 ADR。
+3. 跨端数据形状、运行时校验和错误语义以 `contracts/` 目录下的运行时 schema（zod）为唯一事实来源；修改形状先改 schema 与 fixture，再改调用方。
+4. 实施顺序以根目录 `DEVELOPER_A_IMPLEMENTATION_PLAN.md` 为准。
+5. 涉及官方 skill、CLI 或知乎接口时，实际调用知乎能力前必须读取项目级 `.codex/skills/zhihu/SKILL.md`。
+
+> 2026-09-09 用户决定：原《证据链狼人杀_产品技术分工开发流程与数据接口_v2.0.md》与 `docs/developer-a/`（CONTRACTS、ENGINEERING_SPEC、IMPLEMENTATION_PLAN、OFFICIAL_RESOURCES、README）已归档到仓库外并从仓库删除，不再作为参考；其仍有效的约束已由 `docs/adr/` 与本文件承接。
 
 如果较低优先级文档与较高优先级文档冲突，停止实现并先修正文档；禁止在代码里自行猜测一个“兼容”行为。
 
@@ -36,7 +37,7 @@
 - 交接记录存放于 `docs/handoffs/<ticket-or-stage-id>.md`，索引、命名规则和固定模板见 `docs/handoffs/README.md`。
 - 记录必须写明：环节 ID、状态、完成时间、负责人；实际完成和明确未完成内容；修改文件及用途；更新过的权威文档；运行的定向验证与结果；已知失败、风险、外部阻塞和下一步；下一位 Agent 的最小阅读顺序与可执行起点。
 - 接口、行为、术语、资源、架构或实施顺序发生变化时，必须先更新相应权威开发文档，再在交接记录中链接该变更。没有规范事实变化时，记录必须明确写“无规范变更”，不得复制文档内容充数。
-- 交接记录是工作事实和接手入口，不是新的契约来源；`CONTRACTS.md`、`ENGINEERING_SPEC.md`、根目录 `DEVELOPER_A_IMPLEMENTATION_PLAN.md` 与 ADR 的优先级保持不变。
+- 交接记录是工作事实和接手入口，不是新的契约来源；`contracts/` 运行时 schema、`docs/adr/` 与根目录 `DEVELOPER_A_IMPLEMENTATION_PLAN.md` 的优先级保持不变。
 - 记录不得包含 Secret、Access Secret、API Key、完整私有 Prompt、私有候选、Fidelity、GM 真相、未解锁 Claim 或其他只能存在服务端的数据。
 - 记录可以因事实修正而更新，但必须保留当前真实状态；阻塞、失败和未完成项不得改写成完成。
 

@@ -4,7 +4,7 @@
 
 ## 1. 目的、范围与权威性
 
-本文件是开发人员 A 唯一可编辑的**实施顺序**事实来源。它将原 [开发人员 A 纵向实施计划](./docs/developer-a/IMPLEMENTATION_PLAN.md) 迁移到根目录；旧路径只保留跳转说明，不能再承载独立的实施步骤。
+本文件是开发人员 A 唯一可编辑的**实施顺序**事实来源。（历史注：其前身 docs/developer-a/IMPLEMENTATION_PLAN.md 已于 2026-09-09 随 developer-a 文档一并归档移除。）
 
 本次文档迁移只记录审计结果和后续执行顺序。它**没有**初始化项目、安装依赖、创建业务代码、配置 Secret、调用知乎 API，或把 D0 的提案当作已经生效的公开契约。
 
@@ -13,11 +13,10 @@
 1. 当前用户的明确决定。
 2. [docs/adr/](./docs/adr/) 中已接受的 ADR。
 3. [《证据链狼人杀_产品技术分工开发流程与数据接口_v2.0》](./证据链狼人杀_产品技术分工开发流程与数据接口_v2.0.md) 产品基线。
-4. [CONTRACTS.md](./docs/developer-a/CONTRACTS.md)：跨端数据形状、运行时校验、公开错误语义。
-5. [ENGINEERING_SPEC.md](./docs/developer-a/ENGINEERING_SPEC.md)：A1–A9 行为与架构。
+4. `contracts/` 目录下的运行时 schema（zod）：跨端数据形状、运行时校验、公开错误语义的唯一事实来源（2026-09-09 起 CONTRACTS/ENGINEERING_SPEC 文档已按用户决定归档移除，见 ADR 0005 与 AGENTS.md）。
 6. 本计划：在不改变以上事实的前提下安排实施顺序、Gate 和验收证据。
 
-开始任何环节前，先读 [CONTEXT.md](./CONTEXT.md)、[AGENTS.md](./AGENTS.md)、产品基线、相关 ADR、契约、工程规格、本计划以及相关交接记录。涉及官方 Skill、CLI、知乎接口或刘看山素材时，额外读 [OFFICIAL_RESOURCES.md](./docs/developer-a/OFFICIAL_RESOURCES.md)；实际调用知乎能力前还必须读项目内 [zhihu Skill](./.codex/skills/zhihu/SKILL.md)。
+开始任何环节前，先读 [CONTEXT.md](./CONTEXT.md)、[AGENTS.md](./AGENTS.md)、产品基线、相关 ADR、契约、工程规格、本计划以及相关交接记录。实际调用知乎能力前还必须读项目内 [zhihu Skill](./.codex/skills/zhihu/SKILL.md)。
 
 ## 2. 审计现场：当前事实与 Gate
 
@@ -45,7 +44,7 @@
 
 ## 3. D0：契约修复包与共同评审 Gate
 
-D0 是后续 Public schema 的前置条件，而不是可由实现者自行猜测的设计清单。A 先更新 [CONTRACTS.md](./docs/developer-a/CONTRACTS.md) 和 [ENGINEERING_SPEC.md](./docs/developer-a/ENGINEERING_SPEC.md)；若有意偏离产品 v2.0，再新增并接受 ADR。随后 B 对 Public 类型、错误、认证、状态和 P0 Cut 签署。**在签署前，下列内容均为提案，不能写进生产行为。**
+D0 是后续 Public schema 的前置条件，而不是可由实现者自行猜测的设计清单。A 先更新 `contracts/` 运行时 schema 与对应文档（历史基线 CONTRACTS.md / ENGINEERING_SPEC.md 已于 2026-09-09 归档移除）；行为变更新增并接受 ADR。随后 B 对 Public 类型、错误、认证、状态和 P0 Cut 签署。**在签署前，下列内容均为提案，不能写进生产行为。**
 
 ### 3.1 案件目录、编译与访问模型
 
@@ -222,7 +221,7 @@ P0 使用 Anonymous 身份。AUTH1 只有在 App ID、App Key、Access Secret、
 本次和之后的计划维护均须满足：
 
 - 所有 Markdown 本地链接可解析；旧计划文件只保留迁移链接。
-- [AGENTS.md](./AGENTS.md)、[开发人员 A README](./docs/developer-a/README.md)、[handoff 索引](./docs/handoffs/README.md)和历史记录均指向本根计划，不存在第二份实施顺序。
+- [AGENTS.md](./AGENTS.md)、[handoff 索引](./docs/handoffs/README.md)和历史记录均指向本根计划，不存在第二份实施顺序。
 - A1–A9、每个 Public Interface、每个 Gate 和每个 Public Error 都能在本计划映射到唯一主阶段。
 - 当前状态与现场一致，不宣称已有源码、测试、提交、Golden Case、B 评审或部署。
 - Secret、邀请码明文、OAuth Token、Prompt、私有候选、Fidelity、GM 真相和未解锁 Claim 不进入本计划或 handoff。

@@ -18,7 +18,7 @@ Source Snapshot（URL + 完整正文）
   → 本地语音（SenseVoice ASR + Kokoro TTS，仅 127.0.0.1）
 ```
 
-核心设计约束（详见 [`AGENTS.md`](./AGENTS.md)、[`docs/developer-a/CONTRACTS.md`](./docs/developer-a/CONTRACTS.md)）：
+核心设计约束（详见 [`AGENTS.md`](./AGENTS.md)、[`docs/adr/`](./docs/adr)、`contracts/` 运行时 schema）：
 
 - 完整正文是建案必需输入；URL 只记录来源，运行时不抓取正文。
 - 模型输出只是候选：schema、引用、权限、投影校验全部在服务端；原始 token 永不出后端。
