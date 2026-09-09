@@ -387,6 +387,7 @@ export const initializeAskTurn = internalMutation({
     });
     await ctx.scheduler.runAfter(0, internal.roleTurns.roleTurnWorker, {
       request_id: requestId,
+      owner_identity: args.identity_token, // ADR 0005：按回合发起者解析模型配置
     });
     return { receipt };
   },
@@ -525,6 +526,7 @@ export const initializePresentRecordingTurn = internalMutation({
     });
     await ctx.scheduler.runAfter(0, internal.roleTurns.roleTurnWorker, {
       request_id: requestId,
+      owner_identity: args.identity_token, // ADR 0005：按回合发起者解析模型配置
     });
     return { receipt };
   },
@@ -630,7 +632,10 @@ interface TurnContext {
 }
 
 export const roleTurnWorker = internalAction({
-  args: { request_id: v.string() },
+  args: {
+    request_id: v.string(),
+    owner_identity: v.string(), // ADR 0005：回合发起者的模型配置
+  },
   handler: async (ctx, args) => {
     const accepted = await ctx.runQuery(internal.roleTurns.ticketInternal, {
       request_id: args.request_id,
@@ -677,7 +682,8 @@ export const roleTurnWorker = internalAction({
       });
     };
     try {
-      const gateway = await modelGatewayFor(ctx);
+      // ADR 0005：按回合发起者实时解析其模型配置（保存后下一回合即生效）。
+      const gateway = await modelGatewayFor(ctx, args.owner_identity);
       const outcome = await runGenerationAttempts(
         gateway,
         {

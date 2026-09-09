@@ -5,7 +5,7 @@ import {
   signInAnonymous,
   waitForTurnTerminal,
 } from "./helpers/convex-local.js";
-import { clearAiProviderRegistry } from "./helpers/convex-local.js";
+import { clearUserModelConfig } from "./helpers/convex-local.js";
 import { publicRoleTurnSchema } from "@contracts/public/index.js";
 
 /**
@@ -54,7 +54,7 @@ async function createInvestigationSession(): Promise<{
 
 describe("TB4 角色回合（本地后端，无模型）", () => {
   test("前置：清空 AI 供应商注册表覆盖层", async () => {
-    expect(await clearAiProviderRegistry()).toBe(true);
+    expect(await clearUserModelConfig(await signInAnonymous())).toBe(true);
   });
 
   test("briefing 阶段 ask → SESSION_PHASE_CONFLICT", async () => {

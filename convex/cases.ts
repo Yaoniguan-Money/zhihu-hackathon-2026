@@ -511,6 +511,7 @@ export const initializeCreation = internalMutation({
       source_url: args.source_url,
       canonical_text: args.canonical_text,
       theme: args.theme,
+      owner_identity: args.identity_token, // ADR 0005：按建案发起者解析模型配置
     });
 
     return { receipt };
@@ -546,6 +547,7 @@ export const compileCaseWorker = internalAction({
     source_url: v.string(),
     canonical_text: v.string(),
     theme: v.optional(v.string()),
+    owner_identity: v.string(), // ADR 0005：建案发起者的模型配置
   },
   handler: async (ctx, args) => {
     const ticket = await ctx.runQuery(internal.cases.ticketStatusInternal, {
@@ -590,8 +592,9 @@ export const compileCaseWorker = internalAction({
         article.canonical_text.slice(p.start, p.end),
       );
 
-      // 2) 模型候选（真实外部 Seam；maxRetries=0，无修复无重试）
-      const gateway = await modelGatewayFor(ctx);
+      // 2) 模型候选（真实外部 Seam；maxRetries=0，无修复无重试；
+      // ADR 0005：按建案发起者实时解析其模型配置）
+      const gateway = await modelGatewayFor(ctx, args.owner_identity);
       const claimCallStart = Date.now();
       await audit("model_call_started", { task: "claim" });
       let candidate;

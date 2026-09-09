@@ -4,7 +4,7 @@ import {
   errorText,
   signInAnonymous,
 } from "./helpers/convex-local.js";
-import { clearAiProviderRegistry } from "./helpers/convex-local.js";
+import { clearUserModelConfig } from "./helpers/convex-local.js";
 import { seedGoldenCaseViaAdmin } from "./helpers/golden-seed.js";
 
 /**
@@ -20,7 +20,7 @@ function uuid(): string {
 
 describe("TB7 game.start（本地后端，无模型）", () => {
   test("前置：清空 AI 供应商注册表覆盖层", async () => {
-    expect(await clearAiProviderRegistry()).toBe(true);
+    expect(await clearUserModelConfig(await signInAnonymous())).toBe(true);
   });
   beforeAll(async () => {
     await seedGoldenCaseViaAdmin();

@@ -9,7 +9,6 @@
  */
 
 import type * as admin from "../admin.js";
-import type * as aiConfig from "../aiConfig.js";
 import type * as aiRuntime from "../aiRuntime.js";
 import type * as audit from "../audit.js";
 import type * as auth from "../auth.js";
@@ -23,6 +22,7 @@ import type * as publicErrors from "../publicErrors.js";
 import type * as reveal from "../reveal.js";
 import type * as roleTurns from "../roleTurns.js";
 import type * as sessions from "../sessions.js";
+import type * as userModelConfig from "../userModelConfig.js";
 import type * as voice from "../voice.js";
 
 import type {
@@ -33,7 +33,6 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   admin: typeof admin;
-  aiConfig: typeof aiConfig;
   aiRuntime: typeof aiRuntime;
   audit: typeof audit;
   auth: typeof auth;
@@ -47,6 +46,7 @@ declare const fullApi: ApiFromModules<{
   reveal: typeof reveal;
   roleTurns: typeof roleTurns;
   sessions: typeof sessions;
+  userModelConfig: typeof userModelConfig;
   voice: typeof voice;
 }>;
 

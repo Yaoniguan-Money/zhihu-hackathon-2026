@@ -505,39 +505,3 @@ export const seedSystemCase = internalMutation({
     return { case_key: args.case_key, created: true };
   },
 });
-
-/**
- * 运维诊断工具：在 action 运行时内执行一次最小结构化模型调用，
- * 返回 provider 层错误（含 cause），用于排查 AI_* 配置与供应商可用性。
- * 只返回错误文本，不记录任何 Secret。
- */
-export const debugModelProbe = internalAction({
-  args: {},
-  handler: async (ctx) => {
-    const { modelGatewayFor } = await import("./aiRuntime");
-    const { z: zod } = await import("zod");
-    try {
-      const gateway = await modelGatewayFor(ctx);
-      const result = await gateway.generateStructured({
-        task: "role",
-        schemaName: "probe",
-        system: "只输出 JSON。",
-        prompt: '输出 {"speech":"测试"}',
-        schema: zod.object({ speech: zod.string() }),
-      });
-      return { ok: true as const, speech: result.speech };
-    } catch (error) {
-      const err = error as Error & { cause?: unknown; failure?: unknown };
-      const failure = err.failure as { code?: string } | undefined;
-      const cause = err.cause as Error | undefined;
-      return {
-        ok: false as const,
-        name: err.name,
-        message: err.message.slice(0, 300),
-        failure_code: failure?.code ?? null,
-        cause_name: cause?.name ?? null,
-        cause_message: cause?.message?.slice(0, 500) ?? null,
-      };
-    }
-  },
-});

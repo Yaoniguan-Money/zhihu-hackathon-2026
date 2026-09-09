@@ -171,32 +171,16 @@ export async function waitForTurnTerminal(
 }
 
 /**
- * 清空多供应商注册表覆盖层（ADR 0003 补充决议）。
- * "本地后端，无模型"集成测试的前置：确保网关走 env 回退路径（预期无 AI_* 配置）。
+ * 清空当前用户（匿名身份）的 BYOK 模型配置（ADR 0005）。
+ * "本地后端，无模型"集成测试的前置：确保该身份无模型配置
+ * （预期模型操作返回 typed SERVICE_NOT_CONFIGURED）。
  */
-export async function clearAiProviderRegistry(): Promise<boolean> {
-  const secret = await adminSecret();
-  const result = await callConvex("mutation", "aiConfig:clearRegistry", {
-    secret,
-  });
+export async function clearUserModelConfig(token: string): Promise<boolean> {
+  const result = await callConvex(
+    "mutation",
+    "userModelConfig:clearUserModelConfig",
+    {},
+    { bearer: token },
+  );
   return result.ok;
-}
-
-/**
- * AI_ADMIN_SECRET 只从 gitignored 的 .env.local 读取（bun test 不会自动加载
- * .env.local，与 localBackend() 的管理键读取方式保持一致）。
- */
-async function adminSecret(): Promise<string> {
-  if (process.env.AI_ADMIN_SECRET?.trim()) return process.env.AI_ADMIN_SECRET;
-  const raw = await readFile(join(CASE_DIR, ".env.local"), "utf8");
-  const line = raw
-    .split("\n")
-    .find((l) => l.startsWith("AI_ADMIN_SECRET="));
-  const secret = line?.slice("AI_ADMIN_SECRET=".length).trim();
-  if (!secret) {
-    throw new Error(
-      "AI_ADMIN_SECRET 未配置：无模型集成测试无法清空 AI 供应商注册表覆盖层",
-    );
-  }
-  return secret;
 }

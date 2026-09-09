@@ -1,20 +1,31 @@
 import type { ActionCtx } from "./_generated/server";
 import { internal } from "./_generated/api";
 import { OpenAICompatibleModelGateway } from "../server/model-gateway/openai-compatible-gateway.js";
-import { resolveRegistryDoc } from "../server/model-gateway/config.js";
+import {
+  ModelConfigMissingError,
+  resolveRegistryDoc,
+} from "../server/model-gateway/config.js";
 
 /**
- * 网关运行时解析（ADR 0003 补充决议）：优先 Convex 表 ai_provider_config
- * （管理页保存后下一次调用即生效），表为空回退八项 AI_* 环境变量。
- * 两种来源都是显式配置；解析失败仍为 typed failure，无任何代码默认。
+ * 网关运行时解析（ADR 0005）：模型配置的唯一来源是调用者本人在前端设置里
+ * 保存的 ai_user_provider_config 注册表，每次模型调用实时解析（保存后下一跳
+ * 即生效），无全局注册表或环境变量回退。未配置 → MODEL_CONFIG_MISSING
+ * （公开映射 SERVICE_NOT_CONFIGURED，文案引导去设置）。
  */
 export async function modelGatewayFor(
   ctx: ActionCtx,
+  ownerIdentity: string,
 ): Promise<OpenAICompatibleModelGateway> {
-  const doc = await ctx.runQuery(internal.aiConfig.resolveRegistry);
-  if (doc) {
-    const config = resolveRegistryDoc(JSON.parse(doc.registry_json));
-    return new OpenAICompatibleModelGateway(config);
+  const doc = await ctx.runQuery(internal.userModelConfig.resolveUserRegistry, {
+    owner_identity: ownerIdentity,
+  });
+  if (!doc) {
+    throw new ModelConfigMissingError({
+      code: "MODEL_CONFIG_MISSING",
+      incident_id: "cfg:user-not-configured",
+      detail: "用户尚未配置模型服务：请在设置中填写你的模型 API 配置",
+    });
   }
-  return OpenAICompatibleModelGateway.fromEnv();
+  const config = resolveRegistryDoc(JSON.parse(doc.registry_json));
+  return new OpenAICompatibleModelGateway(config);
 }

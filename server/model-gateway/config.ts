@@ -272,3 +272,63 @@ export function providerForTask(
   }
   return { provider, modelId: modelId.trim() };
 }
+
+/**
+ * BYOK 用户级配置（ADR 0005）：前端设置的简化单供应商表单。
+ * 未填名称时用固定占位名合成单供应商注册表（五任务全路由到它）；
+ * 高级区的每任务模型留空表示用默认模型。
+ */
+export const userModelConfigInputSchema = z.object({
+  name: z.string().trim().optional(),
+  base_url: z.string().trim().min(1),
+  api_key: z.string().min(1),
+  model: z.string().trim().min(1),
+  models: z
+    .object({
+      claim: z.string().trim().optional(),
+      case: z.string().trim().optional(),
+      role: z.string().trim().optional(),
+      validator: z.string().trim().optional(),
+      reveal: z.string().trim().optional(),
+    })
+    .optional(),
+});
+
+export type UserModelConfigInput = z.infer<typeof userModelConfigInputSchema>;
+
+export const USER_PROVIDER_FALLBACK_NAME = "user-provider";
+
+export function buildUserRegistry(
+  input: UserModelConfigInput,
+): ProviderRegistryDoc {
+  const name =
+    input.name !== undefined && input.name.trim() !== ""
+      ? input.name.trim()
+      : USER_PROVIDER_FALLBACK_NAME;
+  const models: Partial<Record<ModelTask, string>> = {};
+  for (const task of MODEL_TASKS) {
+    const value = input.models?.[task];
+    if (value !== undefined && value.trim() !== "") {
+      models[task] = value.trim();
+    }
+  }
+  return {
+    providers: [
+      {
+        name,
+        base_url: input.base_url.trim(),
+        api_key: input.api_key,
+        enabled: true,
+        model: input.model.trim(),
+        ...(Object.keys(models).length > 0 ? { models } : {}),
+      },
+    ],
+    routing: {
+      claim: name,
+      case: name,
+      role: name,
+      validator: name,
+      reveal: name,
+    },
+  };
+}

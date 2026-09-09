@@ -229,12 +229,12 @@ export default defineSchema({
   })
     .index("by_session_message", ["session_id", "message_id"])
     .index("by_session_evidence", ["session_id", "evidence_id"]),
-  // ADR 0003 补充决议：多供应商注册表运行时配置（单例）。registry_json 为 canonical
-  // JSON（providers + routing），边界经 server/model-gateway/config.ts zod 校验；
-  // api_key 仅存服务端，管理接口对外一律掩码。表为空时网关回退八项 AI_* 环境变量。
-  ai_provider_config: defineTable({
-    singleton: v.boolean(),
+  // ADR 0005：BYOK 用户级模型配置。registry_json 为 canonical JSON（复用
+  // server/model-gateway/config.ts providerRegistrySchema 校验）；api_key 仅存
+  // 服务端，任何查询只回掩码。这是模型调用的唯一运行时来源，无系统回退。
+  ai_user_provider_config: defineTable({
+    owner_identity: v.string(), // tokenIdentifier，每人至多一行
     registry_json: v.string(),
     updated_at_ms: v.number(),
-  }).index("by_singleton", ["singleton"]),
+  }).index("by_owner", ["owner_identity"]),
 });

@@ -116,7 +116,8 @@ export const accuseCore = internalAction({
     }
 
     try {
-      const gateway = await modelGatewayFor(ctx);
+      // ADR 0005：按指控发起者实时解析其模型配置。
+      const gateway = await modelGatewayFor(ctx, args.identity_token);
       const context = await ctx.runQuery(internal.reveal.revealContextInternal, {
         session_id: args.session_id,
       });

@@ -5,7 +5,7 @@ import {
   signInAnonymous,
   waitForTerminal,
 } from "./helpers/convex-local.js";
-import { clearAiProviderRegistry } from "./helpers/convex-local.js";
+import { clearUserModelConfig } from "./helpers/convex-local.js";
 import { SOURCE_MAX_UTF16_CODE_UNITS } from "@server/source/normalize.js";
 import { utcDayKey } from "@server/cases/quota.js";
 
@@ -42,7 +42,7 @@ async function seedInvite(code: string, maxUses = 5): Promise<void> {
 
 describe("TB1 建案域集成（本地后端）", () => {
   test("前置：清空 AI 供应商注册表覆盖层", async () => {
-    expect(await clearAiProviderRegistry()).toBe(true);
+    expect(await clearUserModelConfig(await signInAnonymous())).toBe(true);
   });
   beforeAll(async () => {
     // 每轮集成测试从干净额度状态开始（跨运行的全局日计数会累积）。
