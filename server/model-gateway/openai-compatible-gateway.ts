@@ -1,5 +1,5 @@
 import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
-import { generateObject } from "ai";
+import { generateObject, tool } from "ai";
 import type { z } from "zod";
 import type { PrivateFailure } from "@contracts/private/index.js";
 import {
@@ -86,6 +86,8 @@ export class OpenAICompatibleModelGateway implements ModelGateway {
         system: call.system,
         prompt: call.prompt,
         maxRetries: 0,
+        tool: tool({ schema: call.schema, name: call.schemaName }),
+        toolChoice: "required",
       });
     } catch (error) {
       throw new ModelRequestFailedError(

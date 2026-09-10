@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useState, Suspense } from "react";
+import { useEffect, useState, Suspense, Component } from "react";
 import dynamic from "next/dynamic";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "motion/react";
-import { useQuery, useAction } from "convex/react";
+import { useQuery, useAction, useConvexAuth } from "convex/react";
 import { api } from "../convex/_generated/api";
 import { useGame } from "@/context/GameContext";
 import { newClientActionId } from "@/lib/convex-client";
@@ -176,10 +176,11 @@ export default function Home() {
   const [activeIdx, setActiveIdx] = useState(-1);
   const [howtoOpen, setHowtoOpen] = useState(false);
 
-  /** 我的作品架：当前身份自己编译的案件（见 cases.listMine）。 */
+  /** 我的作品架：当前身份自己编译的案件（见 cases.listMine）。匿名/无身份时静默隐藏。 */
   function MyCases({ onStart }: { onStart: (caseId: string) => void }) {
-    const mine = useQuery(api.cases.listMine);
-    if (!mine || mine.length === 0) return null;
+    const { isAuthenticated } = useConvexAuth();
+    const mine = useQuery(api.cases.listMine, isAuthenticated ? {} : "skip");
+    if (!isAuthenticated || !mine || mine.length === 0) return null;
     return (
       <div className="mt-1">
         <p className="flex items-center gap-1.5 text-[11px] font-black text-paper/60">
@@ -198,6 +199,21 @@ export default function Home() {
         ))}
       </div>
     );
+  }
+
+  /** listMine 在无身份/服务端异常时会抛错，用错误边界静默降级。 */
+  class MyCasesErrorBoundary extends Component<{ children: React.ReactNode }, { hasError: boolean }> {
+    constructor(props: { children: React.ReactNode }) {
+      super(props);
+      this.state = { hasError: false };
+    }
+    static getDerivedStateFromError() {
+      return { hasError: true };
+    }
+    render() {
+      if (this.state.hasError) return null;
+      return this.props.children;
+    }
   }
   useEffect(() => {
     retryCatalog();
@@ -315,7 +331,9 @@ export default function Home() {
         </AnimatePresence>
 
         {/* 我的案件：自己带文章编译的案件（错过提交页自动跳转后仍可找回） */}
-        <MyCases onStart={start} />
+        <MyCasesErrorBoundary>
+          <MyCases onStart={start} />
+        </MyCasesErrorBoundary>
 
         {/* ② 带一篇知乎文章来：正式建案（Suspense 包裹 useSearchParams） */}
         <SectionLabel index="②" icon="link" title="带一篇知乎文章来" />

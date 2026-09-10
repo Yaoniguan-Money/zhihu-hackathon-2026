@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { ConvexAuthProvider } from "@convex-dev/auth/react";
-import { convexClient } from "@/lib/convex-client";
+import { convexClient, hasConvex } from "@/lib/convex-client";
 import { GameProvider } from "@/context/GameContext";
 import Toaster from "@/components/ui/Toaster";
 import "./globals.css";
@@ -26,12 +26,19 @@ export default function RootLayout({
   return (
     <html lang="zh-CN" className="h-full" suppressHydrationWarning>
       <body className="min-h-full bg-night text-paper antialiased">
-        <ConvexAuthProvider client={convexClient}>
-          <GameProvider>
+        {hasConvex ? (
+          <ConvexAuthProvider client={convexClient}>
+            <GameProvider>
+              {children}
+              <Toaster />
+            </GameProvider>
+          </ConvexAuthProvider>
+        ) : (
+          <>
             {children}
             <Toaster />
-          </GameProvider>
-        </ConvexAuthProvider>
+          </>
+        )}
       </body>
     </html>
   );
