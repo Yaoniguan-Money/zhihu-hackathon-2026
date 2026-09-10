@@ -7,7 +7,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { useConvexAuth } from "@convex-dev/auth/react";
 import { useGame } from "@/context/GameContext";
 import DialogueList from "@/components/DialogueList";
-import RecordButton from "@/components/ui/RecordButton";
+import VoiceStreamButton from "@/components/ui/VoiceStreamButton";
 import Typewriter from "@/components/ui/Typewriter";
 import ErrorPanel from "@/components/ui/ErrorPanel";
 import Mascot from "@/components/ui/Mascot";
@@ -17,6 +17,7 @@ import { personaForRole } from "@/components/three/characters/personas";
 import { EMOTION_META } from "@/lib/distortions";
 import { playSfx } from "@/lib/sfx";
 import { attachVoiceElement, resetVoiceAmp } from "@/lib/voice-amp";
+import { useVoiceStream } from "@/lib/voice-stream-client";
 import { newClientActionId } from "@/lib/convex-client";
 import { toPublicError } from "@/lib/convex-errors";
 import type { MessagePublic, QuestionMode, RoleEmotion } from "@/contracts/public";
@@ -114,8 +115,56 @@ export default function InterrogationPage() {
     allFetched: boolean;
   } | null>(null);
 
+  // ------------------------------------------------------------------
+  // P1-2b 语音对话模式（ADR 0006）：Streaming ASR → turn detection →
+  // 自动提交 ask → 流式 TTS + barge-in。业务链路仍是既有 roleTurns.ask。
+  const [voiceMode, setVoiceMode] = useState(false);
+  const askContextRef = useRef<{
+    roleId: string | null;
+    mode: QuestionMode;
+    canAsk: boolean;
+    busyTurn: boolean;
+  }>({ roleId: null, mode: "direct", canAsk: false, busyTurn: false });
+  useEffect(() => {
+    askContextRef.current = {
+      roleId: selectedRoleId,
+      mode,
+      canAsk: allowedActions.has("ask") && Boolean(selectedRoleId),
+      busyTurn,
+    };
+  });
+
+  /** turn detection 命中后的自动提交：降质转写或不可提问时留输入框由玩家确认。 */
+  const handleVoiceFinal = useCallback(
+    (text: string, degraded: boolean) => {
+      const ctx = askContextRef.current;
+      if (degraded || !ctx.canAsk || ctx.busyTurn || !ctx.roleId) {
+        setInput((prev) => (prev ? `${prev} ${text}` : text));
+        return;
+      }
+      playSfx("send");
+      ask(ctx.roleId, ctx.mode, text, "asr");
+    },
+    [ask],
+  );
+
+  const {
+    state: voiceState,
+    partial: voicePartial,
+    isActive: voiceIsActive,
+    speakMessage: streamSpeak,
+    stopSpeaking: streamStopSpeaking,
+  } = useVoiceStream({
+    sessionId: sessionId ?? "",
+    enabled: voiceMode && phase === "investigation",
+    fetchAccessToken,
+    onFinal: handleVoiceFinal,
+    onVoiceError: (e) => setVoiceError(e),
+  });
+
   /** 跳过/中止当前朗读：在飞分段请求一并中止，本条剩余语音不再合成不再播。 */
   const stopVoice = useCallback(() => {
+    streamStopSpeaking(); // 流式播报路径：通知服务端停止并清空本地队列
     const q = voiceQueueRef.current;
     if (q) {
       q.stopped = true;
@@ -130,7 +179,7 @@ export default function InterrogationPage() {
     if (messageId) {
       setSpeakingMessageId((cur) => (cur === messageId ? null : cur));
     }
-  }, []);
+  }, [streamStopSpeaking]);
 
   /** 开场前进：下一条已到达则切换（触发自动朗读）；未到达则标记等待，到达后自动接上。 */
   const advanceOpening = useCallback(() => {
@@ -160,10 +209,8 @@ export default function InterrogationPage() {
     [inOpening, advanceOpening],
   );
 
-  // 自动朗读新到达的已批准角色发言：分段流水线（CONTRACTS 14 分段 transport）。
-  // 服务端按句切分，客户端按段请求/播放——首段（第一句）约 2~4 秒即可出声，
-  // 之后边播边取后续段（合成速度约为播放时长的 1/5，缓冲始终领先）。
-  const speakMessage = useCallback(
+  // 既有分段 transport（CONTRACTS 14）：语音管线未连接时的完整播报路径。
+  const legacySpeakMessage = useCallback(
     async (messageId: string) => {
       stopVoice();
       const controller = new AbortController();
@@ -267,6 +314,29 @@ export default function InterrogationPage() {
       void fetchSegment(0);
     },
     [fetchAccessToken, sessionId, stopVoice, finishVoice],
+  );
+
+  // 自动朗读入口（ADR 0006）：语音管线已连接时走流式 TTS（服务端逐段合成、
+  // 事件流逐段下发、支持打断）；未连接时退回既有分段 transport——两条都是
+  // 从同一 Approved Speech Envelope 出发的完整路径，非合成降级。
+  const speakMessage = useCallback(
+    async (messageId: string) => {
+      stopVoice();
+      if (voiceIsActive()) {
+        setVoiceActiveMessageId(messageId);
+        setSpeakingMessageId(messageId);
+        try {
+          await streamSpeak(messageId);
+        } catch {
+          await legacySpeakMessage(messageId);
+          return;
+        }
+        finishVoice(messageId);
+        return;
+      }
+      await legacySpeakMessage(messageId);
+    },
+    [stopVoice, finishVoice, legacySpeakMessage, voiceIsActive, streamSpeak],
   );
 
   // 卸载时停掉朗读。
@@ -512,11 +582,27 @@ export default function InterrogationPage() {
               ))}
             </div>
 
+            {/* 语音实时转写（P1-2b 流式 ASR partial） */}
+            {voiceMode && voicePartial !== "" && (
+              <div
+                className="mb-2 flex items-center gap-2 rounded-xl border border-paper/15 bg-night-soft/60 px-3 py-1.5"
+                aria-live="polite"
+              >
+                <span className="flex shrink-0 items-center gap-1 text-[10px] font-black text-teal">
+                  <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-teal" />
+                  聆听中
+                </span>
+                <span className="truncate text-xs text-paper/75">{voicePartial}</span>
+              </div>
+            )}
+
             <div className="flex items-center gap-2.5" data-tour="int-input">
-              <RecordButton
-                disabled={!canAsk}
-                onTranscript={(t) => setInput((prev) => (prev ? `${prev} ${t.text}` : t.text))}
-                onError={(e) => setVoiceError(e)}
+              <VoiceStreamButton
+                state={voiceState}
+                onToggle={() => {
+                  playSfx("select");
+                  setVoiceMode((v) => !v);
+                }}
               />
               <input
                 value={input}

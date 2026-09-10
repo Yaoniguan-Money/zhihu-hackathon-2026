@@ -563,3 +563,118 @@ export const transcriptResultPublicSchema = z.strictObject({
 export type TranscriptResultPublic = z.infer<
   typeof transcriptResultPublicSchema
 >;
+
+// ---------------------------------------------------------------------------
+// Voice Stream 流式语音管线（14.5，ADR 0006）
+//
+// 同源 Route 与 Browser 之间的流式帧形状。上行是浏览器持续推送的原始
+// PCM16LE 16k 单声道音频帧（二进制体，X-Stream-Id / X-Seq 定位），下行是
+// 本 schema 的事件流（JSON lines，每行一个 voiceStreamFrameSchema）。
+// 部分转写只存在于流式会话内存与浏览器输入框；只有 asr_final 文本会经
+// roleTurns.ask 进入权威数据。TTS 只从服务端 Approved Speech Envelope 合成。
+
+export const voiceStreamStageSchema = z.enum(["asr", "vad", "tts", "pipeline"]);
+
+export type VoiceStreamStage = z.infer<typeof voiceStreamStageSchema>;
+
+/** 流建立/回合提交时的预检投影：客户端据此提前禁用或放行自动提交。 */
+export const voicePreflightSchema = z.strictObject({
+  phase: sessionPhaseSchema,
+  ask_allowed: z.boolean(),
+  worker_ready: z.boolean(),
+});
+
+export type VoicePreflight = z.infer<typeof voicePreflightSchema>;
+
+export const voiceStreamEventSchema = z.discriminatedUnion("type", [
+  z.strictObject({
+    type: z.literal("stream_ready"),
+    stream_id: z.string().min(1),
+    preflight: voicePreflightSchema,
+  }),
+  z.strictObject({
+    type: z.literal("session_preflight"),
+    preflight: voicePreflightSchema,
+  }),
+  /** 已闭合句段的稳定累积转写（前缀单调追加，不回改）。 */
+  z.strictObject({
+    type: z.literal("asr_partial"),
+    text: z.string(),
+    segment_index: z.number().int().min(0),
+    speech_ms: z.number().int().min(0),
+  }),
+  /** 端点判定通过，进入最终确认（客户端留有短暂 turn_resumed 窗口）。 */
+  z.strictObject({ type: z.literal("turn_committed") }),
+  /** 提交宽限窗口内检测到继续说话，本轮继续。 */
+  z.strictObject({ type: z.literal("turn_resumed") }),
+  /** 本轮最终确认转写（已闭合句段文本按序拼接 + 尾段补转写）。 */
+  z.strictObject({
+    type: z.literal("asr_final"),
+    text: z.string().min(1),
+    segments: z.array(z.string()),
+    duration_ms: z.number().int().min(0),
+    /** 本轮存在句段失败或超长截断时为 true：客户端不得自动提交。 */
+    degraded: z.boolean(),
+  }),
+  /** 回合播放中检测到用户重新说话（barge-in）。 */
+  z.strictObject({ type: z.literal("interruption") }),
+  z.strictObject({
+    type: z.literal("tts_started"),
+    message_id: messageIdSchema,
+    segment_total: z.number().int().min(1),
+  }),
+  z.strictObject({
+    type: z.literal("tts_audio"),
+    message_id: messageIdSchema,
+    index: z.number().int().min(0),
+    wav_base64: z.string().min(1),
+    sample_rate: z.number().int().min(8000),
+    duration_ms: z.number().int().min(0),
+  }),
+  z.strictObject({ type: z.literal("tts_finished"), message_id: messageIdSchema }),
+  z.strictObject({ type: z.literal("tts_aborted"), message_id: messageIdSchema }),
+  /** 单段合成失败：显式上报后跳过该段继续后续段（文字内容不受影响）。 */
+  z.strictObject({
+    type: z.literal("tts_segment_failed"),
+    message_id: messageIdSchema,
+    index: z.number().int().min(0),
+    error: publicErrorSchema,
+  }),
+  /** 管线某阶段的显式 typed failure；流不终止，键盘路径不受影响。 */
+  z.strictObject({
+    type: z.literal("voice_stream_error"),
+    stage: voiceStreamStageSchema,
+    error: publicErrorSchema,
+  }),
+]);
+
+export type VoiceStreamEvent = z.infer<typeof voiceStreamEventSchema>;
+
+/** 下行 JSON lines 帧包装：seq 单调递增，客户端断线后按 after_seq 续传。 */
+export const voiceStreamFrameSchema = z.strictObject({
+  seq: z.number().int().min(0),
+  at: isoDateTimeSchema,
+  event: voiceStreamEventSchema,
+});
+
+export type VoiceStreamFrame = z.infer<typeof voiceStreamFrameSchema>;
+
+/** 上行控制动作（POST /api/voice/stream/control 的 body）。 */
+export const voiceStreamControlSchema = z.discriminatedUnion("action", [
+  z.strictObject({
+    action: z.literal("speak"),
+    stream_id: z.string().min(1),
+    session_id: sessionIdSchema,
+    message_id: messageIdSchema,
+  }),
+  z.strictObject({
+    action: z.literal("stop_speak"),
+    stream_id: z.string().min(1),
+  }),
+  z.strictObject({
+    action: z.literal("abort"),
+    stream_id: z.string().min(1),
+  }),
+]);
+
+export type VoiceStreamControl = z.infer<typeof voiceStreamControlSchema>;

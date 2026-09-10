@@ -6,11 +6,17 @@
 模型调用串行（单用户本地演示语义，无排队承诺）。
 
 内部接口（供 Next Route 调用，非公开契约）：
-  GET  /health -> {"ok":true,"asr":bool,"tts":bool,"voice_pack_locked":bool}
-  POST /asr    头 X-Audio-Mime ∈ webm/ogg/wav/mpeg；body=原始音频字节
-               -> {"ok":true,"text","duration_ms"} | {"ok":false,"code"}
-  POST /tts    body {"text","voice","speed"} -> WAV 字节（头 X-Sample-Rate、
-               X-Content-Sha256）| JSON {"ok":false,"code"}
+  GET  /health   -> {"ok":true,"asr":bool,"tts":bool,"vad":bool,"voice_pack_locked":bool}
+  POST /asr      头 X-Audio-Mime ∈ webm/ogg/wav/mpeg；body=原始音频字节
+                 -> {"ok":true,"text","duration_ms"} | {"ok":false,"code"}
+  POST /asr/pcm  头 X-Sample-Rate=16000；body=PCM16LE 单声道原始字节
+                 -> 同 /asr（流式管线用：跳过容器解码）
+  POST /vad      头 X-Sample-Rate=16000；body=PCM16LE 单声道原始字节
+                 -> {"ok":true,"segments":[{"start_ms","end_ms"}],"speech_ms",
+                    "trailing_silence_ms","duration_ms"}（流式管线的
+                    turn detection 输入；独立 VAD 实例，不与 ASR/TTS 抢锁）
+  POST /tts      body {"text","voice","speed"} -> WAV 字节（头 X-Sample-Rate、
+                 X-Content-Sha256）| JSON {"ok":false,"code"}
 
 worker 级错误码（由 Route 映射为 Public Error，CONTRACTS 13.3 Voice 列）：
   TOO_LONG / NO_SPEECH / DECODE_FAILED / ASR_FAILED / TTS_FAILED / BAD_REQUEST
@@ -40,7 +46,8 @@ TTS_SAMPLE_RATE = 24_000
 SUPPORTED_MIME = {"audio/webm", "audio/ogg", "audio/wav", "audio/mpeg"}
 
 _model_lock = threading.Lock()
-_state: dict[str, object] = {"asr": None, "tts": None}
+_vad_lock = threading.Lock()
+_state: dict[str, object] = {"asr": None, "tts": None, "vad": None}
 
 
 def fail_exit(message: str) -> None:
@@ -69,6 +76,21 @@ def init_asr():
         model=str(sense_dir),
         vad_model=str(vad_dir),
         vad_kwargs={"max_single_segment_time": 30_000},
+        device="cpu",
+        disable_update=True,
+        disable_pbar=True,
+    )
+
+
+def init_vad():
+    """独立 FSMN-VAD 实例：流式管线 turn detection 用，独立锁，可与 ASR/TTS 并行。"""
+    from funasr import AutoModel
+
+    vad_dir = MODELS_DIR / "fsmn-vad"
+    if not vad_dir.exists():
+        fail_exit("模型目录缺失，请先运行 download_models.py")
+    return AutoModel(
+        model=str(vad_dir),
         device="cpu",
         disable_update=True,
         disable_pbar=True,
@@ -116,6 +138,97 @@ def run_asr(data: bytes, mime: str) -> dict:
         return {"ok": False, "code": "DECODE_FAILED"}
     if duration_ms > MAX_DURATION_MS:
         return {"ok": False, "code": "TOO_LONG", "duration_ms": duration_ms}
+
+    with _model_lock:
+        model = _state["asr"]
+        result = model.generate(
+            input=samples.astype(np.float32) / 32768.0,
+            fs=ASR_SAMPLE_RATE,
+            cache={},
+            language="zh",
+            use_itn=True,
+        )
+    from funasr.utils.postprocess_utils import rich_transcription_postprocess
+
+    text = rich_transcription_postprocess(result[0]["text"]).strip()
+    if text == "":
+        return {"ok": False, "code": "NO_SPEECH", "duration_ms": duration_ms}
+    return {"ok": True, "text": text, "duration_ms": duration_ms}
+
+
+# ---------------------------------------------------------------------------
+# 流式管线（P1-2b）：原始 PCM 直入的 VAD 与 ASR
+
+def read_pcm(data: bytes, sample_rate: int):
+    """PCM16LE 单声道原始字节 -> (np.int16 samples, duration_ms) | None。"""
+    import numpy as np
+
+    if sample_rate != ASR_SAMPLE_RATE:
+        return None
+    usable = len(data) - (len(data) % 2)
+    if usable <= 0:
+        return None
+    samples = np.frombuffer(data[:usable], dtype=np.int16)
+    return samples, int(len(samples) / ASR_SAMPLE_RATE * 1000)
+
+
+def run_vad(data: bytes, sample_rate: int) -> dict:
+    import numpy as np
+
+    if len(data) > MAX_AUDIO_BYTES:
+        return {"ok": False, "code": "TOO_LONG"}
+    loaded = read_pcm(data, sample_rate)
+    if loaded is None:
+        return {"ok": False, "code": "BAD_REQUEST"}
+    samples, duration_ms = loaded
+    if duration_ms > MAX_DURATION_MS:
+        return {"ok": False, "code": "TOO_LONG", "duration_ms": duration_ms}
+    if duration_ms == 0:
+        return {
+            "ok": True,
+            "segments": [],
+            "speech_ms": 0,
+            "trailing_silence_ms": 0,
+            "duration_ms": 0,
+        }
+
+    with _vad_lock:
+        vad = _state["vad"]
+        result = vad.generate(
+            input=samples.astype(np.float32) / 32768.0,
+            fs=ASR_SAMPLE_RATE,
+            cache={},
+        )
+    raw = result[0].get("value") or []
+    segments = [
+        {"start_ms": int(pair[0]), "end_ms": int(pair[1])}
+        for pair in raw
+        if isinstance(pair, (list, tuple)) and len(pair) >= 2
+    ]
+    speech_ms = sum(seg["end_ms"] - seg["start_ms"] for seg in segments)
+    last_end = segments[-1]["end_ms"] if segments else 0
+    return {
+        "ok": True,
+        "segments": segments,
+        "speech_ms": speech_ms,
+        "trailing_silence_ms": max(0, duration_ms - last_end),
+        "duration_ms": duration_ms,
+    }
+
+
+def run_asr_pcm(data: bytes, sample_rate: int) -> dict:
+    import numpy as np
+
+    if len(data) > MAX_AUDIO_BYTES:
+        return {"ok": False, "code": "TOO_LONG"}
+    loaded = read_pcm(data, sample_rate)
+    if loaded is None:
+        return {"ok": False, "code": "BAD_REQUEST"}
+    samples, duration_ms = loaded
+    if duration_ms > MAX_DURATION_MS:
+        return {"ok": False, "code": "TOO_LONG", "duration_ms": duration_ms}
+    if duration_ms == 0:
+        return {"ok": False, "code": "NO_SPEECH", "duration_ms": 0}
 
     with _model_lock:
         model = _state["asr"]
@@ -209,6 +322,7 @@ class Handler(BaseHTTPRequestHandler):
                 "ok": True,
                 "asr": _state["asr"] is not None,
                 "tts": _state["tts"] is not None,
+                "vad": _state["vad"] is not None,
                 "voice_pack_locked": bool(VOICE_PACK.get("locked")),
             },
         )
@@ -220,7 +334,31 @@ class Handler(BaseHTTPRequestHandler):
         if self.path == "/tts":
             self._handle_tts()
             return
+        if self.path == "/vad":
+            self._handle_pcm(run_vad)
+            return
+        if self.path == "/asr/pcm":
+            self._handle_pcm(run_asr_pcm)
+            return
         self._json(404, {"ok": False, "code": "BAD_REQUEST"})
+
+    def _handle_pcm(self, runner) -> None:
+        sample_rate = self.headers.get("X-Sample-Rate", "")
+        length = int(self.headers.get("Content-Length") or 0)
+        if length <= 0 or length > MAX_AUDIO_BYTES or not sample_rate.isdigit():
+            self._json(400, {"ok": False, "code": "BAD_REQUEST"})
+            return
+        data = self.rfile.read(length)
+        try:
+            result = runner(data, int(sample_rate))
+        except Exception as error:  # 模型层任何异常 -> ASR_FAILED（Route 映射 VOICE_ASR_FAILED）
+            import traceback
+
+            traceback.print_exc()
+            print(f"[voice-worker] pcm 异常: {type(error).__name__}: {error}", flush=True)
+            result = {"ok": False, "code": "ASR_FAILED"}
+        status = 200 if result.get("ok") else 422
+        self._json(status, result)
 
     def _handle_asr(self) -> None:
         mime = self.headers.get("X-Audio-Mime", "")
@@ -282,6 +420,8 @@ if __name__ == "__main__":
     port = int(os.environ.get("VOICE_WORKER_PORT", "8717"))
     print("[voice-worker] 加载 ASR（SenseVoiceSmall + FSMN-VAD，CPU）...")
     _state["asr"] = init_asr()
+    print("[voice-worker] 加载流式 VAD（FSMN-VAD，CPU，独立实例）...")
+    _state["vad"] = init_vad()
     print("[voice-worker] 加载 TTS（Kokoro-82M + Misaki zh，CPU）...")
     _state["tts"] = init_tts(VOICE_PACK)
     server = ThreadingHTTPServer(("127.0.0.1", port), Handler)
