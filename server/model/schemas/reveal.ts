@@ -8,7 +8,8 @@ import { z } from "zod";
 
 export const REVEAL_SCHEMA_VERSION = "reveal-v1@1";
 
-export const revealExplanationModelSchema = z.strictObject({
+/** 模型输出面：剥离未知字段（多余键不作废候选），语义字段照旧严格。 */
+export const revealExplanationModelSchema = z.object({
   explanation: z.string().min(1),
   reality_mapping: z.array(z.string().min(1)).min(1),
   referenced_claim_ids: z.array(z.string().min(1)).min(1),

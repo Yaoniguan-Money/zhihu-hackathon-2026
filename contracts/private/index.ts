@@ -254,7 +254,13 @@ export type CanonicalParagraphPrivate = z.infer<
 // ---------------------------------------------------------------------------
 // 候选、Validator 与批准信封（9）
 
-export const roleCandidatePayloadPrivateSchema = z.strictObject({
+/**
+ * 模型输出面 schema：z.object（剥离未知字段）而非 strictObject——
+ * 模型偶发附带解释/注释类多余键不应整份候选作废（2026-09-11 实测
+ * NoObjectGeneratedError 主因）；语义字段（枚举/必填/长度）照旧严格，
+ * 存证与传输类 schema 仍为 strictObject。
+ */
+export const roleCandidatePayloadPrivateSchema = z.object({
   speech: z.string().min(1),
   support_claim_ids: z.array(claimIdSchema),
   stance: roleStanceSchema,
@@ -269,7 +275,7 @@ export type RoleCandidatePayloadPrivate = z.infer<
 >;
 
 export const candidateTextSpanPrivateSchema = z
-  .strictObject({
+  .object({
     start: z.number().int().min(0),
     end: z.number().int().min(0),
     text: z.string().min(1),
@@ -282,7 +288,7 @@ export type CandidateTextSpanPrivate = z.infer<
   typeof candidateTextSpanPrivateSchema
 >;
 
-export const validationResultPrivateSchema = z.strictObject({
+export const validationResultPrivateSchema = z.object({
   status: z.enum(["entailed", "distorted", "invalid"]),
   detected_distortion_types: z.array(distortionTypeSchema),
   unsupported_spans: z.array(candidateTextSpanPrivateSchema),
