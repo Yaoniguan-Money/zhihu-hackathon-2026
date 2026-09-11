@@ -173,11 +173,12 @@ describe("TB5 忠实回合：重写矩阵（Scripted）", () => {
   });
 
   test("校验器输出不可解析 → 归入语义重写，换候选后通过（不立即终止）", async () => {
+    // glitch 不消耗脚本队列条目：两次 role 候选在前，两次 validator 在后。
     const gateway = new UnparseableValidatorOnceGateway(
       new ScriptedModelGateway([
         { task: "role", value: candidate },
-        { task: "validator", value: entailed },
         { task: "role", value: candidate },
+        { task: "validator", value: entailed },
         { task: "validator", value: entailed },
       ]),
     );

@@ -6,6 +6,7 @@ import {
   validationResultPrivateSchema,
 } from "@contracts/private/index.js";
 import type { ModelGateway } from "@server/model-gateway/openai-compatible-gateway.js";
+import { ModelRequestFailedError } from "@server/model-gateway/openai-compatible-gateway.js";
 import {
   ROLE_CANDIDATE_SCHEMA_VERSION,
   ROLE_VALIDATION_SCHEMA_VERSION,
