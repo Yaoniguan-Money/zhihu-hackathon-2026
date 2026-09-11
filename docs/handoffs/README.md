@@ -118,3 +118,4 @@ docs/handoffs/<ticket-or-stage-id>.md
 | 50 轮资产/体验升级启动：环境修复与基线走查 | complete | [2026-09-09-asset-50-rounds](./2026-09-09-asset-50-rounds.md) |
 | CAM-ROT-01 开场 3D 相机摇摆失控修复 | complete | [2026-09-09-camera-sway-rotation-fix](./2026-09-09-camera-sway-rotation-fix.md) |
 | UX-AUDIO-INPUT-01 首屏自由环视、SFX 增益与三首游戏音乐轮换 | complete | [2026-09-09-lobby-input-sfx-and-game-music](./2026-09-09-lobby-input-sfx-and-game-music.md) |
+| UX-SCORE-HOWTO-01 战绩卡原生分享重构 + 玩法弹窗 + 右栏滚动修复 | complete | [2026-09-11-scorecard-share-and-howto-modal](./2026-09-11-scorecard-share-and-howto-modal.md) |

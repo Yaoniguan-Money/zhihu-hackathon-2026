@@ -17,6 +17,7 @@ import GameTour, { requestTour } from "@/components/onboarding/GameTour";
 import { playSfx } from "@/lib/sfx";
 import SoundToggle from "@/components/ui/SoundToggle";
 import { ModelSettingsButton } from "@/components/settings/ModelSettingsDialog";
+import HowtoModal from "@/components/lobby/HowtoModal";
 
 const InterrogationStage = dynamic(() => import("@/components/three/InterrogationStage"), {
   ssr: false,
@@ -255,7 +256,7 @@ export default function Home() {
       </div>
 
       {/* 右侧面板 */}
-      <div className="absolute bottom-4 right-4 top-4 z-10 flex w-[420px] max-w-[92vw] flex-col gap-3 overflow-y-auto rounded-3xl border-2 border-paper/10 bg-night-deep/70 p-4 backdrop-blur-md">
+      <div className="absolute bottom-4 right-4 top-4 z-10 flex w-[420px] max-w-[92vw] flex-col gap-3 overflow-y-auto overscroll-contain touch-pan-y rounded-3xl border-2 border-paper/10 bg-night-deep/70 p-4 pb-6 backdrop-blur-md">
         {/* ① 开始一局：案件目录 */}
         <div className="flex items-center justify-between" data-tour="lobby-catalog">
           <h2 className="text-lg font-black text-paper">
@@ -354,35 +355,18 @@ export default function Home() {
           <Icon name="next" size={14} className="text-paper/40" />
         </a>
 
-        {/* 玩法说明：默认折叠 */}
+        {/* 玩法说明：点击弹出弹窗（右栏就地展开在小屏会被裁切且无法滚动） */}
         <button
-          onClick={() => setHowtoOpen((o) => !o)}
+          onClick={() => setHowtoOpen(true)}
           className="card-dark flex items-center gap-2 px-4 py-3 text-left transition-colors hover:border-amber/40"
         >
           <Icon name="quote" size={16} className="text-amber" />
           <span className="flex-1 text-xs font-black text-paper">玩法 · 90 秒看懂</span>
-          <motion.span animate={{ rotate: howtoOpen ? 90 : 0 }} className="text-paper/50">
+          <span className="text-paper/50">
             <Icon name="next" size={14} />
-          </motion.span>
+          </span>
         </button>
-        <AnimatePresence>
-          {howtoOpen && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: "auto", opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              className="-mt-1 overflow-hidden"
-            >
-              <div className="card-dark p-4 text-xs leading-relaxed text-paper/60">
-                <p>① 五个 AI 角色围绕圆桌各自开场，只有一人篡改了原文。</p>
-                <p>② 温和/直接/施压三种问法审讯，把发言存成录音证据对质。</p>
-                <p>③ 在证据板上拼出「来源事实 → 角色转述 → 被改变的关系」。</p>
-                <p>④ 提交指控：篡改者 + 篡改方式 + 证据链。</p>
-                <p>⑤ 揭底复盘：证据/审讯双维评分，生成可分享的辨别力战绩卡。</p>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+        {howtoOpen && <HowtoModal onClose={() => setHowtoOpen(false)} />}
 
         {actionError && <ErrorPanel error={actionError} onDismiss={clearActionError} />}
 

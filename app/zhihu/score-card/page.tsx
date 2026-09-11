@@ -1,22 +1,13 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import ZhihuShell from '@/components/zhihu/Shell';
 import Mascot from '@/components/ui/Mascot';
 import { Icon } from '@/components/ui/Icons';
-
-interface ScoreCardData {
-  caseTitle: string;
-  isCorrect: boolean;
-  timeUsed: number;
-  roundsPlayed: number;
-  evidenceScore: number;
-  questioningScore: number;
-  totalScore: number;
-  discernmentLevel: number;
-  timestamp: number;
-}
+import ScoreCardArt from '@/components/zhihu/ScoreCardArt';
+import { generateShareText, type ScoreCardData } from '@/lib/score-card';
+import { toPng } from 'html-to-image';
 
 const LEVEL_LABELS: Record<number, string> = {
   5: 'Lv.5 · 明察秋毫',
@@ -28,10 +19,11 @@ const LEVEL_LABELS: Record<number, string> = {
 
 export default function ScoreCardPage() {
   const [data, setData] = useState<ScoreCardData | null>(null);
-  const [shareText, setShareText] = useState('');
-  const [html, setHtml] = useState('');
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [note, setNote] = useState('');
+  const cardRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const stored = localStorage.getItem('lastGameResult');
@@ -39,30 +31,70 @@ export default function ScoreCardPage() {
       setLoading(false);
       return;
     }
-    const gameData = JSON.parse(stored) as ScoreCardData;
-    setData(gameData);
-
-    fetch('/api/zhihu/score-card', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(gameData),
-    })
-      .then(r => r.json())
-      .then(result => {
-        setShareText(result.shareText ?? '');
-        setHtml(result.html ?? '');
-        setLoading(false);
-      })
-      .catch(() => setLoading(false));
+    setData(JSON.parse(stored) as ScoreCardData);
+    setLoading(false);
   }, []);
 
-  async function copyShareText() {
+  const shareText = data ? generateShareText(data) : '';
+
+  async function capturePng(): Promise<Blob> {
+    if (!cardRef.current) throw new Error('战绩卡尚未渲染');
+    const dataUrl = await toPng(cardRef.current, { pixelRatio: 2 });
+    const res = await fetch(dataUrl);
+    return res.blob();
+  }
+
+  async function copyShareText(): Promise<boolean> {
     try {
       await navigator.clipboard.writeText(shareText);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
+      return true;
     } catch {
-      // ignore
+      setNote('复制失败：浏览器未授权剪贴板');
+      return false;
+    }
+  }
+
+  async function shareCard() {
+    setNote('');
+    setBusy(true);
+    try {
+      const blob = await capturePng();
+      const file = new File([blob], '战绩卡.png', { type: 'image/png' });
+      if (navigator.canShare?.({ files: [file] })) {
+        await navigator.share({ files: [file], title: '证据链狼人杀 · 战绩卡', text: shareText });
+        return;
+      }
+      if (navigator.share) {
+        await navigator.share({ title: '证据链狼人杀 · 战绩卡', text: shareText });
+        return;
+      }
+      const ok = await copyShareText();
+      if (ok) setNote('当前浏览器不支持分享面板，文案已复制，去知乎粘贴即可');
+    } catch (err) {
+      if (err instanceof DOMException && err.name === 'AbortError') return; // 用户取消分享面板
+      setNote(`分享失败：${err instanceof Error ? err.message : '未知错误'}`);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function downloadCard() {
+    setNote('');
+    setBusy(true);
+    try {
+      const blob = await capturePng();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = '战绩卡.png';
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      setNote(`生成图片失败：${err instanceof Error ? err.message : '未知错误'}`);
+    } finally {
+      setBusy(false);
     }
   }
 
@@ -152,20 +184,38 @@ export default function ScoreCardPage() {
         </p>
       </div>
 
-      {/* 战绩卡预览 */}
-      {html && (
-        <div className="card-dark mt-4 overflow-hidden p-4">
-          <p className="mb-3 flex items-center gap-2 text-xs font-black uppercase tracking-widest text-paper/60">
-            <Icon name="file" size={14} className="text-amber" />
-            分享图预览
-          </p>
-          <iframe
-            title="战绩卡预览"
-            srcDoc={html}
-            className="h-[420px] w-full rounded-xl border-2 border-paper/10 bg-night-deep"
-          />
+      {/* 分享按钮 */}
+      <div className="card-dark mt-4 p-5">
+        <p className="mb-3 flex items-center gap-2 text-xs font-black uppercase tracking-widest text-paper/60">
+          <Icon name="bolt" size={14} className="text-amber" />
+          分享战绩
+        </p>
+        <div className="flex gap-3">
+          <button onClick={shareCard} disabled={busy} className="btn btn-amber flex-1 justify-center text-sm disabled:opacity-50">
+            <Icon name="next" size={14} />
+            {busy ? '生成中…' : '分享战绩'}
+          </button>
+          <button onClick={downloadCard} disabled={busy} className="btn btn-ghost flex-1 justify-center text-sm disabled:opacity-50">
+            <Icon name="file" size={14} />
+            保存图片
+          </button>
         </div>
-      )}
+        {note && <p className="mt-2 text-[11px] font-bold text-amber">{note}</p>}
+        <p className="mt-2 text-[11px] text-paper/40">
+          手机上会拉起系统分享面板，可直接分享图片到知乎；桌面浏览器自动降级为分享 / 复制文案。
+        </p>
+      </div>
+
+      {/* 分享图预览 */}
+      <div className="card-dark mt-4 p-4">
+        <p className="mb-3 flex items-center gap-2 text-xs font-black uppercase tracking-widest text-paper/60">
+          <Icon name="file" size={14} className="text-amber" />
+          分享图预览
+        </p>
+        <div className="flex justify-center rounded-xl border-2 border-paper/10 bg-night-deep p-4">
+          <ScoreCardArt ref={cardRef} data={data} />
+        </div>
+      </div>
 
       {/* 可分享文案 */}
       <div className="card-dark mt-4 p-5">
