@@ -96,6 +96,20 @@ export type TurnAuditEvent =
 
 export type TurnAuditEmitter = (event: TurnAuditEvent) => Promise<void>;
 
+/**
+ * 审计诊断后缀：把网关底层错误的形态（HTTP 状态码 / 错误类名）带进
+ * detail_code，用于区分中转站的失败形态（断连 vs 4xx 拒绝 vs 其他）。
+ * 只含错误类名与状态码，不含密钥、请求体或响应文本。
+ */
+export function networkFailureDiagnosis(error: unknown): string {
+  const cause = (
+    error as { cause?: { name?: string; statusCode?: number } | undefined }
+  )?.cause;
+  if (!cause) return "";
+  if (typeof cause.statusCode === "number") return `(http=${cause.statusCode})`;
+  return `(err=${cause.name ?? "unknown"})`;
+}
+
 export async function runGenerationAttempts(
   gateway: ModelGateway,
   context: TurnAttemptContext,
@@ -155,7 +169,7 @@ export async function runGenerationAttempts(
         detail_code:
           error instanceof z.ZodError
             ? "MODEL_PROTOCOL_INVALID"
-            : "MODEL_REQUEST_FAILED",
+            : `MODEL_REQUEST_FAILED${networkFailureDiagnosis(error)}`,
       });
       return {
         ok: false,
@@ -234,7 +248,7 @@ export async function runGenerationAttempts(
         detail_code:
           error instanceof z.ZodError
             ? "VALIDATOR_PROTOCOL_INVALID"
-            : "VALIDATOR_REQUEST_FAILED",
+            : `VALIDATOR_REQUEST_FAILED${networkFailureDiagnosis(error)}`,
       });
       return {
         ok: false,
