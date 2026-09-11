@@ -6,6 +6,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { useGame } from "@/context/GameContext";
 import ErrorPanel from "@/components/ui/ErrorPanel";
 import Mascot from "@/components/ui/Mascot";
+import { ModelSettingsButton } from "@/components/settings/ModelSettingsDialog";
 import { Icon } from "@/components/ui/Icons";
 import { playSfx } from "@/lib/sfx";
 import GameTour from "@/components/onboarding/GameTour";
@@ -527,8 +528,13 @@ export default function EvidencePage() {
 
       {phase === "failed" && sessionView.terminal_error && (
         <div className="absolute inset-0 z-50 flex flex-col items-center justify-center gap-5 bg-night-deep/85">
-          <ErrorPanel error={sessionView.terminal_error} />
-          <button onClick={backToLobby} className="btn btn-amber">回大厅</button>
+          <ErrorPanel error={sessionView.terminal_error} className="max-w-md" />
+          <div className="flex items-center gap-2">
+            {sessionView.terminal_error.code === "SERVICE_NOT_CONFIGURED" && (
+              <ModelSettingsButton label="去设置模型" className="btn btn-coral" />
+            )}
+            <button onClick={backToLobby} className="btn btn-amber">回大厅</button>
+          </div>
         </div>
       )}
     </div>

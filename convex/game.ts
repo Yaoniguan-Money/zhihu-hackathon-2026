@@ -139,7 +139,9 @@ export const start = mutation({
         created_at_ms: nowMs,
         updated_at_ms: nowMs,
       });
-      await ctx.scheduler.runAfter(roleIndex * 1000, internal.game.openingWorker, {
+      // 错峰 2s/条：降低 5 路并发突发（role + 随后 validator）触发
+      // 中转站连接掐断/限流的概率（2026-09-11 实测坏窗口内连发失败）。
+      await ctx.scheduler.runAfter(roleIndex * 2000, internal.game.openingWorker, {
         request_id: requestId,
         role_index: roleIndex,
         owner_identity: identityToken, // ADR 0005：按开局发起者解析模型配置
@@ -251,6 +253,7 @@ export const openingContextInternal = internalQuery({
       case_id: session.case_id,
       role_id: ticket.role_id,
       displayName,
+      session_phase: session.phase,
       policy,
       visibleClaims: graph.claims
         .filter((claim) => policy.visible_claim_ids.includes(claim.claim_id))
@@ -302,6 +305,14 @@ export const openingWorker = internalAction({
         code: "INTERNAL_INVARIANT_VIOLATION",
         incident_id: `opening:${args.request_id}`,
         detail: "开场上下文缺失",
+      });
+      return;
+    }
+    // 死亡排水：开工前对局已被另一条开场的失败终结 → 取消本条，
+    // 不调模型、不发布消息、不发出事件。
+    if (context.session_phase === "failed") {
+      await ctx.runMutation(internal.roleTurns.finalizeTurnCancelled, {
+        request_id: args.request_id,
       });
       return;
     }

@@ -111,7 +111,7 @@ describe("TB5 忠实回合：重写矩阵（Scripted）", () => {
     if (outcome.ok) expect(outcome.attempts).toBe(2);
   });
 
-  test("第二次重写通过 → 3 次候选（上限）", async () => {
+  test("第二次重写通过 → 3 次候选", async () => {
     const gateway = new ScriptedModelGateway([
       { task: "role", value: candidate },
       { task: "validator", value: distortedFail },
@@ -125,20 +125,17 @@ describe("TB5 忠实回合：重写矩阵（Scripted）", () => {
     if (outcome.ok) expect(outcome.attempts).toBe(3);
   });
 
-  test("三次均拒绝 → VALIDATION_EXHAUSTED（不抛协议错误）", async () => {
-    const gateway = new ScriptedModelGateway([
+  test("十次候选均拒绝 → VALIDATION_EXHAUSTED（不抛协议错误）", async () => {
+    const scripted = Array.from({ length: 10 }, () => [
       { task: "role", value: candidate },
       { task: "validator", value: distortedFail },
-      { task: "role", value: candidate },
-      { task: "validator", value: distortedFail },
-      { task: "role", value: candidate },
-      { task: "validator", value: distortedFail },
-    ]);
+    ]).flat();
+    const gateway = new ScriptedModelGateway(scripted);
     const outcome = await runGenerationAttempts(gateway, faithfulContext());
     expect(outcome.ok).toBe(false);
     if (!outcome.ok) {
       expect(outcome.reason).toBe("VALIDATION_EXHAUSTED");
-      expect(outcome.attempts).toBe(3);
+      expect(outcome.attempts).toBe(10);
       expect(outcome.failure.code).toBe("VALIDATION_EXHAUSTED");
     }
   });
@@ -177,21 +174,18 @@ describe("TB5 忠实回合：重写矩阵（Scripted）", () => {
       stance: "answer",
       emotion: "calm",
     };
-    const gateway = new ScriptedModelGateway([
+    const scripted = Array.from({ length: 10 }, () => [
       { task: "role", value: badCandidate },
       { task: "validator", value: entailed }, // 即便校验器放行，前置检查仍拦截
-      { task: "role", value: badCandidate },
-      { task: "validator", value: entailed },
-      { task: "role", value: badCandidate },
-      { task: "validator", value: entailed },
-    ]);
+    ]).flat();
+    const gateway = new ScriptedModelGateway(scripted);
     const outcome = await runGenerationAttempts(gateway, faithfulContext());
     expect(outcome.ok).toBe(false);
     if (!outcome.ok) expect(outcome.reason).toBe("VALIDATION_EXHAUSTED");
   });
 });
 
-describe("TB6 Distorted 回合：单次候选、允许集门控（Scripted）", () => {
+describe("TB6 Distorted 回合：允许集门控 + 语义重写（2026-09-11 用户批准扩展）（Scripted）", () => {
   test("distorted 且类型 ⊆ 允许集 → 通过", async () => {
     const gateway = new ScriptedModelGateway([
       { task: "role", value: distortedCandidate },
@@ -202,20 +196,19 @@ describe("TB6 Distorted 回合：单次候选、允许集门控（Scripted）", 
     if (outcome.ok) expect(outcome.attempts).toBe(1);
   });
 
-  test("候选未构成篡改（entailed）→ 立即终止，不重写", async () => {
+  test("候选未构成篡改（entailed）→ 反馈重写后通过", async () => {
     const gateway = new ScriptedModelGateway([
       { task: "role", value: candidate },
       { task: "validator", value: entailed },
+      { task: "role", value: distortedCandidate },
+      { task: "validator", value: distortedPass },
     ]);
     const outcome = await runGenerationAttempts(gateway, distortedContext());
-    expect(outcome.ok).toBe(false);
-    if (!outcome.ok) {
-      expect(outcome.reason).toBe("VALIDATION_EXHAUSTED");
-      expect(outcome.attempts).toBe(1);
-    }
+    expect(outcome.ok).toBe(true);
+    if (outcome.ok) expect(outcome.attempts).toBe(2);
   });
 
-  test("使用未授权篡改类型 → DISTORTION_POLICY_VIOLATION", async () => {
+  test("使用未授权篡改类型 → 重写为获准类型后通过", async () => {
     const gateway = new ScriptedModelGateway([
       { task: "role", value: distortedCandidate },
       {
@@ -228,12 +221,25 @@ describe("TB6 Distorted 回合：单次候选、允许集门控（Scripted）", 
           confidence: 0.9,
         },
       },
+      { task: "role", value: distortedCandidate },
+      { task: "validator", value: distortedPass },
     ]);
+    const outcome = await runGenerationAttempts(gateway, distortedContext());
+    expect(outcome.ok).toBe(true);
+    if (outcome.ok) expect(outcome.attempts).toBe(2);
+  });
+
+  test("十次候选均未构成获准篡改 → VALIDATION_EXHAUSTED", async () => {
+    const scripted = Array.from({ length: 10 }, () => [
+      { task: "role", value: distortedCandidate },
+      { task: "validator", value: entailed },
+    ]).flat();
+    const gateway = new ScriptedModelGateway(scripted);
     const outcome = await runGenerationAttempts(gateway, distortedContext());
     expect(outcome.ok).toBe(false);
     if (!outcome.ok) {
-      expect(outcome.reason).toBe("DISTORTION_POLICY_VIOLATION");
-      expect(outcome.failure.code).toBe("DISTORTION_POLICY_VIOLATION");
+      expect(outcome.reason).toBe("VALIDATION_EXHAUSTED");
+      expect(outcome.attempts).toBe(10);
     }
   });
 

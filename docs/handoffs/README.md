@@ -119,3 +119,6 @@ docs/handoffs/<ticket-or-stage-id>.md
 | CAM-ROT-01 开场 3D 相机摇摆失控修复 | complete | [2026-09-09-camera-sway-rotation-fix](./2026-09-09-camera-sway-rotation-fix.md) |
 | UX-AUDIO-INPUT-01 首屏自由环视、SFX 增益与三首游戏音乐轮换 | complete | [2026-09-09-lobby-input-sfx-and-game-music](./2026-09-09-lobby-input-sfx-and-game-music.md) |
 | UX-SCORE-HOWTO-01 战绩卡原生分享重构 + 玩法弹窗 + 右栏滚动修复 | complete | [2026-09-11-scorecard-share-and-howto-modal](./2026-09-11-scorecard-share-and-howto-modal.md) |
+| OPENING-FAIL-TOAST-STORM 开场失败诊断与死亡排水/弹窗风暴修复 | complete | [2026-09-11-opening-failure-toast-storm](./2026-09-11-opening-failure-toast-storm.md) |
+| MODEL-JSON-ENFORCEMENT 模型结构化输出强制 + 传输层重试 | complete | [2026-09-11-model-json-enforcement-and-transport-retry](./2026-09-11-model-json-enforcement-and-transport-retry.md) |
+| DISTORTED-REWRITE-AND-TOAST-DEDUP 篡改角色语义重试 + 弹窗去重/语音赛跑静默 | complete | [2026-09-11-distorted-rewrite-and-toast-dedup](./2026-09-11-distorted-rewrite-and-toast-dedup.md) |

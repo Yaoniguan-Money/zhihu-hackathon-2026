@@ -32,6 +32,7 @@ describe("buildUserRegistry：简化表单 → 单供应商注册表", () => {
     expect(registry.providers[0]!.name).toBe("智谱");
     expect(registry.providers[0]!.enabled).toBe(true);
     expect(registry.providers[0]!.models).toEqual({ claim: "claim-model" });
+    expect(registry.providers[0]!.supports_structured_outputs).toBe(false);
     for (const task of ["claim", "case", "role", "validator", "reveal"] as const) {
       expect(registry.routing[task]).toBe("智谱");
     }
@@ -48,13 +49,34 @@ describe("buildUserRegistry：简化表单 → 单供应商注册表", () => {
 });
 
 describe("validateAndProbeUserConfig：校验 → 真实探针（可判别结果）", () => {
-  test("探针成功：返回注册表与解析配置，且探针确实发生了一次调用", async () => {
+  test("strict 探针成功：能力位落库为 true", async () => {
     const result = await validateAndProbeUserConfig(VALID_INPUT, () =>
       okGatewayFor(),
     );
     expect(result.ok).toBe(true);
     if (result.ok) {
       expect(result.config.providers[0]!.apiKey).toBe("user-key-0001");
+      expect(
+        result.registry.providers[0]!.supports_structured_outputs,
+      ).toBe(true);
+    }
+  });
+
+  test("strict 探针失败（供应商不支持 json_schema）→ 退回兼容模式，能力位 false", async () => {
+    let probeCalls = 0;
+    const result = await validateAndProbeUserConfig(VALID_INPUT, (config) => {
+      probeCalls += 1;
+      // 第一次（strict 候选）队列耗尽失败；第二次（兼容候选）成功。
+      return config.providers[0]!.supportsStructuredOutputs
+        ? new ScriptedModelGateway([])
+        : new ScriptedModelGateway([{ task: "role", value: { speech: "测试" } }]);
+    });
+    expect(result.ok).toBe(true);
+    expect(probeCalls).toBe(2);
+    if (result.ok) {
+      expect(
+        result.registry.providers[0]!.supports_structured_outputs,
+      ).toBe(false);
     }
   });
 
@@ -81,7 +103,7 @@ describe("validateAndProbeUserConfig：校验 → 真实探针（可判别结果
     if (!result.ok) expect(result.reason).toBe("invalid_input");
   });
 
-  test("探针失败（队列耗尽）：probe_failed，不产出可保存配置", async () => {
+  test("探针失败（两种模式均失败）：probe_failed，不产出可保存配置", async () => {
     const result = await validateAndProbeUserConfig(
       VALID_INPUT,
       () => new ScriptedModelGateway([]),

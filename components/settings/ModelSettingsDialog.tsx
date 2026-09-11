@@ -38,8 +38,14 @@ interface StatusConfigured {
 }
 type StatusView = { configured: false } | StatusConfigured;
 
-/** 圆形齿轮按钮 + 弹窗；大厅与对局 header 共用。 */
-export function ModelSettingsButton({ className }: { className?: string }) {
+/** 圆形齿轮按钮 + 弹窗；大厅与对局 header 共用。传 label 时渲染文字按钮（终局指引入口）。 */
+export function ModelSettingsButton({
+  className,
+  label,
+}: {
+  className?: string;
+  label?: string;
+}) {
   const [open, setOpen] = useState(false);
   return (
     <>
@@ -53,6 +59,7 @@ export function ModelSettingsButton({ className }: { className?: string }) {
         }
       >
         <Icon name="settings" size={14} />
+        {label}
       </button>
       {open && <ModelSettingsDialog onClose={() => setOpen(false)} />}
     </>

@@ -128,6 +128,12 @@ export interface ProviderEntry {
   /** 每任务模型；缺失时回退到 model 默认值（均为显式配置，不是代码默认）。 */
   models: Partial<Record<ModelTask, string>>;
   model?: string;
+  /**
+   * 供应商是否支持 API 级结构化输出（response_format: json_schema）。
+   * 由保存设置时的真实探针检测落库：支持则 generateObject 走 API 强制
+   * JSON；不支持（缺省 false）退回 SDK 提示词注入模式，行为与历史一致。
+   */
+  supportsStructuredOutputs?: boolean;
 }
 
 export interface ResolvedGatewayConfig {
@@ -144,6 +150,7 @@ export const providerRegistrySchema = z.object({
         api_key: z.string(),
         enabled: z.boolean(),
         model: z.string().trim().optional(),
+        supports_structured_outputs: z.boolean().optional(),
         models: z
           .object({
             claim: z.string().trim().optional(),
@@ -217,6 +224,7 @@ export function resolveRegistryDoc(doc: unknown): ResolvedGatewayConfig {
     apiKey: p.api_key,
     enabled: p.enabled,
     model: p.model,
+    supportsStructuredOutputs: p.supports_structured_outputs,
     models: {
       claim: p.models?.claim,
       case: p.models?.case,
@@ -300,6 +308,7 @@ export const USER_PROVIDER_FALLBACK_NAME = "user-provider";
 
 export function buildUserRegistry(
   input: UserModelConfigInput,
+  supportsStructuredOutputs = false,
 ): ProviderRegistryDoc {
   const name =
     input.name !== undefined && input.name.trim() !== ""
@@ -320,6 +329,7 @@ export function buildUserRegistry(
         api_key: input.api_key,
         enabled: true,
         model: input.model.trim(),
+        supports_structured_outputs: supportsStructuredOutputs,
         ...(Object.keys(models).length > 0 ? { models } : {}),
       },
     ],

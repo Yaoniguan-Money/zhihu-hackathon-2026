@@ -22,15 +22,18 @@ import {
  * 通过 ModelGateway Seam 注入生产 Adapter 或测试 Scripted Adapter；
  * 本模块不含 Convex 依赖，可确定性测试。
  *
- * 重写规则（唯一允许的语义恢复）：
- * - Faithful：初始候选 + 最多两次重写（总候选 ≤3）；status=entailed 且
- *   无 unsupported_spans 且支持 Claim 全部可见才通过。
- * - Distorted：不套用重写兜底——单次候选；status=distorted、检测类型非空
- *   且全部属于允许集合才通过；否则立即终止。
- * 协议/请求/校验器失败不属于语义失败：立即终止，不消耗重写。
+ * 重写规则（唯一允许的语义恢复；2026-09-11 用户批准扩展至篡改角色并上调至 10 次）：
+ * - Faithful：status=entailed 且无 unsupported_spans 且支持 Claim 全部可见
+ *   才通过；语义失败带反馈重写。
+ * - Distorted：status=distorted、检测类型非空且全部属于允许集合才通过；
+ *   未构成获准篡改或类型越出允许集 → 带反馈语义重写。
+ * - 两类均共 10 次候选（首试 + 9 次重写，用户决定"每个人都至少给他 10 次"），
+ *   耗尽即终止。
+ * 协议/请求/校验器失败不属于语义失败：立即终止，不消耗重写；
+ * 对质回合的非法引用 / 新事实（NEW_FACT_INTRODUCED）仍立即终止。
  */
 
-const MAX_FAITHFUL_ATTEMPTS = 3;
+const MAX_SEMANTIC_ATTEMPTS = 10;
 
 export interface TurnAttemptContext {
   policy: z.infer<typeof rolePrivatePolicySchema>;
@@ -99,7 +102,7 @@ export async function runGenerationAttempts(
   emit?: TurnAuditEmitter,
 ): Promise<TurnAttemptOutcome> {
   const faithful = context.policy.fidelity === "faithful";
-  const maxAttempts = faithful ? MAX_FAITHFUL_ATTEMPTS : 1;
+  const maxAttempts = MAX_SEMANTIC_ATTEMPTS;
   const visibleIds = new Set(context.visibleClaims.map((c) => c.claim_id));
   let lastFeedback = "";
   const record = async (event: TurnAuditEvent): Promise<void> => {
@@ -268,7 +271,8 @@ export async function runGenerationAttempts(
       continue;
     }
 
-    // Distorted：单次候选，无重写兜底。
+    // Distorted：未构成获准篡改 → 与忠实相同的语义重写恢复
+    // （2026-09-11 用户批准）；耗尽才终止。
     if (
       validation.status === "distorted" &&
       validation.detected_distortion_types.length > 0 &&
@@ -279,25 +283,10 @@ export async function runGenerationAttempts(
     ) {
       return { ok: true, candidate, validation, attempts: attemptIndex };
     }
-    const policyViolation = validation.detected_distortion_types.some(
-      (type) => !context.policy.allowed_distortion_types.includes(type),
-    );
-    return {
-      ok: false,
-      reason: policyViolation
-        ? "DISTORTION_POLICY_VIOLATION"
-        : "VALIDATION_EXHAUSTED",
-      failure: {
-        code: policyViolation
-          ? "DISTORTION_POLICY_VIOLATION"
-          : "VALIDATION_EXHAUSTED",
-        incident_id: `turn:${context.incidentRef}`,
-        detail: policyViolation
-          ? "候选使用了未授权的篡改方式"
-          : "候选未构成获准的篡改",
-      },
-      attempts: attemptIndex,
-    };
+    lastFeedback = supportVisible
+      ? JSON.stringify(validation)
+      : `${JSON.stringify(validation)}\n另外：support_claim_ids 只能引用可见事实，不得越出给定集合。`;
+    continue;
   }
 
   return {

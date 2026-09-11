@@ -134,6 +134,61 @@ describe("TB7 game.start（本地后端，无模型）", () => {
     // （该用例的 actionId 未保存，语义由 TB3/TB4 幂等测试覆盖）
   });
 
+  test("死亡排水：首条开场失败后，其余在飞开场取消且不再逐条发事件", async () => {
+    const token = await signInAnonymous();
+    const created = await callConvex<{ session_id: string }>(
+      "mutation",
+      "sessions:create",
+      { case_id: GOLDEN, client_action_id: uuid() },
+      { bearer: token },
+    );
+    if (!created.ok) return;
+    const sessionId = created.value.session_id;
+
+    const started = await callConvex(
+      "mutation",
+      "game:start",
+      { session_id: sessionId, client_action_id: uuid() },
+      { bearer: token },
+    );
+    expect(started.ok).toBe(true);
+
+    // 无模型：首条开场快速失败（SERVICE_NOT_CONFIGURED）→ Session failed。
+    const deadline = Date.now() + 30_000;
+    let failed = false;
+    while (Date.now() < deadline) {
+      const result = await callConvex<{ phase: string }>(
+        "query",
+        "sessions:getPublic",
+        { session_id: sessionId },
+        { bearer: token },
+      );
+      if (result.ok && result.value && result.value.phase === "failed") {
+        failed = true;
+        break;
+      }
+      await new Promise((resolve) => setTimeout(resolve, 300));
+    }
+    expect(failed).toBe(true);
+
+    // 等剩余 4 条错峰调度的 worker 全部开工：应被排水取消（无事件），
+    // 而不是各自再走 finalizeTurnFailure 发 role_turn_failed。
+    await new Promise((resolve) => setTimeout(resolve, 6000));
+
+    const events = await callConvex<
+      { sequence: number; payload: { type: string } }[]
+    >("query", "events:listPublic", { session_id: sessionId, after_sequence: 0 }, {
+      bearer: token,
+    });
+    expect(events.ok).toBe(true);
+    if (!events.ok) return;
+    const types = events.value.map((event) => event.payload.type);
+    expect(types.filter((t) => t === "role_turn_failed")).toHaveLength(1);
+    expect(types.filter((t) => t === "session_failed")).toHaveLength(1);
+    expect(types).not.toContain("role_message_published");
+    expect(types).not.toContain("evidence_unlocked");
+  }, 20_000);
+
   test("错误语义：非 briefing 阶段 / 不存在 Session / 无身份", async () => {
     const token = await signInAnonymous();
     const created = await callConvex<{ session_id: string }>(

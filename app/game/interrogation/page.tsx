@@ -11,6 +11,7 @@ import VoiceStreamButton from "@/components/ui/VoiceStreamButton";
 import Typewriter from "@/components/ui/Typewriter";
 import ErrorPanel from "@/components/ui/ErrorPanel";
 import Mascot from "@/components/ui/Mascot";
+import { ModelSettingsButton } from "@/components/settings/ModelSettingsDialog";
 import GameTour from "@/components/onboarding/GameTour";
 import { Icon } from "@/components/ui/Icons";
 import { personaForRole } from "@/components/three/characters/personas";
@@ -159,7 +160,10 @@ export default function InterrogationPage() {
     enabled: voiceMode && phase === "investigation",
     fetchAccessToken,
     onFinal: handleVoiceFinal,
-    onVoiceError: (e) => setVoiceError(e),
+    onVoiceError: (e) => {
+      // 同 failVoice：相位赛跑的拒绝是正常收口，不弹错误。
+      if (e.code !== "SESSION_PHASE_CONFLICT") setVoiceError(e);
+    },
   });
 
   /** 跳过/中止当前朗读：在飞分段请求一并中止，本条剩余语音不再合成不再播。 */
@@ -232,7 +236,11 @@ export default function InterrogationPage() {
         voiceQueueRef.current = null;
         setVoiceActiveMessageId((cur) => (cur === messageId ? null : cur));
         setSpeakingMessageId((cur) => (cur === messageId ? null : cur));
-        setVoiceError(err);
+        // 相位赛跑：朗读发起时对局还活着、响应回来时已 failed（服务端
+        // 按门控拒绝）。这是正常收口不是故障，静默跳过，文字不受影响。
+        if (err.code !== "SESSION_PHASE_CONFLICT") {
+          setVoiceError(err);
+        }
       };
 
       const playNext = () => {
@@ -373,7 +381,11 @@ export default function InterrogationPage() {
     if (isNew) {
       spokenIdsRef.current.add(currentMessage.message_id);
       if (currentMessage.speaker_type === "role") playSfx("receive");
-      void speakMessage(currentMessage.message_id);
+      // 相位前置检查：只在可朗读阶段发起 TTS（服务端 Envelope 门控的
+      // 同源镜像；failed 等阶段的合成请求必被拒，不再打出）。
+      if (phase === "opening_statements" || phase === "investigation") {
+        void speakMessage(currentMessage.message_id);
+      }
     }
     if (speakTimer.current) clearTimeout(speakTimer.current);
     setSpeakingMessageId(currentMessage.message_id);
@@ -682,9 +694,14 @@ export default function InterrogationPage() {
         <div className="absolute inset-0 z-30 flex flex-col items-center justify-center gap-5 bg-night-deep/85 px-6">
           <Mascot motion="sleep" size={120} caption="这一局没能走到揭晓…" />
           <ErrorPanel error={sessionView.terminal_error} className="max-w-md" />
-          <button onClick={game.backToLobby} className="btn btn-amber">
-            <Icon name="home" size={15} /> 回大厅开新局
-          </button>
+          <div className="flex items-center gap-2">
+            {sessionView.terminal_error.code === "SERVICE_NOT_CONFIGURED" && (
+              <ModelSettingsButton label="去设置模型" className="btn btn-coral" />
+            )}
+            <button onClick={game.backToLobby} className="btn btn-amber">
+              <Icon name="home" size={15} /> 回大厅开新局
+            </button>
+          </div>
         </div>
       )}
 

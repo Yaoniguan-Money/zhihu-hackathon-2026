@@ -45,6 +45,30 @@ export class ModelRequestFailedError extends Error {
   }
 }
 
+/**
+ * 网络类瞬时错误判定（2026-09-11 用户批准的传输层重试口径）：
+ * 连接断开（无 HTTP 状态码的 APICallError / fetch TypeError）、5xx、429、408。
+ * 注意 AI SDK 自带 maxRetries 不覆盖"无状态码的连接断开"（其 isRetryable
+ * 判定要求 statusCode ∈ {408,409,429} 或 ≥500），故重试由本网关手动实现。
+ * schema 解析（NoObjectGeneratedError）、协议、4xx（除上述）与配置错误不重试。
+ */
+export function isTransientNetworkError(error: unknown): boolean {
+  if (!(error instanceof Error)) return false;
+  const name = error.name;
+  if (name === "AI_NoObjectGeneratedError" || name === "AI_NoEmbeddingGeneratedError") {
+    return false;
+  }
+  const status = (error as { statusCode?: unknown }).statusCode;
+  if (typeof status === "number") {
+    return status >= 500 || status === 408 || status === 409 || status === 429;
+  }
+  // 无状态码：连接级失败（socket 断开 / fetch failed / 响应中断）。
+  return name === "AI_APICallError" || name === "TypeError";
+}
+
+/** 网络类瞬时错误的传输层重试上限（不含首次调用）。 */
+export const NETWORK_RETRY_MAX = 2;
+
 function newIncidentId(): string {
   return `inc:${Date.now().toString(36)}:${Math.random().toString(36).slice(2, 10)}`;
 }
@@ -74,28 +98,49 @@ export class OpenAICompatibleModelGateway implements ModelGateway {
       name: provider.name,
       baseURL: provider.baseUrl,
       apiKey: provider.apiKey,
+      // 能力位（保存时探针检测）：true 时 generateObject 走 API 级
+      // response_format: json_schema 强制 JSON，消除提示词注入模式下
+      // 模型偶尔输出纯文本导致的解析失败。
+      supportsStructuredOutputs: provider.supportsStructuredOutputs ?? false,
     });
     const model = aiProvider(modelId);
 
     let result;
-    try {
-      result = await generateObject({
-        model,
-        schema: call.schema,
-        schemaName: call.schemaName,
-        system: call.system,
-        prompt: call.prompt,
-        maxRetries: 0,
-      });
-    } catch (error) {
-      throw new ModelRequestFailedError(
-        {
-          code: "MODEL_REQUEST_FAILED",
-          incident_id: newIncidentId(),
-          detail: `任务 ${call.task} 的模型请求失败（provider=${provider.name}）`,
-        },
-        error,
-      );
+    {
+      // 传输层重试（2026-09-11 用户批准）：仅网络类瞬时错误，最多 2 次
+      // 重试（指数退避 500ms/1000ms）。SDK 自带 maxRetries 不覆盖无状态码
+      // 的连接断开，故由本网关实现；其余错误立即失败不掩盖。
+      for (let attempt = 0; ; attempt += 1) {
+        try {
+          result = await generateObject({
+            model,
+            schema: call.schema,
+            schemaName: call.schemaName,
+            system: call.system,
+            prompt: call.prompt,
+            maxRetries: 0,
+          });
+          break;
+        } catch (error) {
+          if (
+            attempt < NETWORK_RETRY_MAX &&
+            isTransientNetworkError(error)
+          ) {
+            await new Promise((resolve) =>
+              setTimeout(resolve, 500 * 2 ** attempt),
+            );
+            continue;
+          }
+          throw new ModelRequestFailedError(
+            {
+              code: "MODEL_REQUEST_FAILED",
+              incident_id: newIncidentId(),
+              detail: `任务 ${call.task} 的模型请求失败（provider=${provider.name}）`,
+            },
+            error,
+          );
+        }
+      }
     }
 
     // generateObject 已按 schema 校验；此处仍经运行时 schema 严格复验，

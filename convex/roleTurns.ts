@@ -987,15 +987,35 @@ export const finalizeTurnSuccess = internalMutation({
       .unique();
     if (!ticket || ticket.status !== "working") return; // 幂等：不重写终态
 
+    // 死亡排水：对局已 failed（如另一条开场已失败）时，本条即使在飞途中
+    // 完成，也不再发布消息、不解锁证据、不发出事件——Ticket 以取消终结。
+    const session = await ctx.db
+      .query("sessions")
+      .withIndex("by_session_key", (q) => q.eq("session_key", ticket.session_id))
+      .unique();
+    if (session?.phase === "failed") {
+      await ctx.db.patch(ticket._id, {
+        status: "failed",
+        error_json: JSON.stringify({
+          code: "ROLE_TURN_FAILED",
+          message: "对局已终止，本回合已取消",
+        }),
+        updated_at_ms: Date.now(),
+      });
+      await ctx.runMutation(internalApi.audit.recordInternal, {
+        event: "role_turn_cancelled",
+        session_id: ticket.session_id,
+        request_id: ticket.request_id,
+        detail_code: "session_failed",
+      });
+      return;
+    }
+
     const nowMs = Date.now();
     const messageId = newOpaqueId("msg-");
 
     // P1-2：持久化 Approved Speech Envelope（CONTRACTS 9 / 14）——
     // voice_id 来自案件公开 Role；TTS Route 只接受本信封。
-    const session = await ctx.db
-      .query("sessions")
-      .withIndex("by_session_key", (q) => q.eq("session_key", ticket.session_id))
-      .unique();
     const caseDoc = session
       ? await ctx.db
           .query("cases")
@@ -1142,6 +1162,39 @@ export const finalizeTurnFailure = internalMutation({
       status: "failed",
       error_json: JSON.stringify(publicError),
       updated_at_ms: nowMs,
+    });
+  },
+});
+
+/**
+ * 死亡排水（drain-on-fail）：对局已 failed 后取消尚未开工的 Ticket。
+ * 与 finalizeTurnFailure 的区别：不插入 role_turn_failed 事件（对局终局
+ * 错误已由 session_failed 呈现，逐条再弹只会形成弹窗风暴），仅终结
+ * Ticket 并记私有审计。幂等：不重写终态。
+ */
+export const finalizeTurnCancelled = internalMutation({
+  args: { request_id: v.string() },
+  handler: async (ctx, args) => {
+    const ticket = await ctx.db
+      .query("role_turn_tickets")
+      .withIndex("by_request_id", (q) => q.eq("request_id", args.request_id))
+      .unique();
+    if (!ticket || ticket.status === "succeeded" || ticket.status === "failed") {
+      return;
+    }
+    await ctx.db.patch(ticket._id, {
+      status: "failed",
+      error_json: JSON.stringify({
+        code: "ROLE_TURN_FAILED",
+        message: "对局已终止，本回合已取消",
+      }),
+      updated_at_ms: Date.now(),
+    });
+    await ctx.runMutation(internalApi.audit.recordInternal, {
+      event: "role_turn_cancelled",
+      session_id: ticket.session_id,
+      request_id: ticket.request_id,
+      detail_code: "session_failed",
     });
   },
 });

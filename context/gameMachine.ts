@@ -485,13 +485,36 @@ export const gameMachine = setup({
           actions: assign(({ context, event }) => {
             let notifs = context.notifs;
             let thinking = context.thinking;
+            // 死亡静默：对局已 failed（此前批次见过 session_failed，或快照
+            // 已置 failed）后，世界停止响应——不再为后续事件弹任何通知。
+            let sessionDead = context.sessionView?.phase === "failed";
+            // 开场阶段的开场失败由终局面板统一呈现，逐条 toast 是重复噪声。
+            const inOpening = context.sessionView?.phase === "opening_statements";
+            let evidenceUnlockedCount = 0;
+            // 先扫本批是否含 session_failed：同批的逐条回合失败不再弹
+            // （终局 toast 一条 + 终局面板已经完整覆盖，一票否决只说一遍）。
+            const batchHasSessionFailed = event.events.some(
+              (e) => e.payload.type === "session_failed",
+            );
             for (const e of event.events) {
               const p = e.payload;
+              if (p.type === "session_failed") {
+                thinking = null;
+                // 终局错误只提示一次（跨批次去重）。
+                if (!sessionDead) {
+                  notifs = pushNotif(
+                    notifs,
+                    notif("error", "对局异常终止", p.error.message, p.error.code),
+                  );
+                }
+                sessionDead = true;
+                continue;
+              }
+              if (sessionDead) continue;
               if (p.type === "evidence_unlocked") {
-                notifs = pushNotif(
-                  notifs,
-                  notif("evidence", "解锁了新证据", `${p.evidence_ids.length} 条证据已加入证据池`),
-                );
+                // 同批多条解锁合并为一条通知（开场并行完成时不再连环弹窗）。
+                evidenceUnlockedCount += p.evidence_ids.length;
+                continue;
               }
               if (p.type === "recording_saved") {
                 notifs = pushNotif(notifs, notif("success", "录音证据已保存", "可以在证据板查看"));
@@ -502,12 +525,19 @@ export const gameMachine = setup({
               if (p.type === "role_message_published" || p.type === "role_turn_failed") {
                 if (thinking?.requestId === p.request_id) thinking = null;
               }
-              if (p.type === "role_turn_failed") {
+              if (
+                p.type === "role_turn_failed" &&
+                !inOpening &&
+                !batchHasSessionFailed
+              ) {
                 notifs = pushNotif(notifs, notif("error", "这条回应失败了", p.error.message, p.error.code));
               }
-              if (p.type === "session_failed") {
-                notifs = pushNotif(notifs, notif("error", "对局异常终止", p.error.message, p.error.code));
-              }
+            }
+            if (evidenceUnlockedCount > 0 && !sessionDead) {
+              notifs = pushNotif(
+                notifs,
+                notif("evidence", "解锁了新证据", `${evidenceUnlockedCount} 条证据已加入证据池`),
+              );
             }
             return {
               messages: event.messages ?? context.messages,

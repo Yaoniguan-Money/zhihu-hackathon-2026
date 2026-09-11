@@ -42,7 +42,10 @@ export async function validateAndProbeUserConfig(
   let registry: ProviderRegistryDoc;
   let config: ResolvedGatewayConfig;
   try {
-    registry = buildUserRegistry(parsed.data);
+    // 结构化输出能力检测：优先用 API 级 response_format: json_schema 探针；
+    // 该调用失败（供应商不支持或拒绝该参数）时退回默认提示词注入模式再探。
+    // 两次都失败才判 probe_failed；任一成功即按对应能力位落库。
+    registry = buildUserRegistry(parsed.data, true);
     config = resolveRegistryDoc(registry);
   } catch (error) {
     return {
@@ -55,7 +58,13 @@ export async function validateAndProbeUserConfig(
     };
   }
   try {
-    await probeUserModelConfig(gatewayFor(config));
+    try {
+      await probeUserModelConfig(gatewayFor(config));
+    } catch {
+      registry = buildUserRegistry(parsed.data, false);
+      config = resolveRegistryDoc(registry);
+      await probeUserModelConfig(gatewayFor(config));
+    }
   } catch (error) {
     return {
       ok: false,

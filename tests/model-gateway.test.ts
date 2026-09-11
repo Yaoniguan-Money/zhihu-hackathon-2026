@@ -9,6 +9,7 @@ import {
   resolveRegistryDoc,
 } from "@server/model-gateway/config.js";
 import {
+  isTransientNetworkError,
   OpenAICompatibleModelGateway,
 } from "@server/model-gateway/openai-compatible-gateway.js";
 import {
@@ -26,6 +27,33 @@ const FULL_ENV: Record<string, string> = {
   AI_VALIDATOR_MODEL: "max-model",
   AI_REVEAL_MODEL: "max-model",
 };
+
+describe("isTransientNetworkError：网络类瞬时错误判定（传输层重试口径）", () => {
+  const named = (name: string, statusCode?: number) =>
+    Object.assign(new Error("x"), { name, ...(statusCode !== undefined ? { statusCode } : {}) });
+
+  test("连接断开：无状态码的 AI_APICallError / TypeError → 可重试", () => {
+    expect(isTransientNetworkError(named("AI_APICallError"))).toBe(true);
+    expect(isTransientNetworkError(named("TypeError"))).toBe(true);
+  });
+
+  test("5xx / 408 / 409 / 429 → 可重试；其他状态码不可", () => {
+    expect(isTransientNetworkError(named("AI_APICallError", 502))).toBe(true);
+    expect(isTransientNetworkError(named("AI_APICallError", 429))).toBe(true);
+    expect(isTransientNetworkError(named("AI_APICallError", 408))).toBe(true);
+    expect(isTransientNetworkError(named("AI_APICallError", 400))).toBe(false);
+    expect(isTransientNetworkError(named("AI_APICallError", 401))).toBe(false);
+  });
+
+  test("schema 解析失败（NoObjectGeneratedError）→ 不可重试", () => {
+    expect(isTransientNetworkError(named("AI_NoObjectGeneratedError"))).toBe(false);
+  });
+
+  test("其他普通错误 → 不可重试", () => {
+    expect(isTransientNetworkError(new Error("boom"))).toBe(false);
+    expect(isTransientNetworkError("not an error")).toBe(false);
+  });
+});
 
 describe("AI_* 显式配置", () => {
   test("八项齐全时成功，且任务→模型映射显式", () => {
