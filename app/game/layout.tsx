@@ -8,8 +8,7 @@ import { Icon } from "@/components/ui/Icons";
 import { requestTour, type TourId } from "@/components/onboarding/GameTour";
 import SoundToggle from "@/components/ui/SoundToggle";
 import { ModelSettingsButton } from "@/components/settings/ModelSettingsDialog";
-import { playSfx, primeSfx } from "@/lib/sfx";
-import { startBgm, stopBgm } from "@/lib/bgm";
+import { playSfx } from "@/lib/sfx";
 
 const go = () => playSfx("click");
 
@@ -43,22 +42,6 @@ export default function GameLayout({ children }: { children: ReactNode }) {
       router.replace("/");
     }
   }, [booted, matchesLobby, pathname, router]);
-
-  // BGM：首次手势解锁后启动三首上传音乐的顺序轮换。
-  useEffect(() => {
-    const kick = () => {
-      primeSfx();
-      startBgm();
-    };
-    window.addEventListener("pointerdown", kick);
-    window.addEventListener("keydown", kick);
-    return () => {
-      window.removeEventListener("pointerdown", kick);
-      window.removeEventListener("keydown", kick);
-    };
-  }, [pathname]);
-
-  useEffect(() => () => stopBgm(), []);
 
   return (
     <div className="flex min-h-screen flex-col">

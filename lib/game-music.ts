@@ -34,6 +34,12 @@ export function getGameMusicTrackVolume(index: number): number {
   return Math.min(1, GAME_MUSIC_VOLUME * GAME_MUSIC_TRACKS[index].gain);
 }
 
+/** 随机切曲：不与当前曲目重复（2026-09-11 用户决定全场随机播放）。 */
 export function nextGameMusicIndex(currentIndex: number): number {
-  return (currentIndex + 1) % GAME_MUSIC_TRACKS.length;
+  if (GAME_MUSIC_TRACKS.length <= 1) return currentIndex;
+  let next = currentIndex;
+  while (next === currentIndex) {
+    next = Math.floor(Math.random() * GAME_MUSIC_TRACKS.length);
+  }
+  return next;
 }

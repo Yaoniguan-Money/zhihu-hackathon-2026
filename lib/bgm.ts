@@ -7,7 +7,6 @@ let player: HTMLAudioElement | null = null;
 let currentTrackIndex = 0;
 let running = false;
 let consecutiveErrors = 0;
-let unsubscribeMute: (() => void) | null = null;
 
 function playCurrentTrack(): void {
   if (!player || !running || typeof window === "undefined") return;
@@ -64,36 +63,17 @@ function ensurePlayer(): HTMLAudioElement | null {
   player.addEventListener("error", handleError);
   player.addEventListener("playing", handlePlaying);
   document.addEventListener("visibilitychange", handleVisibilityChange);
-  unsubscribeMute = subscribeSfxMuted((muted) => {
+  // BGM 全场常驻（2026-09-11 用户决定），静音订阅无需退订。
+  subscribeSfxMuted((muted) => {
     if (player) player.muted = muted;
   });
   return player;
 }
 
-/** 在用户手势后启动三首游戏音乐的顺序轮换；重复调用不会叠加播放器。 */
+/** 首次用户手势后启动全场 BGM（大厅/对局/揭晓全程持续，随机切曲）；重复调用不会叠加播放器。 */
 export function startBgm(): void {
   running = true;
   const audio = ensurePlayer();
   if (!audio) return;
   if (audio.paused) playCurrentTrack();
-}
-
-/** 离开游戏区域时停止并释放播放器，避免返回大厅后继续播放或重复叠音。 */
-export function stopBgm(): void {
-  running = false;
-  currentTrackIndex = 0;
-  consecutiveErrors = 0;
-  unsubscribeMute?.();
-  unsubscribeMute = null;
-  if (typeof document !== "undefined") {
-    document.removeEventListener("visibilitychange", handleVisibilityChange);
-  }
-  if (!player) return;
-  player.pause();
-  player.removeEventListener("ended", handleEnded);
-  player.removeEventListener("error", handleError);
-  player.removeEventListener("playing", handlePlaying);
-  player.removeAttribute("src");
-  player.load();
-  player = null;
 }

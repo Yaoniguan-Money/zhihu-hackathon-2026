@@ -3,6 +3,7 @@ import { ConvexAuthProvider } from "@convex-dev/auth/react";
 import { convexClient } from "@/lib/convex-client";
 import { GameProvider } from "@/context/GameContext";
 import Toaster from "@/components/ui/Toaster";
+import BgmStarter from "@/components/ui/BgmStarter";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -30,6 +31,7 @@ export default function RootLayout({
           <GameProvider>
             {children}
             <Toaster />
+            <BgmStarter />
           </GameProvider>
         </ConvexAuthProvider>
       </body>
