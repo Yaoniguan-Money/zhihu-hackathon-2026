@@ -40,9 +40,10 @@
 
 ## 已知风险、阻塞与下一步
 
+- **2026-09-11 补充修正**：用户复测反馈「带一篇知乎文章来」展开后依旧无法滚动——右栏滚动容器的 `overscroll-contain touch-pan-y` 修复在用户真机上不生效。二次修复：新增通用弹窗壳 `components/ui/Modal.tsx`（portal + fixed 遮罩 + `max-h-[85vh]` 内部滚动 + Esc/遮罩/✕ 关闭），`HowtoModal` 改用该壳；「带一篇知乎文章来」表单整体从右栏就地展开改为点击弹窗（textarea 增至 8 行），彻底不再依赖右栏滚动；同时移除右栏滚动容器的 `backdrop-blur-md`（多层 backdrop-filter 叠加是真机触摸滚动卡顿的已知诱因，子卡片 `.card-dark` 自身磨砂保留）。typecheck 通过；`bunx eslint` 仅剩既有同类错误（`Modal` 的 portal `setState` 与 `ModelSettingsDialog` 同款模式，`app/page.tsx` 三处为改动前既有）。
 - `html-to-image` 在 Tailwind v4 的 oklch 计算色下依赖现代浏览器渲染能力；卡片主体使用内联十六进制色，风险低，但建议真机过一遍「保存图片」确认图案完整。
 - `navigator.share` 带文件仅 HTTPS / 安全上下文可用；本地 HTTP 桌面端会走文案分享/复制降级，部署到 HTTPS 后才有图文件分享。
-- 下一步可执行的起点：真机（触屏）回归大厅滚动、玩法弹窗、战绩卡分享三处；如需美化分享图，直接改 `ScoreCardArt.tsx` 单文件即可。
+- 下一步可执行的起点：真机（触屏）回归大厅滚动、玩法弹窗、带文建案弹窗、战绩卡分享四处；如需美化分享图，直接改 `ScoreCardArt.tsx` 单文件即可。
 
 ## 最小接手阅读顺序
 

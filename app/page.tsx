@@ -18,6 +18,7 @@ import { playSfx } from "@/lib/sfx";
 import SoundToggle from "@/components/ui/SoundToggle";
 import { ModelSettingsButton } from "@/components/settings/ModelSettingsDialog";
 import HowtoModal from "@/components/lobby/HowtoModal";
+import Modal from "@/components/ui/Modal";
 
 const InterrogationStage = dynamic(() => import("@/components/three/InterrogationStage"), {
   ssr: false,
@@ -104,10 +105,10 @@ function CustomCaseForm() {
   const canSubmit = /^https:\/\/.+/.test(url) && text.trim().length > 0 && invite.trim().length > 0 && !caseId;
 
   return (
-    <div className="card-dark overflow-hidden" data-tour="lobby-bring">
+    <div data-tour="lobby-bring">
       <button
-        onClick={() => setOpen((o) => !o)}
-        className="flex w-full items-center gap-2 px-5 py-4 text-left"
+        onClick={() => setOpen(true)}
+        className="card-dark flex w-full items-center gap-2 px-5 py-4 text-left transition-colors hover:border-amber/40"
       >
         <span className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-paper/40 text-paper/80">
           <Icon name="link" size={15} />
@@ -116,58 +117,56 @@ function CustomCaseForm() {
           <span className="block text-sm font-black text-paper">带来一篇真实知乎文章</span>
           <span className="block text-xs text-paper/55">需要邀请码 · AI 会把它编译成一局五角色对局</span>
         </span>
-        <motion.span animate={{ rotate: open ? 90 : 0 }} className="text-paper/60">
+        <span className="text-paper/60">
           <Icon name="next" size={16} />
-        </motion.span>
+        </span>
       </button>
-      <AnimatePresence>
-        {open && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            className="overflow-hidden"
-          >
-            <div className="space-y-3 px-5 pb-5">
-              <input
-                value={url}
-                onChange={(e) => setUrl(e.target.value)}
-                placeholder="https://zhuanlan.zhihu.com/p/…"
-                className="w-full rounded-xl border-2 border-paper/20 bg-night-deep/60 px-4 py-2.5 text-sm text-paper placeholder:text-paper/30 focus:border-amber focus:outline-none"
-              />
-              <textarea
-                value={text}
-                onChange={(e) => setText(e.target.value)}
-                placeholder="粘贴文章的完整正文（必须完整，URL 只作来源记录）"
-                rows={5}
-                className="w-full resize-none rounded-xl border-2 border-paper/20 bg-night-deep/60 px-4 py-2.5 text-sm leading-relaxed text-paper placeholder:text-paper/30 focus:border-amber focus:outline-none"
-              />
-              <input
-                value={invite}
-                onChange={(e) => setInvite(e.target.value)}
-                placeholder="邀请码"
-                className="w-full rounded-xl border-2 border-paper/20 bg-night-deep/60 px-4 py-2.5 text-sm text-paper placeholder:text-paper/30 focus:border-amber focus:outline-none"
-              />
-              {caseId && !error && (
-                <div className="flex items-center gap-3 rounded-xl border-2 border-amber/60 bg-amber/10 px-4 py-3">
-                  <motion.span
-                    className="h-4 w-4 rounded-full border-2 border-amber border-t-transparent"
-                    animate={{ rotate: 360 }}
-                    transition={{ repeat: Infinity, duration: 0.8, ease: "linear" }}
-                  />
-                  <span className="text-sm font-bold text-amber">
-                    {compilation?.status === "working" ? "AI 正在编译案件…" : "已受理，等待编译…"}
-                  </span>
-                </div>
-              )}
-              {error && <ErrorPanel error={error as never} onDismiss={() => { setError(null); setCaseId(null); }} />}
-              <button onClick={submit} disabled={!canSubmit} className="btn btn-amber w-full text-sm disabled:opacity-40">
-                <Icon name="sparkle" size={15} filled /> 编译案件
-              </button>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {open && (
+        <Modal
+          title="带来一篇真实知乎文章"
+          subtitle="需要邀请码 · AI 会把它编译成一局五角色对局"
+          icon="link"
+          onClose={() => setOpen(false)}
+        >
+          <div className="mt-4 space-y-3">
+            <input
+              value={url}
+              onChange={(e) => setUrl(e.target.value)}
+              placeholder="https://zhuanlan.zhihu.com/p/…"
+              className="w-full rounded-xl border-2 border-paper/20 bg-night-deep/60 px-4 py-2.5 text-sm text-paper placeholder:text-paper/30 focus:border-amber focus:outline-none"
+            />
+            <textarea
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+              placeholder="粘贴文章的完整正文（必须完整，URL 只作来源记录）"
+              rows={8}
+              className="w-full resize-none rounded-xl border-2 border-paper/20 bg-night-deep/60 px-4 py-2.5 text-sm leading-relaxed text-paper placeholder:text-paper/30 focus:border-amber focus:outline-none"
+            />
+            <input
+              value={invite}
+              onChange={(e) => setInvite(e.target.value)}
+              placeholder="邀请码"
+              className="w-full rounded-xl border-2 border-paper/20 bg-night-deep/60 px-4 py-2.5 text-sm text-paper placeholder:text-paper/30 focus:border-amber focus:outline-none"
+            />
+            {caseId && !error && (
+              <div className="flex items-center gap-3 rounded-xl border-2 border-amber/60 bg-amber/10 px-4 py-3">
+                <motion.span
+                  className="h-4 w-4 rounded-full border-2 border-amber border-t-transparent"
+                  animate={{ rotate: 360 }}
+                  transition={{ repeat: Infinity, duration: 0.8, ease: "linear" }}
+                />
+                <span className="text-sm font-bold text-amber">
+                  {compilation?.status === "working" ? "AI 正在编译案件…" : "已受理，等待编译…"}
+                </span>
+              </div>
+            )}
+            {error && <ErrorPanel error={error as never} onDismiss={() => { setError(null); setCaseId(null); }} />}
+            <button onClick={submit} disabled={!canSubmit} className="btn btn-amber w-full text-sm disabled:opacity-40">
+              <Icon name="sparkle" size={15} filled /> 编译案件
+            </button>
+          </div>
+        </Modal>
+      )}
     </div>
   );
 }
@@ -256,7 +255,7 @@ export default function Home() {
       </div>
 
       {/* 右侧面板 */}
-      <div className="absolute bottom-4 right-4 top-4 z-10 flex w-[420px] max-w-[92vw] flex-col gap-3 overflow-y-auto overscroll-contain touch-pan-y rounded-3xl border-2 border-paper/10 bg-night-deep/70 p-4 pb-6 backdrop-blur-md">
+      <div className="absolute bottom-4 right-4 top-4 z-10 flex w-[420px] max-w-[92vw] flex-col gap-3 overflow-y-auto overscroll-contain touch-pan-y rounded-3xl border-2 border-paper/10 bg-night-deep/70 p-4 pb-6">
         {/* ① 开始一局：案件目录 */}
         <div className="flex items-center justify-between" data-tour="lobby-catalog">
           <h2 className="text-lg font-black text-paper">
