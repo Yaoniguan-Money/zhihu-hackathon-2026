@@ -70,6 +70,8 @@ export function errorCodeHint(code: PublicError["code"]): string {
       return "没听到说话内容，请靠近麦克风再试一次。";
     case "VOICE_AUDIO_TOO_LONG":
       return "录音超过 30 秒上限，请把问题说短一点。";
+    case "REVEAL_FAILED":
+      return "揭晓生成失败：网络或服务波动，指控内容不变，请重新提交指控。";
     case "SERVICE_NOT_CONFIGURED":
       return "你还没有配置模型服务：点右上角齿轮，填写你的模型 API（Base URL / API Key / 模型名）后再试。";
     case "SERVICE_UNAVAILABLE":

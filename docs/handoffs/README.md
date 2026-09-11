@@ -122,3 +122,4 @@ docs/handoffs/<ticket-or-stage-id>.md
 | OPENING-FAIL-TOAST-STORM 开场失败诊断与死亡排水/弹窗风暴修复 | complete | [2026-09-11-opening-failure-toast-storm](./2026-09-11-opening-failure-toast-storm.md) |
 | MODEL-JSON-ENFORCEMENT 模型结构化输出强制 + 传输层重试 | complete | [2026-09-11-model-json-enforcement-and-transport-retry](./2026-09-11-model-json-enforcement-and-transport-retry.md) |
 | DISTORTED-REWRITE-AND-TOAST-DEDUP 篡改角色语义重试 + 弹窗去重/语音赛跑静默 | complete | [2026-09-11-distorted-rewrite-and-toast-dedup](./2026-09-11-distorted-rewrite-and-toast-dedup.md) |
+| REVEAL-RETRYABLE 揭晓失败退回审讯中 + Reveal 网络重试 10 次 | complete | [2026-09-11-reveal-retryable](./2026-09-11-reveal-retryable.md) |

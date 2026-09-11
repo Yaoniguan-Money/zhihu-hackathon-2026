@@ -16,7 +16,10 @@ import {
 } from "@contracts/private/index.js";
 import { sha256Hex } from "@server/cases/hash.js";
 import { canonicalJson } from "@server/cases/idempotency.js";
-import { ModelRequestFailedError } from "@server/model-gateway/openai-compatible-gateway.js";
+import {
+  isTransientNetworkError,
+  ModelRequestFailedError,
+} from "@server/model-gateway/openai-compatible-gateway.js";
 import { modelGatewayFor } from "./aiRuntime";
 import { ModelConfigMissingError as ConfigMissingError } from "@server/model-gateway/config.js";
 import {
@@ -30,11 +33,18 @@ import { throwPublicError } from "./publicErrors.js";
 /**
  * TB9：Final Accusation 与 Reveal（CONTRACTS 10，ENGINEERING_SPEC 5.5）。
  * 正确性、两项分数、truth chain、altered links 全部服务器确定；
- * Reveal 模型只产生解释与 Reality Mapping 候选（校验失败→整个 Reveal 失败）。
+ * Reveal 模型只产生解释与 Reality Mapping 候选。网络失败带 10 次重试，
+ * 仍失败时对局退回审讯中可重新提交（2026-09-11 用户批准，不整局作废）。
  * accuse 返回前完成完整持久化：judging（瞬态）→ revealed。
  */
 
 const OPERATION_ACCUSE = "game.accuse";
+/**
+ * Reveal 生成的网络重试上限（2026-09-11 用户批准："重试也是至少10次"）。
+ * 揭晓是整局收尾的单次模型调用，不再整局判死（见 failRevealInternal），
+ * 这里再给足传输层容错；仅网络类瞬时错误重试，schema/协议错误仍立即失败。
+ */
+const REVEAL_ATTEMPT_MAX = 10;
 
 interface AccusationInit {
   replayedFailure: boolean;
@@ -124,22 +134,46 @@ export const accuseCore = internalAction({
       if (!context) {
         throwPublicError('REVEAL_FAILED', '真相揭晓失败，本局无法继续');
       }
-      const explanation = await gateway.generateStructured({
-        task: 'reveal',
-        schemaName: REVEAL_SCHEMA_VERSION,
-        system: revealSystemPrompt(),
-        prompt: revealUserPrompt({
-          correctRoleId: golden.distortion_owner_role_id,
-          distortionTypes: golden.answer_distortion_types,
-          truthChain: context.truthChain,
-          playerCorrect: initialized.playerCorrect,
-          accusedRoleId: args.suspect_role_id,
-          accusedTypes: args.distortion_types,
-          evidenceTitles: context.evidenceTitles,
-          alteredLinks: context.alteredLinks,
-        }),
-        schema: revealExplanationModelSchema,
-      });
+      // 网络类瞬时错误最多 10 次尝试（指数退避 500ms 起、单次封顶 4s）；
+      // 其余错误立即抛出走统一失败路径。
+      let explanation: {
+        explanation: string;
+        reality_mapping: string[];
+        referenced_claim_ids: string[];
+      } | undefined;
+      for (let attempt = 0; attempt < REVEAL_ATTEMPT_MAX; attempt += 1) {
+        try {
+          explanation = await gateway.generateStructured({
+            task: 'reveal',
+            schemaName: REVEAL_SCHEMA_VERSION,
+            system: revealSystemPrompt(),
+            prompt: revealUserPrompt({
+              correctRoleId: golden.distortion_owner_role_id,
+              distortionTypes: golden.answer_distortion_types,
+              truthChain: context.truthChain,
+              playerCorrect: initialized.playerCorrect,
+              accusedRoleId: args.suspect_role_id,
+              accusedTypes: args.distortion_types,
+              evidenceTitles: context.evidenceTitles,
+              alteredLinks: context.alteredLinks,
+            }),
+            schema: revealExplanationModelSchema,
+          });
+          break;
+        } catch (error) {
+          const transient =
+            error instanceof ModelRequestFailedError &&
+            isTransientNetworkError(error.cause);
+          if (!transient || attempt === REVEAL_ATTEMPT_MAX - 1) throw error;
+          await new Promise((resolve) =>
+            setTimeout(resolve, Math.min(500 * 2 ** attempt, 4000)),
+          );
+        }
+      }
+      if (explanation === undefined) {
+        // 循环内最后一次失败已抛出；此分支仅用于类型收敛。
+        throwPublicError('REVEAL_FAILED', '真相揭晓失败，本局无法继续');
+      }
       const claimIds = new Set(context.allClaimIds);
       if (!explanation.referenced_claim_ids.every((id) => claimIds.has(id))) {
         throwPublicError('REVEAL_FAILED', '真相揭晓失败，本局无法继续');
@@ -594,6 +628,12 @@ export const finalizeRevealed = internalMutation({
   },
 });
 
+/**
+ * Reveal 生成失败（2026-09-11 用户批准）：不再整局作废——退回审讯中，
+ * 证据/进度/回合历史全保留，玩家可重新提交指控。错误经由 accuse action
+ * 抛出的 Public Error 在指控页呈现（不伪造成功，也无终局面板）。
+ * 幂等：已 revealed 不回退。
+ */
 export const failRevealInternal = internalMutation({
   args: {
     session_id: v.string(),
@@ -607,19 +647,15 @@ export const failRevealInternal = internalMutation({
       .withIndex("by_session_key", (q) => q.eq("session_key", args.session_id))
       .unique();
     if (!session || session.phase === "revealed") return;
-    const nowMs = Date.now();
-    const publicError =
-      args.failure_code === "MODEL_CONFIG_MISSING"
-        ? { code: "SERVICE_NOT_CONFIGURED", message: "服务未配置，无法生成揭晓" }
-        : { code: "REVEAL_FAILED", message: "真相揭晓失败，本局无法继续" };
     await ctx.db.patch(session._id, {
-      phase: "failed",
-      terminal_error_json: JSON.stringify(publicError),
-      updated_at_ms: nowMs,
+      phase: "investigation",
+      updated_at_ms: Date.now(),
     });
-    await insertEvent(ctx, args.session_id, {
-      type: "session_failed",
-      error: publicError,
+    await ctx.runMutation(internal.audit.recordInternal, {
+      event: "reveal_failed_retryable",
+      session_id: args.session_id,
+      client_action_id: args.client_action_id,
+      detail_code: args.failure_code,
     });
   },
 });
