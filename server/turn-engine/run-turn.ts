@@ -110,6 +110,23 @@ export function networkFailureDiagnosis(error: unknown): string {
   return `(err=${cause.name ?? "unknown"})`;
 }
 
+/**
+ * 模型输出无法解析（AI_NoObjectGeneratedError）：在 json_object/提示词
+ * 模式下模型偶发输出不符合 schema 的 JSON（2026-09-11 官方端点实测）。
+ * 归入语义重写（消耗 10 次候选上限，用户批准"每个人都至少给他 10 次"），
+ * 不再作为协议失败一票否决。
+ */
+export function isUnparseableModelOutput(error: unknown): boolean {
+  return (
+    error instanceof ModelRequestFailedError &&
+    (error.cause as { name?: string } | undefined)?.name ===
+      "AI_NoObjectGeneratedError"
+  );
+}
+
+const UNPARSEABLE_FEEDBACK =
+  "上一次输出无法解析为符合 schema 的 JSON，请严格只输出单个 JSON 对象，不要输出解释、推理过程或多余字段。";
+
 export async function runGenerationAttempts(
   gateway: ModelGateway,
   context: TurnAttemptContext,
@@ -161,6 +178,18 @@ export async function runGenerationAttempts(
         }),
       );
     } catch (error) {
+      // 输出解析失败 → 归入语义重写（消耗候选上限），不再立即终止。
+      if (isUnparseableModelOutput(error)) {
+        await record({
+          type: "model_call_failed",
+          task: "role",
+          attempt_index: attemptIndex,
+          duration_ms: Date.now() - roleCallStart,
+          detail_code: "MODEL_OUTPUT_UNPARSEABLE",
+        });
+        lastFeedback = UNPARSEABLE_FEEDBACK;
+        continue;
+      }
       await record({
         type: "model_call_failed",
         task: "role",
@@ -240,6 +269,18 @@ export async function runGenerationAttempts(
         }),
       );
     } catch (error) {
+      // 校验器输出解析失败 → 换一个候选整轮重试（消耗候选上限）。
+      if (isUnparseableModelOutput(error)) {
+        await record({
+          type: "model_call_failed",
+          task: "validator",
+          attempt_index: attemptIndex,
+          duration_ms: Date.now() - validatorCallStart,
+          detail_code: "VALIDATOR_OUTPUT_UNPARSEABLE",
+        });
+        lastFeedback = UNPARSEABLE_FEEDBACK;
+        continue;
+      }
       await record({
         type: "model_call_failed",
         task: "validator",

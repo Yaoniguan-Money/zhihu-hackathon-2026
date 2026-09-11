@@ -1,10 +1,42 @@
 import { describe, expect, test } from "bun:test";
+import type { z } from "zod";
 import { ScriptedModelGateway } from "./helpers/scripted-model-gateway.js";
 import {
   runGenerationAttempts,
   type TurnAttemptContext,
 } from "@server/turn-engine/run-turn.js";
+import {
+  ModelRequestFailedError,
+  type ModelGateway,
+  type StructuredModelCall,
+} from "@server/model-gateway/openai-compatible-gateway.js";
 import { rolePrivatePolicySchema } from "@contracts/private/index.js";
+
+/** 校验器首次调用抛 NoObjectGeneratedError（模拟模型输出不可解析），其余透传。 */
+class UnparseableValidatorOnceGateway implements ModelGateway {
+  private glitched = false;
+  constructor(
+    private readonly inner: ScriptedModelGateway,
+  ) {}
+  async generateStructured<TSchema extends z.ZodType>(
+    call: StructuredModelCall<TSchema>,
+  ): Promise<z.infer<TSchema>> {
+    if (call.task === "validator" && !this.glitched) {
+      this.glitched = true;
+      throw new ModelRequestFailedError(
+        {
+          code: "MODEL_REQUEST_FAILED",
+          incident_id: "test:unparseable",
+          detail: "No object generated",
+        },
+        Object.assign(new Error("response did not match schema"), {
+          name: "AI_NoObjectGeneratedError",
+        }),
+      );
+    }
+    return this.inner.generateStructured(call);
+  }
+}
 
 /**
  * TB5/TB6：生成-校验-重写循环的确定性覆盖（Scripted Adapter，无网络）。
@@ -138,6 +170,20 @@ describe("TB5 忠实回合：重写矩阵（Scripted）", () => {
       expect(outcome.attempts).toBe(10);
       expect(outcome.failure.code).toBe("VALIDATION_EXHAUSTED");
     }
+  });
+
+  test("校验器输出不可解析 → 归入语义重写，换候选后通过（不立即终止）", async () => {
+    const gateway = new UnparseableValidatorOnceGateway(
+      new ScriptedModelGateway([
+        { task: "role", value: candidate },
+        { task: "validator", value: entailed },
+        { task: "role", value: candidate },
+        { task: "validator", value: entailed },
+      ]),
+    );
+    const outcome = await runGenerationAttempts(gateway, faithfulContext());
+    expect(outcome.ok).toBe(true);
+    if (outcome.ok) expect(outcome.attempts).toBe(2);
   });
 
   test("生成器协议失败 → 立即终止，不消耗语义重写", async () => {
