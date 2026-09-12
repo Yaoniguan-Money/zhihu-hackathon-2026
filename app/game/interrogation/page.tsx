@@ -70,6 +70,42 @@ export default function InterrogationPage() {
   const speakTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const roleMessages = useMemo(() => messages.filter((m) => m.speaker_type === "role"), [messages]);
+  const playerMessages = useMemo(() => messages.filter((m) => m.speaker_type === "player"), [messages]);
+
+  const ROUND_TIME = 90;
+
+  const currentRound = playerMessages.length + 1;
+  const [timeLeft, setTimeLeft] = useState(ROUND_TIME);
+  const [timeUp, setTimeUp] = useState(false);
+  const prevPlayerCountRef = useRef(0);
+
+  useEffect(() => {
+    if (phase !== "investigation") {
+      setTimeLeft(ROUND_TIME);
+      setTimeUp(false);
+      return;
+    }
+    if (busyTurn) return;
+    if (timeLeft <= 0) return;
+
+    const t = setInterval(() => setTimeLeft((s) => s - 1), 1000);
+    return () => clearInterval(t);
+  }, [phase, busyTurn, timeLeft > 0]);
+
+  useEffect(() => {
+    if (playerMessages.length > prevPlayerCountRef.current) {
+      setTimeLeft(ROUND_TIME);
+      setTimeUp(false);
+    }
+    prevPlayerCountRef.current = playerMessages.length;
+  }, [playerMessages.length]);
+
+  useEffect(() => {
+    if (timeLeft <= 0 && phase === "investigation" && !busyTurn) {
+      setTimeUp(true);
+      playSfx("click");
+    }
+  }, [timeLeft, phase, busyTurn]);
 
   // 门屏等待计时：真实加载通常数秒；超过 20s 提示玩家返回大厅，避免无限盲等。
   const [gateSeconds, setGateSeconds] = useState(0);
@@ -499,6 +535,24 @@ export default function InterrogationPage() {
             <Icon name="sparkle" size={11} />
             已解锁证据 {evidences.length}
           </span>
+          {phase === "investigation" && (
+            <span className="ml-1 flex items-center gap-1 rounded-full bg-amber/15 px-2 py-0.5 text-[10px] font-black text-amber">
+              第 {currentRound} 轮
+            </span>
+          )}
+          {phase === "investigation" && !busyTurn && (
+            <span className={`flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-black ${
+              timeLeft < 30 ? "bg-coral/20 text-coral" : "bg-paper/10 text-paper/70"
+            }`}>
+              {timeLeft < 30 && <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-coral" />}
+              剩余 {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, "0")}
+            </span>
+          )}
+          {phase === "investigation" && busyTurn && (
+            <span className="flex items-center gap-1 rounded-full bg-paper/10 px-2 py-0.5 text-[10px] font-black text-paper/50">
+              对方作答中
+            </span>
+          )}
         </div>
         <AnimatePresence>
           {selectedRole && (
@@ -567,8 +621,21 @@ export default function InterrogationPage() {
       {phase === "investigation" && (
         <div className="absolute bottom-4 left-4 right-4 z-10 pb-[env(safe-area-inset-bottom)]">
           <div className="mx-auto max-w-3xl rounded-2xl border-2 border-paper/15 bg-night-deep/85 p-3 backdrop-blur-md">
-            {/* 角色选择 + 问法 */}
+            {/* 角色选择 + 问法 + 跳过本轮 */}
             <div className="mb-2.5 flex flex-wrap items-center gap-1.5" data-tour="int-role">
+              {phase === "investigation" && !busyTurn && (
+                <button
+                  onClick={() => {
+                    playSfx("click");
+                    setTimeLeft(ROUND_TIME);
+                    setTimeUp(false);
+                  }}
+                  title="跳过本轮计时"
+                  className="rounded-full border-2 border-paper/20 px-2.5 py-1 text-xs font-black text-paper/50 transition-all hover:border-amber/50 hover:text-amber"
+                >
+                  跳过本轮
+                </button>
+              )}
               {roles.map((role) => {
                 const look = personaForRole(role);
                 const emotion = emotionOf(role.role_id);
@@ -770,6 +837,49 @@ export default function InterrogationPage() {
               error={{ code: voiceError.code as never, message: voiceError.message }}
               onDismiss={() => setVoiceError(null)}
             />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* 回合时间到弹窗 */}
+      <AnimatePresence>
+        {timeUp && phase === "investigation" && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="absolute inset-0 z-40 flex items-center justify-center bg-night-deep/80 backdrop-blur-sm"
+          >
+            <motion.div
+              initial={{ scale: 0.8, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.8, opacity: 0 }}
+              className="card w-[340px] max-w-[90vw] px-6 py-8 text-center"
+            >
+              <div className="mb-3 text-5xl">⏰</div>
+              <h3 className="mb-2 text-xl font-black text-ink">本轮时间到</h3>
+              <p className="mb-6 text-sm font-bold text-ink/50">
+                已完成第 {currentRound} 轮审讯，可继续提问或提交指控
+              </p>
+              <div className="flex flex-col gap-2.5">
+                <button
+                  onClick={() => {
+                    playSfx("click");
+                    setTimeLeft(ROUND_TIME);
+                    setTimeUp(false);
+                  }}
+                  className="btn btn-amber w-full"
+                >
+                  继续审讯
+                </button>
+                {allowedActions.has("accuse") && (
+                  <Link href="/game/accusation" onClick={() => { playSfx("click"); setTimeUp(false); }} className="btn btn-coral w-full">
+                    <Icon name="bolt" size={14} filled />
+                    提交最终指控
+                  </Link>
+                )}
+              </div>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
