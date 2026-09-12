@@ -7,7 +7,6 @@ import Mascot from '@/components/ui/Mascot';
 import { Icon } from '@/components/ui/Icons';
 import ScoreCardArt from '@/components/zhihu/ScoreCardArt';
 import { generateShareText, type ScoreCardData } from '@/lib/score-card';
-import { toPng } from 'html-to-image';
 
 const LEVEL_LABELS: Record<number, string> = {
   5: 'Lv.5 · 明察秋毫',
@@ -39,6 +38,7 @@ export default function ScoreCardPage() {
 
   async function capturePng(): Promise<Blob> {
     if (!cardRef.current) throw new Error('战绩卡尚未渲染');
+    const { toPng } = await import('html-to-image');
     const dataUrl = await toPng(cardRef.current, { pixelRatio: 2 });
     const res = await fetch(dataUrl);
     return res.blob();
