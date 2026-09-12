@@ -5,7 +5,7 @@ import {
   type TurnAttemptContext,
 } from "@server/turn-engine/run-turn.js";
 import { rolePrivatePolicySchema } from "@contracts/private/index.js";
-import { roleGeneratorUserPrompt } from "@server/model/schemas/role-turn.js";
+import { roleGeneratorSystemPrompt, roleGeneratorUserPrompt } from "@server/model/schemas/role-turn.js";
 
 /**
  * P1-1 对质回合的确定性覆盖（Scripted Adapter，无网络）。
@@ -199,5 +199,19 @@ describe("P1-1 对质 prompt", () => {
     });
     expect(prompt).toContain("玩家的问题（mode=direct）：Meta 裁了多少人？");
     expect(prompt).not.toContain("录音证据");
+  });
+
+  test("system prompt 要求点名回应表态类问题且允许解释层分歧", () => {
+    const prompt = roleGeneratorSystemPrompt({
+      displayName: "纪云汀",
+      goal: "评估裁员数据的行业影响。",
+      faithful: true,
+    });
+    // 被「你不认可谁的观点」类问题点名时必须点名 + 引用具体说法，不得空泛回避
+    expect(prompt).toContain("必须从近期对话中点名一位参与者");
+    expect(prompt).toContain("不得以「我谁都不评价」之类的空泛回避作答");
+    // 分歧可以是解释层的，不必证明对方「造假」（否则忠实角色互相矛盾无法回答）
+    expect(prompt).toContain("分歧可以是解释层的");
+    expect(prompt).toContain("不必证明对方「造假」");
   });
 });

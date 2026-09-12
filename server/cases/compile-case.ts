@@ -84,6 +84,10 @@ export function compileCaseFromCandidates(input: {
   theme?: string | null;
   graph: EvidenceGraphPrivate;
   candidate: CandidateCaseCompilation;
+  /** 每局随机失真者（用户 2026-09-12 决定）：给定角色数返回随机下标；
+   *  与编译器指定下标不同时，交换两个位置的人设（display_name/public_bio/
+   *  persona_key），篡改计划结构原位保留。缺省保持编译器指定（测试确定性）。 */
+  pickDistorterIndex?: (roleCount: number) => number;
 }): CompiledCaseArtifacts {
   const { case_id, source_url, graph, candidate } = input;
   const claims = graph.claims;
@@ -105,14 +109,41 @@ export function compileCaseFromCandidates(input: {
     return [...new Set(indices.map((index) => claimIdAt(index)))];
   });
 
+  // 每局随机失真者：把编译器指定位置的人设与随机选中的位置交换。
+  // 交换只涉及 display_name/public_bio/persona_key；篡改计划（可见集、获准
+  // 方式、goal、答案、解锁规则、rubric）全部按位置保留，结构不变量不受影响。
+  // 音色跟随人设（按人设原下标取轮换），不随位置变化。
+  const swapIndex = input.pickDistorterIndex
+    ? input.pickDistorterIndex(candidate.roles.length)
+    : plan.distorted_role_index;
+  if (swapIndex < 0 || swapIndex >= candidate.roles.length) {
+    throw new CaseInvariantFailure(`随机失真者下标越界: ${swapIndex}`);
+  }
+  const personaAt = (position: number) =>
+    candidate.roles[
+      position === swapIndex
+        ? plan.distorted_role_index
+        : position === plan.distorted_role_index
+          ? swapIndex
+          : position
+    ]!;
+  const voiceAt = (position: number) =>
+    VOICE_ID_ROTATION[
+      position === swapIndex
+        ? plan.distorted_role_index
+        : position === plan.distorted_role_index
+          ? swapIndex
+          : position
+    ]!;
+
   // 角色：内容来自候选，role_id 与 voice 由服务器分配；顺序即开场顺序。
-  const roles: RolePublic[] = candidate.roles.map((role, index) =>
+  const roles: RolePublic[] = candidate.roles.map((_, index) =>
     casePublicSchema.shape.roles.element.parse({
       role_id: `role-${index + 1}`,
-      display_name: role.display_name,
-      public_bio: role.public_bio,
-      persona_key: role.persona_key,
-      voice_id: VOICE_ID_ROTATION[index]!,
+      display_name: personaAt(index).display_name,
+      public_bio: personaAt(index).public_bio,
+      persona_key: personaAt(index).persona_key,
+      voice_id: voiceAt(index),
     }),
   );
 

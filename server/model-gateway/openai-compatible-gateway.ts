@@ -63,11 +63,21 @@ export function isTransientNetworkError(error: unknown): boolean {
     return status >= 500 || status === 408 || status === 409 || status === 429;
   }
   // 无状态码：连接级失败（socket 断开 / fetch failed / 响应中断）。
-  return name === "AI_APICallError" || name === "TypeError";
+  if (name === "AI_APICallError" || name === "TypeError") return true;
+  // 请求超时 abort（AbortSignal 手动触发）：对端挂起不回包，与 408 同类。
+  return name === "AbortError" || name === "TimeoutError";
 }
 
 /** 网络类瞬时错误的传输层重试上限（不含首次调用）。 */
 export const NETWORK_RETRY_MAX = 2;
+
+/**
+ * 单次模型请求的无响应超时（2026-09-12）：挂起的连接（对端不回包也不断开）
+ * 原本既不报错也不重试，回合会一直停在"working"，前端"正在回答"无限计时。
+ * 超时 abort 与 408 同属网络类瞬时错误，走既定传输层重试（一般 2 次），
+ * 重试耗尽后抛明确 typed failure，不静默吞掉。
+ */
+export const REQUEST_TIMEOUT_MS = 120_000;
 
 function newIncidentId(): string {
   return `inc:${Date.now().toString(36)}:${Math.random().toString(36).slice(2, 10)}`;
@@ -111,6 +121,12 @@ export class OpenAICompatibleModelGateway implements ModelGateway {
       // 重试（指数退避 500ms/1000ms）。SDK 自带 maxRetries 不覆盖无状态码
       // 的连接断开，故由本网关实现；其余错误立即失败不掩盖。
       for (let attempt = 0; ; attempt += 1) {
+        // 单次请求无响应超时：挂起连接按网络类瞬时错误处理（见 REQUEST_TIMEOUT_MS）。
+        const abortController = new AbortController();
+        const timeoutTimer = setTimeout(
+          () => abortController.abort(),
+          REQUEST_TIMEOUT_MS,
+        );
         try {
           result = await generateObject({
             model,
@@ -119,6 +135,7 @@ export class OpenAICompatibleModelGateway implements ModelGateway {
             system: call.system,
             prompt: call.prompt,
             maxRetries: 0,
+            abortSignal: abortController.signal,
           });
           break;
         } catch (error) {
@@ -139,6 +156,8 @@ export class OpenAICompatibleModelGateway implements ModelGateway {
             },
             error,
           );
+        } finally {
+          clearTimeout(timeoutTimer);
         }
       }
     }

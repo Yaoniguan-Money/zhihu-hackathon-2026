@@ -128,6 +128,29 @@ export function isUnparseableModelOutput(error: unknown): boolean {
 const UNPARSEABLE_FEEDBACK =
   "上一次输出无法解析为符合 schema 的 JSON，请严格只输出单个 JSON 对象，不要输出解释、推理过程或多余字段。";
 
+const INLINE_ID_FEEDBACK =
+  "上一次发言正文里写了内部 claim 编号（如 [cl-010]）；编号只允许出现在 support_claim_ids 字段。请重新输出完整发言，正文不得包含任何 claim 编号或方括号。";
+
+/**
+ * Public Projection 卫生（浏览器只接收公开投影，内部 claim 编号不得外泄）：
+ * 模型偶发把 user prompt 里的 claim 编号抄进正文（如 [CL-010]、（cl-3））。
+ * 在服务端剥离：先删连同括号的整体标记，再兜底删裸编号，最后清理遗留空括号与标点。
+ * 纯函数，可确定性测试。
+ */
+export function stripInlineClaimIds(speech: string): string {
+  let out = speech.replace(
+    /[[({（【「]\s*cl[-_ ]?\d+\s*[\])}）】」]/gi,
+    "",
+  );
+  out = out.replace(/\bcl[-_ ]?\d+\b/gi, "");
+  out = out.replace(/([([{（【「])\s*([)\]}）】」])/g, "");
+  out = out
+    .replace(/[ \t]{2,}/g, " ")
+    .replace(/\s+([，。；、！？：,.!?;:])/g, "$1")
+    .trim();
+  return out;
+}
+
 export async function runGenerationAttempts(
   gateway: ModelGateway,
   context: TurnAttemptContext,
@@ -222,6 +245,15 @@ export async function runGenerationAttempts(
       type: "candidate_generated",
       attempt_index: attemptIndex,
     });
+
+    // 发布前剥离正文中的内部 claim 编号（Public Projection 卫生）；
+    // 剥空说明候选除编号外无实义内容，按语义失败带反馈重写（消耗候选上限）。
+    const cleanedSpeech = stripInlineClaimIds(candidate.speech);
+    if (!cleanedSpeech) {
+      lastFeedback = INLINE_ID_FEEDBACK;
+      continue;
+    }
+    candidate = { ...candidate, speech: cleanedSpeech };
 
     // 服务器前置检查：支持 Claim 必须存在且属于可见集合。
     // 对质回合额外要求非空且可见（CONTRACTS 8.2）：违反即 NEW_FACT_INTRODUCED

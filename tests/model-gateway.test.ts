@@ -37,6 +37,11 @@ describe("isTransientNetworkError：网络类瞬时错误判定（传输层重�
     expect(isTransientNetworkError(named("TypeError"))).toBe(true);
   });
 
+  test("请求超时 abort（AbortError / TimeoutError）→ 可重试", () => {
+    expect(isTransientNetworkError(named("AbortError"))).toBe(true);
+    expect(isTransientNetworkError(named("TimeoutError"))).toBe(true);
+  });
+
   test("5xx / 408 / 409 / 429 → 可重试；其他状态码不可", () => {
     expect(isTransientNetworkError(named("AI_APICallError", 502))).toBe(true);
     expect(isTransientNetworkError(named("AI_APICallError", 429))).toBe(true);

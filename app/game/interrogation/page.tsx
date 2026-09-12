@@ -414,6 +414,10 @@ export default function InterrogationPage() {
   }
 
   const roles = casePublic.roles;
+  // 下一条未到达开场的陈述人（按案件固定顺序第一个未到达者），用于开场等待文案。
+  const arrivedOpeningSpeakerIds = new Set(roleMessages.slice(0, 5).map((m) => m.speaker_id));
+  const nextOpeningRoleName =
+    roles.find((r) => !arrivedOpeningSpeakerIds.has(r.role_id))?.display_name.split(" · ")[0] ?? "";
   const latestByRole = new Map<string, Extract<MessagePublic, { speaker_type: "role" }>>();
   for (const m of roleMessages) {
     if (m.speaker_type === "role") latestByRole.set(m.speaker_id, m);
@@ -529,17 +533,22 @@ export default function InterrogationPage() {
         </AnimatePresence>
       </div>
 
-      {/* 右侧对话面板 */}
-      <div className="absolute bottom-[150px] right-4 top-[70px] z-10 w-[350px] max-w-[86vw] overflow-hidden rounded-2xl border-2 border-paper/10 bg-night-deep/75 backdrop-blur-md" data-tour="int-log">
+      {/* 右侧对话面板（top 让位顶部选中角色卡，避免重叠） */}
+      <div
+        className={`absolute bottom-[150px] right-4 z-10 w-[350px] max-w-[86vw] overflow-hidden rounded-2xl border-2 border-paper/10 bg-night-deep/75 backdrop-blur-md transition-[top] duration-300 ${
+          selectedRole ? "top-[132px]" : "top-[70px]"
+        }`}
+        data-tour="int-log"
+      >
         <div className="flex items-center gap-2 border-b border-paper/10 px-4 py-2.5">
-          <Icon name="eye" size={15} className="text-amber" />
-          <span className="text-sm font-black text-paper">审讯记录</span>
+          <Icon name="eye" size={15} className="shrink-0 text-amber" />
+          <span className="shrink-0 text-sm font-black text-paper">审讯记录</span>
           {thinking && (
-            <span className="chip !border-amber/60 !bg-amber/10 !text-[10px] !text-amber">
-              正在回答… {answerSeconds}s
+            <span className="chip min-w-0 !border-amber/60 !bg-amber/10 !text-[10px] !text-amber">
+              <span className="truncate">正在回答… {answerSeconds}s</span>
             </span>
           )}
-          <span className="ml-auto chip !border-paper/30 !bg-transparent !text-[10px] !text-paper/60">
+          <span className="ml-auto shrink-0 chip !border-paper/30 !bg-transparent !text-[10px] !text-paper/60">
             {messages.length} 条
           </span>
         </div>
@@ -658,6 +667,7 @@ export default function InterrogationPage() {
               roles={roles}
               done={openings.length >= 5}
               nextPending={awaitingNext}
+              nextRoleName={nextOpeningRoleName}
               voiceActive={voiceActiveMessageId !== null}
               onSkip={() => {
                 stopVoice();
@@ -776,6 +786,7 @@ function OpeningTheater({
   roles,
   done,
   nextPending,
+  nextRoleName,
   voiceActive,
   onSkip,
 }: {
@@ -788,6 +799,8 @@ function OpeningTheater({
   done: boolean;
   /** 本条已播完/跳过且下一条尚未到达。 */
   nextPending: boolean;
+  /** 下一条未到达开场的陈述人名（等待文案用）。 */
+  nextRoleName: string;
   voiceActive: boolean;
   onSkip: () => void;
 }) {
@@ -866,7 +879,7 @@ function OpeningTheater({
       {nextPending ? (
         <p className="mt-3 flex items-center gap-2 text-xs font-black text-coral-deep">
           <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-coral" />
-          第 {stepNumber + 1} 条正在生成，完成后自动开始朗读…
+          {nextRoleName}正在整理措辞…
         </p>
       ) : !done ? (
         <p className="mt-3 flex items-center gap-2 text-xs font-black text-ink/45">

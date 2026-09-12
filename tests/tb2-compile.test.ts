@@ -219,6 +219,50 @@ describe("TB2b 编译器纯函数层", () => {
     });
     expect(art.case_public.theme).toBe("用户指定主题");
   });
+
+  test("随机失真者：交换人设后 distortion_owner 对应随机角色，结构不变量保持", () => {
+    // 固定随机源：始终选中下标 1（乙），编译器指定的失真者是下标 4（戊）。
+    const art = compileCaseFromCandidates({
+      ...BASE,
+      candidate: validCandidate(),
+      pickDistorterIndex: () => 1,
+    });
+
+    // 失真者的人设变成了乙（随机选中者），戊变成忠实角色
+    const owner = art.case_private.golden_answer.distortion_owner_role_id;
+    expect(owner).toBe("role-5"); // 篡改计划按位置保留：失真位置仍是 role-5
+    expect(art.case_public.roles[4]!.display_name).toBe("乙 · 分析师");
+    expect(art.case_public.roles[0]!.display_name).toBe("甲 · 记者");
+    // 音色跟随人设：乙原本在位置 1（voice-zh-02），交换后仍用该音色
+    expect(art.case_public.roles[4]!.voice_id).toBe("voice-zh-02");
+    // 私有策略逐字段不变：fidelity、可见集、goal、获准方式全部原位
+    expect(art.case_private.role_policies[4]!.fidelity).toBe("distorted");
+    expect(art.case_private.role_policies[0]!.fidelity).toBe("faithful");
+    expect(art.case_private.role_policies[4]!.visible_claim_ids).toHaveLength(6);
+    // 可玩不变量与 unlock rule 不受影响
+    const casePrivate: CasePrivate = {
+      case_id: art.case_private.case_id,
+      graph: art.case_private.graph,
+      role_policies: art.case_private.role_policies,
+      golden_answer: art.case_private.golden_answer,
+      evidence_catalog: art.case_private.evidence_catalog,
+      evidence_unlock_rules: art.evidence_unlock_rules,
+    };
+    casePrivateSchemaParse(casePrivate);
+    assertPlayableCaseInvariants(casePrivate);
+    const rule0 = art.evidence_unlock_rules.find((r) => r.evidence_id === "ev-1")!;
+    expect(rule0.allowed_role_ids.sort()).toEqual(["role-1", "role-5"]);
+  });
+
+  test("随机失真者下标越界 → CASE_INVARIANT_FAILED", () => {
+    expect(() =>
+      compileCaseFromCandidates({
+        ...BASE,
+        candidate: validCandidate(),
+        pickDistorterIndex: () => 9,
+      }),
+    ).toThrow(CaseInvariantFailure);
+  });
 });
 
 /** 便捷包装：用 contracts schema 逐字段复验（模拟 finalize 写入边界）。 */

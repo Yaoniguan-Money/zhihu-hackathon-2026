@@ -714,13 +714,17 @@ export const compileCaseWorker = internalAction({
       });
 
       // 6) 服务器完成全部决定：可信 ID、voice、4+1、答案子集、
-      //    unlock rule、rubric（总和恰 100）与 Public Projection
+      //    unlock rule、rubric（总和恰 100）与 Public Projection。
+      //    每局随机失真者（用户 2026-09-12 决定）：均匀随机挑一个角色
+      //    与编译器指定位置交换人设，篡改计划结构原位保留。
       const artifacts = compileCaseFromCandidates({
         case_id: args.case_key,
         source_url: args.source_url,
         theme: args.theme ?? null,
         graph,
         candidate: compilationCandidate,
+        pickDistorterIndex: (roleCount) =>
+          Math.floor(Math.random() * roleCount),
       });
 
       // 7) 原子持久化：source + 完整 Private + Public 投影，一次 ready

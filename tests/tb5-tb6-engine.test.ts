@@ -3,6 +3,7 @@ import type { z } from "zod";
 import { ScriptedModelGateway } from "./helpers/scripted-model-gateway.js";
 import {
   runGenerationAttempts,
+  stripInlineClaimIds,
   type TurnAttemptContext,
 } from "@server/turn-engine/run-turn.js";
 import {
@@ -303,5 +304,62 @@ describe("TB6 Distorted 回合：允许集门控 + 语义重写（2026-09-11 用
     ]);
     const outcome = await runGenerationAttempts(gateway, distortedContext());
     expect(outcome.ok).toBe(false);
+  });
+});
+
+describe("Public Projection 卫生：正文内联 claim 编号剥离（2026-09-12）", () => {
+  test("stripInlineClaimIds：剥离各种括号包裹与裸编号，并清理遗留标点", () => {
+    expect(stripInlineClaimIds("这个岗位首当其冲[CL-010]，随后波及内容业。")).toBe(
+      "这个岗位首当其冲，随后波及内容业。",
+    );
+    expect(stripInlineClaimIds("裁员是系统性失业（cl-016）。")).toBe(
+      "裁员是系统性失业。",
+    );
+    expect(stripInlineClaimIds("结论见【CL-022】与「cl-020」。")).toBe(
+      "结论见与。",
+    );
+    expect(stripInlineClaimIds("资本垄断了生产资料 CL-021。")).toBe(
+      "资本垄断了生产资料。",
+    );
+    expect(stripInlineClaimIds("不含编号的普通发言保持不变。")).toBe(
+      "不含编号的普通发言保持不变。",
+    );
+  });
+
+  test("候选正文含 [CL-xxx] → 发布前剥离，validator 只见清洗后文本", async () => {
+    const leaked = {
+      speech: "Meta 计划裁减约20%的员工[CL-004]。",
+      support_claim_ids: ["cl-004"],
+      stance: "answer",
+      emotion: "calm",
+    };
+    const gateway = new ScriptedModelGateway([
+      { task: "role", value: leaked },
+      { task: "validator", value: entailed },
+    ]);
+    const outcome = await runGenerationAttempts(gateway, faithfulContext());
+    expect(outcome.ok).toBe(true);
+    if (outcome.ok) {
+      expect(outcome.attempts).toBe(1);
+      expect(outcome.candidate.speech).not.toMatch(/cl[-_ ]?\d+/i);
+      expect(outcome.candidate.speech).toBe("Meta 计划裁减约20%的员工。");
+    }
+  });
+
+  test("正文除编号外无实义 → 带反馈语义重写（消耗候选上限）", async () => {
+    const onlyId = {
+      speech: "[CL-004]",
+      support_claim_ids: ["cl-004"],
+      stance: "answer",
+      emotion: "calm",
+    };
+    const gateway = new ScriptedModelGateway([
+      { task: "role", value: onlyId },
+      { task: "role", value: candidate },
+      { task: "validator", value: entailed },
+    ]);
+    const outcome = await runGenerationAttempts(gateway, faithfulContext());
+    expect(outcome.ok).toBe(true);
+    if (outcome.ok) expect(outcome.attempts).toBe(2);
   });
 });

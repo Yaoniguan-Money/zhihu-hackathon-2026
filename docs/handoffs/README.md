@@ -123,3 +123,5 @@ docs/handoffs/<ticket-or-stage-id>.md
 | MODEL-JSON-ENFORCEMENT 模型结构化输出强制 + 传输层重试 | complete | [2026-09-11-model-json-enforcement-and-transport-retry](./2026-09-11-model-json-enforcement-and-transport-retry.md) |
 | DISTORTED-REWRITE-AND-TOAST-DEDUP 篡改角色语义重试 + 弹窗去重/语音赛跑静默 | complete | [2026-09-11-distorted-rewrite-and-toast-dedup](./2026-09-11-distorted-rewrite-and-toast-dedup.md) |
 | REVEAL-RETRYABLE 揭晓失败退回审讯中 + Reveal 网络重试 10 次 | complete | [2026-09-11-reveal-retryable](./2026-09-11-reveal-retryable.md) |
+| REPLY-WAIT-UX-AND-MODEL-TIMEOUT 开场等待文案/面板重叠/回复无响应超时 | complete | [2026-09-12-reply-wait-ux-and-model-timeout](./2026-09-12-reply-wait-ux-and-model-timeout.md) |
+| NPC-DEBATE-AND-CLAIM-ID NPC 互相辩论解锁 + claim 编号清洗 + 每局随机失真者 | complete | [2026-09-12-npc-debate-and-inline-claim-id](./2026-09-12-npc-debate-and-inline-claim-id.md) |

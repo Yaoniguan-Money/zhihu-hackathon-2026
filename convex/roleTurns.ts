@@ -811,10 +811,21 @@ export const turnContextInternal = internalQuery({
       )
       .order("asc")
       .collect();
+    // 历史发言用显示名呈现（内部 role_id 不外泄，也让模型能自然点名其他参与者互辩）。
+    const casePublic = caseDoc.public_json
+      ? (JSON.parse(caseDoc.public_json) as {
+          roles: { role_id: string; display_name: string }[];
+        })
+      : null;
+    const roleDisplayName = (roleId: string): string =>
+      casePublic?.roles.find((role) => role.role_id === roleId)?.display_name ??
+      roleId;
     const history = historyDocs.slice(-10).map((doc) => {
       const message = JSON.parse(doc.payload_json);
       const speaker =
-        message.speaker_type === "player" ? "玩家" : message.speaker_id;
+        message.speaker_type === "player"
+          ? "玩家"
+          : roleDisplayName(message.speaker_id);
       return `${speaker}: ${message.exact_text}`;
     });
     // 玩家问题原文与 mode 来自最后一条玩家消息（ask 初始化时已持久化）。
@@ -828,14 +839,7 @@ export const turnContextInternal = internalQuery({
         break;
       }
     }
-    const casePublic = caseDoc.public_json
-      ? (JSON.parse(caseDoc.public_json) as {
-          roles: { role_id: string; display_name: string }[];
-        })
-      : null;
-    const displayName =
-      casePublic?.roles.find((role) => role.role_id === ticket.role_id)
-        ?.display_name ?? ticket.role_id;
+    const displayName = roleDisplayName(ticket.role_id);
 
     // P1-1：对质回合以录音内容构造生成上下文（CONTRACTS 8.2）。
     if (ticket.kind === "present_recording") {
