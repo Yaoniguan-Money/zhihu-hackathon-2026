@@ -1,506 +1,510 @@
-[
-  {
-    "paragraph_index": 0,
-    "start": 0,
-    "end": 34,
-    "is_quote": false
-  },
-  {
-    "paragraph_index": 1,
-    "start": 36,
-    "end": 94,
-    "is_quote": false
-  },
-  {
-    "paragraph_index": 2,
-    "start": 96,
-    "end": 112,
-    "is_quote": false
-  },
-  {
-    "paragraph_index": 3,
-    "start": 114,
-    "end": 153,
-    "is_quote": false
-  },
-  {
-    "paragraph_index": 4,
-    "start": 155,
-    "end": 160,
-    "is_quote": false
-  },
-  {
-    "paragraph_index": 5,
-    "start": 162,
-    "end": 227,
-    "is_quote": false
-  },
-  {
-    "paragraph_index": 6,
-    "start": 229,
-    "end": 284,
-    "is_quote": false
-  },
-  {
-    "paragraph_index": 7,
-    "start": 286,
-    "end": 344,
-    "is_quote": false
-  },
-  {
-    "paragraph_index": 8,
-    "start": 346,
-    "end": 372,
-    "is_quote": false
-  },
-  {
-    "paragraph_index": 9,
-    "start": 374,
-    "end": 438,
-    "is_quote": false
-  },
-  {
-    "paragraph_index": 10,
-    "start": 440,
-    "end": 458,
-    "is_quote": false
-  },
-  {
-    "paragraph_index": 11,
-    "start": 460,
-    "end": 499,
-    "is_quote": false
-  },
-  {
-    "paragraph_index": 12,
-    "start": 501,
-    "end": 536,
-    "is_quote": false
-  },
-  {
-    "paragraph_index": 13,
-    "start": 538,
-    "end": 564,
-    "is_quote": false
-  },
-  {
-    "paragraph_index": 14,
-    "start": 566,
-    "end": 573,
-    "is_quote": false
-  },
-  {
-    "paragraph_index": 15,
-    "start": 575,
-    "end": 664,
-    "is_quote": false
-  },
-  {
-    "paragraph_index": 16,
-    "start": 666,
-    "end": 726,
-    "is_quote": false
-  },
-  {
-    "paragraph_index": 17,
-    "start": 728,
-    "end": 743,
-    "is_quote": false
-  },
-  {
-    "paragraph_index": 18,
-    "start": 745,
-    "end": 791,
-    "is_quote": false
-  },
-  {
-    "paragraph_index": 19,
-    "start": 793,
-    "end": 916,
-    "is_quote": false
-  },
-  {
-    "paragraph_index": 20,
-    "start": 918,
-    "end": 1000,
-    "is_quote": false
-  },
-  {
-    "paragraph_index": 21,
-    "start": 1002,
-    "end": 1039,
-    "is_quote": false
-  },
-  {
-    "paragraph_index": 22,
-    "start": 1041,
-    "end": 1056,
-    "is_quote": false
-  },
-  {
-    "paragraph_index": 23,
-    "start": 1058,
-    "end": 1082,
-    "is_quote": false
-  },
-  {
-    "paragraph_index": 24,
-    "start": 1084,
-    "end": 1122,
-    "is_quote": false
-  },
-  {
-    "paragraph_index": 25,
-    "start": 1124,
-    "end": 1164,
-    "is_quote": false
-  },
-  {
-    "paragraph_index": 26,
-    "start": 1166,
-    "end": 1195,
-    "is_quote": false
-  },
-  {
-    "paragraph_index": 27,
-    "start": 1197,
-    "end": 1226,
-    "is_quote": false
-  },
-  {
-    "paragraph_index": 28,
-    "start": 1228,
-    "end": 1284,
-    "is_quote": false
-  },
-  {
-    "paragraph_index": 29,
-    "start": 1286,
-    "end": 1334,
-    "is_quote": false
-  },
-  {
-    "paragraph_index": 30,
-    "start": 1336,
-    "end": 1412,
-    "is_quote": false
-  },
-  {
-    "paragraph_index": 31,
-    "start": 1414,
-    "end": 1518,
-    "is_quote": false
-  },
-  {
-    "paragraph_index": 32,
-    "start": 1520,
-    "end": 1537,
-    "is_quote": false
-  },
-  {
-    "paragraph_index": 33,
-    "start": 1539,
-    "end": 1670,
-    "is_quote": false
-  },
-  {
-    "paragraph_index": 34,
-    "start": 1672,
-    "end": 1691,
-    "is_quote": false
-  },
-  {
-    "paragraph_index": 35,
-    "start": 1693,
-    "end": 1737,
-    "is_quote": false
-  },
-  {
-    "paragraph_index": 36,
-    "start": 1739,
-    "end": 1782,
-    "is_quote": false
-  },
-  {
-    "paragraph_index": 37,
-    "start": 1784,
-    "end": 1788,
-    "is_quote": false
-  },
-  {
-    "paragraph_index": 38,
-    "start": 1790,
-    "end": 1834,
-    "is_quote": false
-  },
-  {
-    "paragraph_index": 39,
-    "start": 1836,
-    "end": 1867,
-    "is_quote": false
-  },
-  {
-    "paragraph_index": 40,
-    "start": 1869,
-    "end": 1886,
-    "is_quote": false
-  },
-  {
-    "paragraph_index": 41,
-    "start": 1888,
-    "end": 1909,
-    "is_quote": false
-  },
-  {
-    "paragraph_index": 42,
-    "start": 1911,
-    "end": 1979,
-    "is_quote": false
-  },
-  {
-    "paragraph_index": 43,
-    "start": 1981,
-    "end": 2032,
-    "is_quote": false
-  },
-  {
-    "paragraph_index": 44,
-    "start": 2034,
-    "end": 2051,
-    "is_quote": false
-  },
-  {
-    "paragraph_index": 45,
-    "start": 2053,
-    "end": 2086,
-    "is_quote": false
-  },
-  {
-    "paragraph_index": 46,
-    "start": 2088,
-    "end": 2110,
-    "is_quote": false
-  },
-  {
-    "paragraph_index": 47,
-    "start": 2112,
-    "end": 2150,
-    "is_quote": false
-  },
-  {
-    "paragraph_index": 48,
-    "start": 2152,
-    "end": 2166,
-    "is_quote": false
-  },
-  {
-    "paragraph_index": 49,
-    "start": 2168,
-    "end": 2209,
-    "is_quote": false
-  },
-  {
-    "paragraph_index": 50,
-    "start": 2211,
-    "end": 2221,
-    "is_quote": false
-  },
-  {
-    "paragraph_index": 51,
-    "start": 2223,
-    "end": 2279,
-    "is_quote": false
-  },
-  {
-    "paragraph_index": 52,
-    "start": 2281,
-    "end": 2323,
-    "is_quote": false
-  },
-  {
-    "paragraph_index": 53,
-    "start": 2325,
-    "end": 2337,
-    "is_quote": false
-  },
-  {
-    "paragraph_index": 54,
-    "start": 2339,
-    "end": 2399,
-    "is_quote": false
-  },
-  {
-    "paragraph_index": 55,
-    "start": 2401,
-    "end": 2422,
-    "is_quote": false
-  },
-  {
-    "paragraph_index": 56,
-    "start": 2424,
-    "end": 2462,
-    "is_quote": false
-  },
-  {
-    "paragraph_index": 57,
-    "start": 2464,
-    "end": 2538,
-    "is_quote": false
-  },
-  {
-    "paragraph_index": 58,
-    "start": 2540,
-    "end": 2571,
-    "is_quote": false
-  },
-  {
-    "paragraph_index": 59,
-    "start": 2573,
-    "end": 2585,
-    "is_quote": false
-  },
-  {
-    "paragraph_index": 60,
-    "start": 2587,
-    "end": 2599,
-    "is_quote": false
-  },
-  {
-    "paragraph_index": 61,
-    "start": 2601,
-    "end": 2695,
-    "is_quote": false
-  },
-  {
-    "paragraph_index": 62,
-    "start": 2697,
-    "end": 2718,
-    "is_quote": false
-  },
-  {
-    "paragraph_index": 63,
-    "start": 2720,
-    "end": 2780,
-    "is_quote": false
-  },
-  {
-    "paragraph_index": 64,
-    "start": 2782,
-    "end": 2799,
-    "is_quote": false
-  },
-  {
-    "paragraph_index": 65,
-    "start": 2801,
-    "end": 2869,
-    "is_quote": false
-  },
-  {
-    "paragraph_index": 66,
-    "start": 2871,
-    "end": 2893,
-    "is_quote": false
-  },
-  {
-    "paragraph_index": 67,
-    "start": 2895,
-    "end": 2959,
-    "is_quote": false
-  },
-  {
-    "paragraph_index": 68,
-    "start": 2961,
-    "end": 2998,
-    "is_quote": false
-  },
-  {
-    "paragraph_index": 69,
-    "start": 3000,
-    "end": 3021,
-    "is_quote": false
-  },
-  {
-    "paragraph_index": 70,
-    "start": 3023,
-    "end": 3071,
-    "is_quote": false
-  },
-  {
-    "paragraph_index": 71,
-    "start": 3073,
-    "end": 3089,
-    "is_quote": false
-  },
-  {
-    "paragraph_index": 72,
-    "start": 3091,
-    "end": 3187,
-    "is_quote": false
-  },
-  {
-    "paragraph_index": 73,
-    "start": 3189,
-    "end": 3209,
-    "is_quote": false
-  },
-  {
-    "paragraph_index": 74,
-    "start": 3211,
-    "end": 3221,
-    "is_quote": false
-  },
-  {
-    "paragraph_index": 75,
-    "start": 3223,
-    "end": 3241,
-    "is_quote": false
-  },
-  {
-    "paragraph_index": 76,
-    "start": 3243,
-    "end": 3270,
-    "is_quote": false
-  },
-  {
-    "paragraph_index": 77,
-    "start": 3272,
-    "end": 3301,
-    "is_quote": false
-  },
-  {
-    "paragraph_index": 78,
-    "start": 3303,
-    "end": 3329,
-    "is_quote": false
-  },
-  {
-    "paragraph_index": 79,
-    "start": 3331,
-    "end": 3349,
-    "is_quote": false
-  },
-  {
-    "paragraph_index": 80,
-    "start": 3351,
-    "end": 3388,
-    "is_quote": false
-  },
-  {
-    "paragraph_index": 81,
-    "start": 3390,
-    "end": 3413,
-    "is_quote": false
-  },
-  {
-    "paragraph_index": 82,
-    "start": 3415,
-    "end": 3430,
-    "is_quote": false
-  },
-  {
-    "paragraph_index": 83,
-    "start": 3432,
-    "end": 3513,
-    "is_quote": false
-  }
-]
+{
+  "case_id": "case-demo-002",
+  "source_id": "src-case-demo-002",
+  "paragraphs": [
+    {
+      "paragraph_index": 0,
+      "start": 0,
+      "end": 34,
+      "is_quote": false
+    },
+    {
+      "paragraph_index": 1,
+      "start": 36,
+      "end": 94,
+      "is_quote": false
+    },
+    {
+      "paragraph_index": 2,
+      "start": 96,
+      "end": 112,
+      "is_quote": false
+    },
+    {
+      "paragraph_index": 3,
+      "start": 114,
+      "end": 153,
+      "is_quote": false
+    },
+    {
+      "paragraph_index": 4,
+      "start": 155,
+      "end": 160,
+      "is_quote": false
+    },
+    {
+      "paragraph_index": 5,
+      "start": 162,
+      "end": 227,
+      "is_quote": false
+    },
+    {
+      "paragraph_index": 6,
+      "start": 229,
+      "end": 284,
+      "is_quote": false
+    },
+    {
+      "paragraph_index": 7,
+      "start": 286,
+      "end": 344,
+      "is_quote": false
+    },
+    {
+      "paragraph_index": 8,
+      "start": 346,
+      "end": 372,
+      "is_quote": false
+    },
+    {
+      "paragraph_index": 9,
+      "start": 374,
+      "end": 438,
+      "is_quote": false
+    },
+    {
+      "paragraph_index": 10,
+      "start": 440,
+      "end": 458,
+      "is_quote": false
+    },
+    {
+      "paragraph_index": 11,
+      "start": 460,
+      "end": 499,
+      "is_quote": false
+    },
+    {
+      "paragraph_index": 12,
+      "start": 501,
+      "end": 536,
+      "is_quote": false
+    },
+    {
+      "paragraph_index": 13,
+      "start": 538,
+      "end": 564,
+      "is_quote": false
+    },
+    {
+      "paragraph_index": 14,
+      "start": 566,
+      "end": 573,
+      "is_quote": false
+    },
+    {
+      "paragraph_index": 15,
+      "start": 575,
+      "end": 664,
+      "is_quote": false
+    },
+    {
+      "paragraph_index": 16,
+      "start": 666,
+      "end": 726,
+      "is_quote": false
+    },
+    {
+      "paragraph_index": 17,
+      "start": 728,
+      "end": 743,
+      "is_quote": false
+    },
+    {
+      "paragraph_index": 18,
+      "start": 745,
+      "end": 791,
+      "is_quote": false
+    },
+    {
+      "paragraph_index": 19,
+      "start": 793,
+      "end": 916,
+      "is_quote": false
+    },
+    {
+      "paragraph_index": 20,
+      "start": 918,
+      "end": 1000,
+      "is_quote": false
+    },
+    {
+      "paragraph_index": 21,
+      "start": 1002,
+      "end": 1039,
+      "is_quote": false
+    },
+    {
+      "paragraph_index": 22,
+      "start": 1041,
+      "end": 1056,
+      "is_quote": false
+    },
+    {
+      "paragraph_index": 23,
+      "start": 1058,
+      "end": 1082,
+      "is_quote": false
+    },
+    {
+      "paragraph_index": 24,
+      "start": 1084,
+      "end": 1122,
+      "is_quote": false
+    },
+    {
+      "paragraph_index": 25,
+      "start": 1124,
+      "end": 1164,
+      "is_quote": false
+    },
+    {
+      "paragraph_index": 26,
+      "start": 1166,
+      "end": 1195,
+      "is_quote": false
+    },
+    {
+      "paragraph_index": 27,
+      "start": 1197,
+      "end": 1226,
+      "is_quote": false
+    },
+    {
+      "paragraph_index": 28,
+      "start": 1228,
+      "end": 1284,
+      "is_quote": false
+    },
+    {
+      "paragraph_index": 29,
+      "start": 1286,
+      "end": 1334,
+      "is_quote": false
+    },
+    {
+      "paragraph_index": 30,
+      "start": 1336,
+      "end": 1412,
+      "is_quote": false
+    },
+    {
+      "paragraph_index": 31,
+      "start": 1414,
+      "end": 1518,
+      "is_quote": false
+    },
+    {
+      "paragraph_index": 32,
+      "start": 1520,
+      "end": 1537,
+      "is_quote": false
+    },
+    {
+      "paragraph_index": 33,
+      "start": 1539,
+      "end": 1670,
+      "is_quote": false
+    },
+    {
+      "paragraph_index": 34,
+      "start": 1672,
+      "end": 1691,
+      "is_quote": false
+    },
+    {
+      "paragraph_index": 35,
+      "start": 1693,
+      "end": 1737,
+      "is_quote": false
+    },
+    {
+      "paragraph_index": 36,
+      "start": 1739,
+      "end": 1782,
+      "is_quote": false
+    },
+    {
+      "paragraph_index": 37,
+      "start": 1784,
+      "end": 1788,
+      "is_quote": false
+    },
+    {
+      "paragraph_index": 38,
+      "start": 1790,
+      "end": 1834,
+      "is_quote": false
+    },
+    {
+      "paragraph_index": 39,
+      "start": 1836,
+      "end": 1867,
+      "is_quote": false
+    },
+    {
+      "paragraph_index": 40,
+      "start": 1869,
+      "end": 1886,
+      "is_quote": false
+    },
+    {
+      "paragraph_index": 41,
+      "start": 1888,
+      "end": 1909,
+      "is_quote": false
+    },
+    {
+      "paragraph_index": 42,
+      "start": 1911,
+      "end": 1979,
+      "is_quote": false
+    },
+    {
+      "paragraph_index": 43,
+      "start": 1981,
+      "end": 2032,
+      "is_quote": false
+    },
+    {
+      "paragraph_index": 44,
+      "start": 2034,
+      "end": 2051,
+      "is_quote": false
+    },
+    {
+      "paragraph_index": 45,
+      "start": 2053,
+      "end": 2086,
+      "is_quote": false
+    },
+    {
+      "paragraph_index": 46,
+      "start": 2088,
+      "end": 2110,
+      "is_quote": false
+    },
+    {
+      "paragraph_index": 47,
+      "start": 2112,
+      "end": 2150,
+      "is_quote": false
+    },
+    {
+      "paragraph_index": 48,
+      "start": 2152,
+      "end": 2166,
+      "is_quote": false
+    },
+    {
+      "paragraph_index": 49,
+      "start": 2168,
+      "end": 2209,
+      "is_quote": false
+    },
+    {
+      "paragraph_index": 50,
+      "start": 2211,
+      "end": 2221,
+      "is_quote": false
+    },
+    {
+      "paragraph_index": 51,
+      "start": 2223,
+      "end": 2279,
+      "is_quote": false
+    },
+    {
+      "paragraph_index": 52,
+      "start": 2281,
+      "end": 2323,
+      "is_quote": false
+    },
+    {
+      "paragraph_index": 53,
+      "start": 2325,
+      "end": 2337,
+      "is_quote": false
+    },
+    {
+      "paragraph_index": 54,
+      "start": 2339,
+      "end": 2399,
+      "is_quote": false
+    },
+    {
+      "paragraph_index": 55,
+      "start": 2401,
+      "end": 2422,
+      "is_quote": false
+    },
+    {
+      "paragraph_index": 56,
+      "start": 2424,
+      "end": 2462,
+      "is_quote": false
+    },
+    {
+      "paragraph_index": 57,
+      "start": 2464,
+      "end": 2538,
+      "is_quote": false
+    },
+    {
+      "paragraph_index": 58,
+      "start": 2540,
+      "end": 2571,
+      "is_quote": false
+    },
+    {
+      "paragraph_index": 59,
+      "start": 2573,
+      "end": 2585,
+      "is_quote": false
+    },
+    {
+      "paragraph_index": 60,
+      "start": 2587,
+      "end": 2599,
+      "is_quote": false
+    },
+    {
+      "paragraph_index": 61,
+      "start": 2601,
+      "end": 2695,
+      "is_quote": false
+    },
+    {
+      "paragraph_index": 62,
+      "start": 2697,
+      "end": 2718,
+      "is_quote": false
+    },
+    {
+      "paragraph_index": 63,
+      "start": 2720,
+      "end": 2780,
+      "is_quote": false
+    },
+    {
+      "paragraph_index": 64,
+      "start": 2782,
+      "end": 2799,
+      "is_quote": false
+    },
+    {
+      "paragraph_index": 65,
+      "start": 2801,
+      "end": 2869,
+      "is_quote": false
+    },
+    {
+      "paragraph_index": 66,
+      "start": 2871,
+      "end": 2893,
+      "is_quote": false
+    },
+    {
+      "paragraph_index": 67,
+      "start": 2895,
+      "end": 2959,
+      "is_quote": false
+    },
+    {
+      "paragraph_index": 68,
+      "start": 2961,
+      "end": 2998,
+      "is_quote": false
+    },
+    {
+      "paragraph_index": 69,
+      "start": 3000,
+      "end": 3021,
+      "is_quote": false
+    },
+    {
+      "paragraph_index": 70,
+      "start": 3023,
+      "end": 3071,
+      "is_quote": false
+    },
+    {
+      "paragraph_index": 71,
+      "start": 3073,
+      "end": 3089,
+      "is_quote": false
+    },
+    {
+      "paragraph_index": 72,
+      "start": 3091,
+      "end": 3187,
+      "is_quote": false
+    },
+    {
+      "paragraph_index": 73,
+      "start": 3189,
+      "end": 3209,
+      "is_quote": false
+    },
+    {
+      "paragraph_index": 74,
+      "start": 3211,
+      "end": 3221,
+      "is_quote": false
+    },
+    {
+      "paragraph_index": 75,
+      "start": 3223,
+      "end": 3241,
+      "is_quote": false
+    },
+    {
+      "paragraph_index": 76,
+      "start": 3243,
+      "end": 3270,
+      "is_quote": false
+    },
+    {
+      "paragraph_index": 77,
+      "start": 3272,
+      "end": 3301,
+      "is_quote": false
+    },
+    {
+      "paragraph_index": 78,
+      "start": 3303,
+      "end": 3329,
+      "is_quote": false
+    },
+    {
+      "paragraph_index": 79,
+      "start": 3331,
+      "end": 3349,
+      "is_quote": false
+    },
+    {
+      "paragraph_index": 80,
+      "start": 3351,
+      "end": 3388,
+      "is_quote": false
+    },
+    {
+      "paragraph_index": 81,
+      "start": 3390,
+      "end": 3413,
+      "is_quote": false
+    },
+    {
+      "paragraph_index": 82,
+      "start": 3415,
+      "end": 3430,
+      "is_quote": false
+    },
+    {
+      "paragraph_index": 83,
+      "start": 3432,
+      "end": 3513,
+      "is_quote": false
+    }
+  ]
+}

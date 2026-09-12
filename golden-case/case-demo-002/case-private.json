@@ -1,8 +1,8 @@
 {
-  "case_id": "1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+  "case_id": "case-demo-002",
   "graph": {
-    "case_id": "1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
-    "source_id": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+    "case_id": "case-demo-002",
+    "source_id": "src-case-demo-002",
     "claims": [
       {
         "claim_id": "cl-1",
@@ -13,7 +13,7 @@
           "text": "养老金制度没有崩，但它的逻辑变了",
           "paragraph_index": 1
         },
-        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "source_ref": "src-case-demo-002",
         "confidence": 1
       },
       {
@@ -25,7 +25,7 @@
           "text": "从“国家给你养老”，变成了“国家帮你养老”",
           "paragraph_index": 1
         },
-        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "source_ref": "src-case-demo-002",
         "confidence": 1
       },
       {
@@ -37,7 +37,7 @@
           "text": "很多人以为，自己每个月社保扣的那笔钱，是存在一个账户里，等自己退休了再慢慢领",
           "paragraph_index": 3
         },
-        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "source_ref": "src-case-demo-002",
         "confidence": 1
       },
       {
@@ -49,7 +49,7 @@
           "text": "中国现在的养老金制度是“现收现付制”",
           "paragraph_index": 5
         },
-        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "source_ref": "src-case-demo-002",
         "confidence": 1
       },
       {
@@ -61,7 +61,7 @@
           "text": "你现在交的钱，正在发给现在已经退休的人",
           "paragraph_index": 5
         },
-        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "source_ref": "src-case-demo-002",
         "confidence": 1
       },
       {
@@ -73,7 +73,7 @@
           "text": "等你退休了，那时候还在工作的年轻人交的钱，才会发给你",
           "paragraph_index": 5
         },
-        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "source_ref": "src-case-demo-002",
         "confidence": 1
       },
       {
@@ -85,7 +85,7 @@
           "text": "这个制度的设计逻辑在人口结构稳定的时候是完全可以运转的",
           "paragraph_index": 6
         },
-        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "source_ref": "src-case-demo-002",
         "confidence": 1
       },
       {
@@ -97,7 +97,7 @@
           "text": "中国的人口结构正在经历建国以来最剧烈的变化",
           "paragraph_index": 6
         },
-        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "source_ref": "src-case-demo-002",
         "confidence": 1
       },
       {
@@ -109,7 +109,7 @@
           "text": "中国60岁及以上人口已经超过3亿",
           "paragraph_index": 7
         },
-        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "source_ref": "src-case-demo-002",
         "confidence": 1
       },
       {
@@ -121,7 +121,7 @@
           "text": "劳动年龄人口（16-59岁）从2012年开始就在持续下降",
           "paragraph_index": 7
         },
-        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "source_ref": "src-case-demo-002",
         "confidence": 1
       },
       {
@@ -133,7 +133,7 @@
           "text": "交钱的人增速在放缓，领钱的人数量在暴涨",
           "paragraph_index": 8
         },
-        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "source_ref": "src-case-demo-002",
         "confidence": 1
       },
       {
@@ -145,7 +145,7 @@
           "text": "这不是任何一个国家的“政策失误”，这是全球性的老龄化难题",
           "paragraph_index": 9
         },
-        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "source_ref": "src-case-demo-002",
         "confidence": 1
       },
       {
@@ -157,7 +157,7 @@
           "text": "中国“未富先老”，来得更快、更猛",
           "paragraph_index": 9
         },
-        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "source_ref": "src-case-demo-002",
         "confidence": 1
       },
       {
@@ -169,7 +169,7 @@
           "text": "养老金替代率 = 退休后每月领的养老金 ÷ 退休前的月工资",
           "paragraph_index": 11
         },
-        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "source_ref": "src-case-demo-002",
         "confidence": 1
       },
       {
@@ -181,7 +181,7 @@
           "text": "你退休前月薪1万，退休后每个月领4000，替代率就是40%",
           "paragraph_index": 12
         },
-        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "source_ref": "src-case-demo-002",
         "confidence": 1
       },
       {
@@ -193,7 +193,7 @@
           "text": "2026年，中国养老金的平均替代率大概在40%左右",
           "paragraph_index": 13
         },
-        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "source_ref": "src-case-demo-002",
         "confidence": 1
       },
       {
@@ -205,7 +205,7 @@
           "text": "意味着一个退休前月薪1万的人，退休后每月到手的钱大约是4000块",
           "paragraph_index": 15
         },
-        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "source_ref": "src-case-demo-002",
         "confidence": 1
       },
       {
@@ -217,7 +217,7 @@
           "text": "国际劳工组织建议的养老金替代率最低标准是55%",
           "paragraph_index": 16
         },
-        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "source_ref": "src-case-demo-002",
         "confidence": 1
       },
       {
@@ -229,7 +229,7 @@
           "text": "世界银行建议的是不低于70%才能维持退休前的生活水平",
           "paragraph_index": 16
         },
-        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "source_ref": "src-case-demo-002",
         "confidence": 1
       },
       {
@@ -241,7 +241,7 @@
           "text": "你问焦虑从哪来？从这40%来",
           "paragraph_index": 17
         },
-        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "source_ref": "src-case-demo-002",
         "confidence": 1
       },
       {
@@ -253,7 +253,7 @@
           "text": "养老金替代率不是被“故意压低”的，而是两个因素共同作用的结果",
           "paragraph_index": 18
         },
-        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "source_ref": "src-case-demo-002",
         "confidence": 1
       },
       {
@@ -265,7 +265,7 @@
           "text": "养老金已经连续涨了二十多年",
           "paragraph_index": 19
         },
-        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "source_ref": "src-case-demo-002",
         "confidence": 1
       },
       {
@@ -277,7 +277,7 @@
           "text": "从2005年到现在，企业退休人员的基本养老金年年上调，只是涨幅从早期的10%左右降到了近年的3%-4%左右",
           "paragraph_index": 19
         },
-        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "source_ref": "src-case-demo-002",
         "confidence": 1
       },
       {
@@ -289,7 +289,7 @@
           "text": "网上那些“2026年领不到养老金”的说法，人社部早已辟谣，纯属谣言",
           "paragraph_index": 19
         },
-        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "source_ref": "src-case-demo-002",
         "confidence": 1
       },
       {
@@ -301,7 +301,7 @@
           "text": "替代率下降的根本原因是工资增速跑赢了养老金涨幅",
           "paragraph_index": 20
         },
-        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "source_ref": "src-case-demo-002",
         "confidence": 1
       },
       {
@@ -313,7 +313,7 @@
           "text": "养老金每年都在涨，但社会平均工资涨得更快，所以替代率反而下降了",
           "paragraph_index": 20
         },
-        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "source_ref": "src-case-demo-002",
         "confidence": 1
       },
       {
@@ -325,7 +325,7 @@
           "text": "这是一个“水涨船不高”的问题，不是有人坑你",
           "paragraph_index": 20
         },
-        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "source_ref": "src-case-demo-002",
         "confidence": 1
       },
       {
@@ -337,7 +337,7 @@
           "text": "40%的替代率，确实不足以支撑一个体面的退休生活",
           "paragraph_index": 21
         },
-        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "source_ref": "src-case-demo-002",
         "confidence": 1
       },
       {
@@ -349,7 +349,7 @@
           "text": "2025年1月1日起，中国开始实施渐进式延迟退休，不是一步到位",
           "paragraph_index": 24
         },
-        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "source_ref": "src-case-demo-002",
         "confidence": 1
       },
       {
@@ -361,7 +361,7 @@
           "text": "男职工：原法定退休年龄60岁，每4个月延1个月，最终到63岁（过渡期15年）",
           "paragraph_index": 25
         },
-        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "source_ref": "src-case-demo-002",
         "confidence": 1
       },
       {
@@ -373,7 +373,7 @@
           "text": "女职工（原50岁退休）：每2个月延1个月，最终到55岁",
           "paragraph_index": 26
         },
-        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "source_ref": "src-case-demo-002",
         "confidence": 1
       },
       {
@@ -385,7 +385,7 @@
           "text": "女干部（原55岁退休）：每4个月延1个月，最终到58岁",
           "paragraph_index": 27
         },
-        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "source_ref": "src-case-demo-002",
         "confidence": 1
       },
       {
@@ -397,7 +397,7 @@
           "text": "如果你是1966年出生的男性，你在2026年退休，你的退休年龄是60岁零3个月",
           "paragraph_index": 28
         },
-        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "source_ref": "src-case-demo-002",
         "confidence": 1
       },
       {
@@ -409,7 +409,7 @@
           "text": "网上那些“2026年直接63岁退休”“坏消息！退休人员苦日子来了”之类的说法，完全是两回事",
           "paragraph_index": 29
         },
-        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "source_ref": "src-case-demo-002",
         "confidence": 1
       },
       {
@@ -421,7 +421,7 @@
           "text": "还有一个很多人不知道的点：弹性退休是存在的",
           "paragraph_index": 30
         },
-        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "source_ref": "src-case-demo-002",
         "confidence": 1
       },
       {
@@ -433,7 +433,7 @@
           "text": "你可以提前最多3年退休（但不能低于原来的法定退休年龄），也可以和单位协商延迟最多3年退休",
           "paragraph_index": 30
         },
-        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "source_ref": "src-case-demo-002",
         "confidence": 1
       },
       {
@@ -445,7 +445,7 @@
           "text": "2025年到2029年退休的人，最低缴费年限仍然是15年，不变",
           "paragraph_index": 31
         },
-        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "source_ref": "src-case-demo-002",
         "confidence": 1
       },
       {
@@ -457,7 +457,7 @@
           "text": "从2030年开始，才会用10年时间每年增加6个月，逐步从15年提高到20年（到2039年才正式到20年）",
           "paragraph_index": 31
         },
-        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "source_ref": "src-case-demo-002",
         "confidence": 1
       },
       {
@@ -469,7 +469,7 @@
           "text": "人均寿命从建国初期的40多岁提高到现在的78岁（2025年国家卫健委数据）",
           "paragraph_index": 33
         },
-        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "source_ref": "src-case-demo-002",
         "confidence": 1
       },
       {
@@ -481,7 +481,7 @@
           "text": "延迟退休的本质不是“让你多干几年”，而是：在人均寿命从建国初期的40多岁提高到现在的78岁（2025年国家卫健委数据）的大背景下，养老金制度在做结构性调整",
           "paragraph_index": 33
         },
-        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "source_ref": "src-case-demo-002",
         "confidence": 1
       },
       {
@@ -493,7 +493,7 @@
           "text": "你活得越久，交的时间就要越长，领的时间相对越短这是一个数学问题，不是道德问题",
           "paragraph_index": 33
         },
-        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "source_ref": "src-case-demo-002",
         "confidence": 1
       },
       {
@@ -505,7 +505,7 @@
           "text": "工资只够维持劳动力的再生产，从未为衰老后的人生兜底",
           "paragraph_index": 35
         },
-        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "source_ref": "src-case-demo-002",
         "confidence": 1
       },
       {
@@ -517,7 +517,7 @@
           "text": "你每个月到手的工资，刚好够你活到下一次发工资，存不下能让你安心养老的钱",
           "paragraph_index": 36
         },
-        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "source_ref": "src-case-demo-002",
         "confidence": 1
       },
       {
@@ -529,7 +529,7 @@
           "text": "过去二十年，普通人的财富增长主要靠两样东西工资增长+资产升值（主要是房子）",
           "paragraph_index": 38
         },
-        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "source_ref": "src-case-demo-002",
         "confidence": 1
       },
       {
@@ -541,7 +541,7 @@
           "text": "工资增速在放缓（宏观经济换挡，GDP从10%到了5%左右）",
           "paragraph_index": 39
         },
-        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "source_ref": "src-case-demo-002",
         "confidence": 1
       },
       {
@@ -553,7 +553,7 @@
           "text": "房价不再普涨（有些地方还在跌）",
           "paragraph_index": 40
         },
-        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "source_ref": "src-case-demo-002",
         "confidence": 1
       },
       {
@@ -565,7 +565,7 @@
           "text": "生活成本在涨（食品、教育、医疗、房租）",
           "paragraph_index": 41
         },
-        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "source_ref": "src-case-demo-002",
         "confidence": 1
       },
       {
@@ -577,7 +577,7 @@
           "text": "每个月工资到手，还完房贷、交完孩子的学费、买了一家人的菜，剩下的钱存进银行，然后告诉自己“我在攒养老钱”",
           "paragraph_index": 42
         },
-        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "source_ref": "src-case-demo-002",
         "confidence": 1
       },
       {
@@ -589,7 +589,7 @@
           "text": "10万块钱存银行，在当前的低利率环境下，20年后的购买力能剩下多少？这是一个你不想算、但必须算的账",
           "paragraph_index": 43
         },
-        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "source_ref": "src-case-demo-002",
         "confidence": 1
       },
       {
@@ -601,7 +601,7 @@
           "text": "2026年，中国的养老保障体系正在从“单腿跳”走向“三条腿走路”",
           "paragraph_index": 45
         },
-        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "source_ref": "src-case-demo-002",
         "confidence": 1
       },
       {
@@ -613,7 +613,7 @@
           "text": "覆盖超过10亿人，是全球最大的养老保障网",
           "paragraph_index": 47
         },
-        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "source_ref": "src-case-demo-002",
         "confidence": 1
       },
       {
@@ -625,7 +625,7 @@
           "text": "作用是“保基本”，不是“保体面”",
           "paragraph_index": 47
         },
-        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "source_ref": "src-case-demo-002",
         "confidence": 1
       },
       {
@@ -637,7 +637,7 @@
           "text": "不是所有单位都有。主要是国企、事业单位和少数效益好的民企",
           "paragraph_index": 49
         },
-        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "source_ref": "src-case-demo-002",
         "confidence": 1
       },
       {
@@ -649,7 +649,7 @@
           "text": "覆盖率大约7000万人",
           "paragraph_index": 49
         },
-        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "source_ref": "src-case-demo-002",
         "confidence": 1
       },
       {
@@ -661,7 +661,7 @@
           "text": "2022年开始试点，2024年推向全国",
           "paragraph_index": 51
         },
-        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "source_ref": "src-case-demo-002",
         "confidence": 1
       },
       {
@@ -673,7 +673,7 @@
           "text": "每个人可以开一个个人养老金账户，每年最高缴存12000元，享受税收优惠",
           "paragraph_index": 51
         },
-        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "source_ref": "src-case-demo-002",
         "confidence": 1
       },
       {
@@ -685,7 +685,7 @@
           "text": "第一支柱不会崩，国家兜底",
           "paragraph_index": 52
         },
-        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "source_ref": "src-case-demo-002",
         "confidence": 1
       },
       {
@@ -697,7 +697,7 @@
           "text": "如果你想退休后过得体面，只靠第一支柱是不够的",
           "paragraph_index": 52
         },
-        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "source_ref": "src-case-demo-002",
         "confidence": 1
       },
       {
@@ -709,7 +709,7 @@
           "text": "个人对自己养老的责任在增加",
           "paragraph_index": 54
         },
-        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "source_ref": "src-case-demo-002",
         "confidence": 1
       },
       {
@@ -721,7 +721,7 @@
           "text": "以前是“国家兜底”，以后是“国家兜底+个人努力”",
           "paragraph_index": 54
         },
-        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "source_ref": "src-case-demo-002",
         "confidence": 1
       },
       {
@@ -733,7 +733,7 @@
           "text": "这是全球趋势，不独中国如此",
           "paragraph_index": 54
         },
-        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "source_ref": "src-case-demo-002",
         "confidence": 1
       },
       {
@@ -745,7 +745,7 @@
           "text": "大量自媒体用“坏消息！！”“紧急通知！！！”做标题，收割流量",
           "paragraph_index": 56
         },
-        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "source_ref": "src-case-demo-002",
         "confidence": 1
       },
       {
@@ -757,7 +757,7 @@
           "text": "拿真实政策中的一小部分，放大、扭曲、制造恐慌",
           "paragraph_index": 57
         },
-        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "source_ref": "src-case-demo-002",
         "confidence": 1
       },
       {
@@ -769,7 +769,7 @@
           "text": "把“渐进式延迟”说成“一步到位”，把“缴费年限逐步延长”说成“突然变20年”",
           "paragraph_index": 57
         },
-        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "source_ref": "src-case-demo-002",
         "confidence": 1
       },
       {
@@ -781,7 +781,7 @@
           "text": "焦虑是真实的。但焦虑被定价了，被人利用了",
           "paragraph_index": 58
         },
-        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "source_ref": "src-case-demo-002",
         "confidence": 1
       },
       {
@@ -793,7 +793,7 @@
           "text": "登录“国家社会保险公共服务平台”或者电子社保卡APP，看看你累计缴了多少年、个人账户里有多少钱",
           "paragraph_index": 61
         },
-        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "source_ref": "src-case-demo-002",
         "confidence": 1
       },
       {
@@ -805,7 +805,7 @@
           "text": "很多人交了十几年社保，从来没看过自己的账户长什么样",
           "paragraph_index": 61
         },
-        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "source_ref": "src-case-demo-002",
         "confidence": 1
       },
       {
@@ -817,7 +817,7 @@
           "text": "养老金不是“交够15年就行了”",
           "paragraph_index": 63
         },
-        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "source_ref": "src-case-demo-002",
         "confidence": 1
       },
       {
@@ -829,7 +829,7 @@
           "text": "交的时间越长、基数越高，退休后拿到的越多",
           "paragraph_index": 63
         },
-        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "source_ref": "src-case-demo-002",
         "confidence": 1
       },
       {
@@ -841,7 +841,7 @@
           "text": "有条件的，不要按最低基数交，不要卡着15年停",
           "paragraph_index": 63
         },
-        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "source_ref": "src-case-demo-002",
         "confidence": 1
       },
       {
@@ -853,7 +853,7 @@
           "text": "每年12000元，享受个税优惠",
           "paragraph_index": 65
         },
-        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "source_ref": "src-case-demo-002",
         "confidence": 1
       },
       {
@@ -865,7 +865,7 @@
           "text": "账户里的钱可以买理财产品",
           "paragraph_index": 65
         },
-        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "source_ref": "src-case-demo-002",
         "confidence": 1
       },
       {
@@ -877,7 +877,7 @@
           "text": "这是一个实实在在的税收优惠，你不用就亏了",
           "paragraph_index": 65
         },
-        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "source_ref": "src-case-demo-002",
         "confidence": 1
       },
       {
@@ -889,7 +889,7 @@
           "text": "房子不是养老的唯一依靠（尤其是只有一套自住房的人）",
           "paragraph_index": 67
         },
-        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "source_ref": "src-case-demo-002",
         "confidence": 1
       },
       {
@@ -901,7 +901,7 @@
           "text": "孩子不是“养老保险”（ta们自己压力已经够大了）",
           "paragraph_index": 67
         },
-        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "source_ref": "src-case-demo-002",
         "confidence": 1
       },
       {
@@ -913,7 +913,7 @@
           "text": "养老金也不能覆盖所有开销",
           "paragraph_index": 67
         },
-        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "source_ref": "src-case-demo-002",
         "confidence": 1
       },
       {
@@ -925,7 +925,7 @@
           "text": "真正的养老规划，是多元的：社保打底，存款保底，投资增厚，健康是最大的本钱",
           "paragraph_index": 68
         },
-        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "source_ref": "src-case-demo-002",
         "confidence": 1
       },
       {
@@ -937,7 +937,7 @@
           "text": "“等退休是场骗局”这个说法，我不完全同意",
           "paragraph_index": 69
         },
-        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "source_ref": "src-case-demo-002",
         "confidence": 1
       },
       {
@@ -949,7 +949,7 @@
           "text": "它让很多人开始正视自己的养老问题，这是好事",
           "paragraph_index": 70
         },
-        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "source_ref": "src-case-demo-002",
         "confidence": 1
       },
       {
@@ -961,7 +961,7 @@
           "text": "但它也隐含了一个前提“我曾经以为只要等退休就好了”",
           "paragraph_index": 70
         },
-        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "source_ref": "src-case-demo-002",
         "confidence": 1
       },
       {
@@ -973,7 +973,7 @@
           "text": "这个“曾经以为”，才是问题所在",
           "paragraph_index": 71
         },
-        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "source_ref": "src-case-demo-002",
         "confidence": 1
       },
       {
@@ -985,7 +985,7 @@
           "text": "从来没有任何一个国家的任何一代人，是靠“等着”把晚年过好的",
           "paragraph_index": 72
         },
-        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "source_ref": "src-case-demo-002",
         "confidence": 1
       },
       {
@@ -997,7 +997,7 @@
           "text": "养老金从来都只是生活的一部分",
           "paragraph_index": 72
         },
-        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "source_ref": "src-case-demo-002",
         "confidence": 1
       },
       {
@@ -1009,7 +1009,7 @@
           "text": "你现在的每一个决定，都在为你60岁以后的生活投票",
           "paragraph_index": 72
         },
-        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "source_ref": "src-case-demo-002",
         "confidence": 1
       },
       {
@@ -1021,7 +1021,7 @@
           "text": "你的投票权，不用就作废了，没人能替你投",
           "paragraph_index": 73
         },
-        "source_ref": "src-1b8ffe3c-8c85-446c-a10a-952efccc6fa9",
+        "source_ref": "src-case-demo-002",
         "confidence": 1
       }
     ],

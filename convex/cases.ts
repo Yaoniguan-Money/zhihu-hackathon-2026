@@ -33,7 +33,6 @@ import {
 } from "@contracts/private/index.js";
 import {
   ingestSourceSnapshot,
-  locateSourceSpan,
   normalizeSourceText,
   SourceIngestionError,
   SOURCE_MAX_UTF16_CODE_UNITS,
@@ -54,11 +53,16 @@ import { ModelRequestFailedError } from "@server/model-gateway/openai-compatible
 import { ModelConfigMissingError } from "@server/model-gateway/config.js";
 import { modelGatewayFor } from "./aiRuntime";
 import {
-  candidateClaimGraphSchema,
+  candidateClaimGraphSliceSchema,
+  claimExtractionParagraphBatches,
   claimExtractionSystemPrompt,
   claimExtractionUserPrompt,
   CLAIM_EXTRACTION_SCHEMA_VERSION,
 } from "@server/model/schemas/claim-extraction.js";
+import {
+  materializeEvidenceGraph,
+  mergeClaimGraphSlices,
+} from "@server/source/materialize-claims.js";
 import {
   candidateCaseCompilationSchema,
   caseCompilationSystemPrompt,
@@ -595,87 +599,52 @@ export const compileCaseWorker = internalAction({
       // 2) 模型候选（真实外部 Seam；maxRetries=0，无修复无重试；
       // ADR 0005：按建案发起者实时解析其模型配置）
       const gateway = await modelGatewayFor(ctx, args.owner_identity);
-      const claimCallStart = Date.now();
-      await audit("model_call_started", { task: "claim" });
-      let candidate;
-      try {
-        candidate = await gateway.generateStructured({
-          task: "claim",
-          schemaName: CLAIM_EXTRACTION_SCHEMA_VERSION,
-          system: claimExtractionSystemPrompt(),
-          prompt: claimExtractionUserPrompt({ numberedParagraphs }),
-          schema: candidateClaimGraphSchema,
-        });
-      } catch (error) {
-        await audit("model_call_failed", {
+      const batches = claimExtractionParagraphBatches(
+        numberedParagraphs.length,
+      );
+      const slices = [];
+      for (const range of batches) {
+        const claimCallStart = Date.now();
+        await audit("model_call_started", { task: "claim" });
+        try {
+          slices.push(
+            await gateway.generateStructured({
+              task: "claim",
+              schemaName: CLAIM_EXTRACTION_SCHEMA_VERSION,
+              system: claimExtractionSystemPrompt(),
+              prompt: claimExtractionUserPrompt({
+                numberedParagraphs,
+                range,
+              }),
+              schema: candidateClaimGraphSliceSchema,
+            }),
+          );
+        } catch (error) {
+          await audit("model_call_failed", {
+            task: "claim",
+            duration_ms: Date.now() - claimCallStart,
+            detail_code:
+              error instanceof ModelRequestFailedError
+                ? error.failure.code
+                : "MODEL_REQUEST_FAILED",
+          });
+          throw error;
+        }
+        await audit("model_call_completed", {
           task: "claim",
           duration_ms: Date.now() - claimCallStart,
-          detail_code:
-            error instanceof ModelRequestFailedError
-              ? error.failure.code
-              : "MODEL_REQUEST_FAILED",
         });
-        throw error;
       }
-      await audit("model_call_completed", {
-        task: "claim",
-        duration_ms: Date.now() - claimCallStart,
-      });
+      const candidate = mergeClaimGraphSlices(slices);
 
-      // 3) 服务器分配可信 ID、定位 Span、装配并校验图谱
-      const claims = candidate.claims.map((claim, index) => {
-        const { start, end } = locateSourceSpan(
-          article.canonical_text,
-          article.paragraphs,
-          {
-            paragraph_index: claim.paragraph_index,
-            excerpt: claim.excerpt,
-          },
-        );
-        return {
-          claim_id: `cl-${index + 1}`,
-          proposition: claim.proposition,
-          ...(claim.subject !== undefined && { subject: claim.subject }),
-          ...(claim.predicate !== undefined && { predicate: claim.predicate }),
-          ...(claim.object !== undefined && { object: claim.object }),
-          ...(claim.time !== undefined && { time: claim.time }),
-          ...(claim.scope !== undefined && { scope: claim.scope }),
-          ...(claim.condition !== undefined && { condition: claim.condition }),
-          ...(claim.modality !== undefined && { modality: claim.modality }),
-          source_span: {
-            start,
-            end,
-            text: claim.excerpt,
-            paragraph_index: claim.paragraph_index,
-          },
-          source_ref: `src-${args.case_key}`,
-          confidence: 1,
-        };
+      // 3) 服务器分配可信 ID、定位 Span、丢弃无法逐字定位的候选后装配图谱
+      const graph = materializeEvidenceGraph({
+        case_key: args.case_key,
+        canonical: article.canonical_text,
+        paragraphs: article.paragraphs,
+        candidate,
       });
-      const relations = candidate.relations.map((relation, index) => {
-        const from = claims[relation.from_claim_index];
-        const to = claims[relation.to_claim_index];
-        if (!from || !to) {
-          throw new SourceIngestionError({
-            code: "SOURCE_SPAN_INVALID",
-            incident_id: "span:relation_endpoint",
-            detail: "Relation 端点下标不存在",
-          });
-        }
-        return {
-          relation_id: `rel-${index + 1}`,
-          from_claim_id: from.claim_id,
-          to_claim_id: to.claim_id,
-          type: relation.type,
-        };
-      });
-      const graph = evidenceGraphPrivateSchema.parse({
-        case_id: args.case_key,
-        source_id: `src-${args.case_key}`,
-        claims,
-        relations,
-      });
-      assertEvidenceGraphInvariants(graph);
+      const claims = graph.claims;
 
       // 5) 案件编译候选（真实外部 Seam；模型只出内容与下标引用）
       const caseCallStart = Date.now();
@@ -692,7 +661,15 @@ export const compileCaseWorker = internalAction({
                 proposition: claim.proposition,
                 excerpt: claim.source_span.text,
               })),
-              relations: candidate.relations,
+              relations: graph.relations.map((relation) => ({
+                from_claim_index: claims.findIndex(
+                  (claim) => claim.claim_id === relation.from_claim_id,
+                ),
+                to_claim_index: claims.findIndex(
+                  (claim) => claim.claim_id === relation.to_claim_id,
+                ),
+                type: relation.type,
+              })),
             }),
             schema: candidateCaseCompilationSchema,
           }),

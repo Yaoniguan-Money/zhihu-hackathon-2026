@@ -8,7 +8,10 @@ import { relationTypeSchema } from "@contracts/shared/index.js";
  * 摘录必须是所给段块中逐字、连续且唯一的片段（服务器据此定位 Span）。
  */
 
-export const CLAIM_EXTRACTION_SCHEMA_VERSION = "claim-extraction-v1@3";
+export const CLAIM_EXTRACTION_SCHEMA_VERSION = "claim-extraction-v1@4";
+
+/** 每批送入模型的段块数。长文拆批以降低 flash 档改写摘录的概率。 */
+export const CLAIM_EXTRACTION_PARAGRAPH_BATCH_SIZE = 12;
 
 export const candidateClaimSchema = z.strictObject({
   paragraph_index: z.number().int().min(0),
@@ -23,25 +26,45 @@ export const candidateClaimSchema = z.strictObject({
   modality: z.string().min(1).optional(),
 });
 
-export const candidateClaimGraphSchema = z.strictObject({
-  claims: z.array(candidateClaimSchema).min(1),
-  relations: z.array(
-    z.strictObject({
-      from_claim_index: z.number().int().min(0),
-      to_claim_index: z.number().int().min(0),
-      type: relationTypeSchema,
-    }),
-  ),
+const candidateRelationSchema = z.strictObject({
+  from_claim_index: z.number().int().min(0),
+  to_claim_index: z.number().int().min(0),
+  type: relationTypeSchema,
 });
 
-export type CandidateClaimGraph = z.infer<typeof candidateClaimGraphSchema>;
+export const candidateClaimGraphSliceSchema = z.strictObject({
+  claims: z.array(candidateClaimSchema),
+  relations: z.array(candidateRelationSchema),
+});
+
+export const candidateClaimGraphSchema = z.strictObject({
+  claims: z.array(candidateClaimSchema).min(1),
+  relations: z.array(candidateRelationSchema),
+});
+
+export type CandidateClaimGraph = z.infer<typeof candidateClaimGraphSliceSchema>;
+
+export function claimExtractionParagraphBatches(
+  paragraphCount: number,
+  batchSize: number = CLAIM_EXTRACTION_PARAGRAPH_BATCH_SIZE,
+): { start: number; end: number }[] {
+  if (paragraphCount <= 0) return [];
+  const batches: { start: number; end: number }[] = [];
+  for (let start = 0; start < paragraphCount; start += batchSize) {
+    batches.push({
+      start,
+      end: Math.min(start + batchSize, paragraphCount),
+    });
+  }
+  return batches;
+}
 
 export function claimExtractionSystemPrompt(): string {
   return [
     "你是证据图谱抽取器。输入是一篇带段块编号的 Canonical Source。",
     "任务：抽取最小可验证命题（claims）与命题之间的语义关系（relations）。",
     "excerpt 的唯一合法生成方式：先在某个段块文本中定位原文位置，然后逐字符复制该处的一个连续片段。禁止凭印象重构原文，禁止改写、摘要、压缩、归纳、合并、翻译、纠正或增删任何字符（包括标点、引号、全角半角、括号、序号）。",
-    "宁可少抽：如果一个命题找不到可逐字复制的原文片段，直接放弃该命题；输出与原文不完全一致的摘录是最高优先级的错误。",
+    "宁可少抽：如果一个命题找不到可逐字复制的原文片段，直接放弃该命题；本批没有任何可抽命题时输出空 claims 与空 relations。输出与原文不完全一致的摘录是最高优先级的错误。",
     "规则：",
     "1. excerpt 必须是所给段块内逐字、连续、唯一的原文片段；禁止改写、摘要或跨段块拼接。",
     "2. excerpt 长度至少 10 个字符；若短语在段块内出现多次，扩展摘录上下文使其在该段块内只出现一次。",
@@ -57,10 +80,17 @@ export function claimExtractionSystemPrompt(): string {
 
 export function claimExtractionUserPrompt(paragraphs: {
   numberedParagraphs: string[];
+  range?: { start: number; end: number };
 }): string {
+  const start = paragraphs.range?.start ?? 0;
+  const end = paragraphs.range?.end ?? paragraphs.numberedParagraphs.length;
+  const slice = paragraphs.numberedParagraphs.slice(start, end);
   return [
-    `Canonical Source 共 ${paragraphs.numberedParagraphs.length} 个段块：`,
-    ...paragraphs.numberedParagraphs.map((text, index) => `[${index}] ${text}`),
+    `Canonical Source 共 ${paragraphs.numberedParagraphs.length} 个段块。以下仅给出第 ${start}–${end - 1} 段（共 ${slice.length} 段）。`,
+    "paragraph_index 必须使用方括号中的全局编号，禁止把本批重新从 0 编号。",
+    "只为本批已给出的段块抽取；不要引用未给出的段块。",
+    "如果本批没有任何可逐字复制的命题，输出空 claims 数组与空 relations 数组。",
+    ...slice.map((text, index) => `[${start + index}] ${text}`),
     "",
     "请抽取 claims 与 relations。",
   ].join("\n");
