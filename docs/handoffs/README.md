@@ -97,7 +97,7 @@ docs/handoffs/<ticket-or-stage-id>.md
 | P1-1 Recording 与对质 | complete | [2026-09-05-p11-1-recording-confrontation](./2026-09-05-p11-1-recording-confrontation.md) |
 | P1-2a 本地 Voice 基建 | complete | [2026-09-05-p12-2a-local-voice-infra](./2026-09-05-p12-2a-local-voice-infra.md) |
 | P1-2b 流式语音管线 | complete | [2026-09-09-p12b-voice-stream-pipeline](./2026-09-09-p12b-voice-stream-pipeline.md) |
-| P1-3 / G1 第二案件 | blocked（外部：DeepSeek 余额） | [2026-09-05-p13-g1-second-case](./2026-09-05-p13-g1-second-case.md) |
+| P1-3 / G1 第二案件 | complete | [2026-09-05-p13-g1-second-case](./2026-09-05-p13-g1-second-case.md) |
 | developer-b 分支合并可行性研究 | complete | [2026-09-06-developer-b-merge-feasibility](./2026-09-06-developer-b-merge-feasibility.md) |
 | AI 供应商切换：智谱 GLM | complete | [2026-09-06-ai-provider-switch-glm](./2026-09-06-ai-provider-switch-glm.md) |
 | 2026-09-06 夜间开发中继 | complete | [2026-09-06-night-relay](./2026-09-06-night-relay.md) |
@@ -125,3 +125,6 @@ docs/handoffs/<ticket-or-stage-id>.md
 | REVEAL-RETRYABLE 揭晓失败退回审讯中 + Reveal 网络重试 10 次 | complete | [2026-09-11-reveal-retryable](./2026-09-11-reveal-retryable.md) |
 | REPLY-WAIT-UX-AND-MODEL-TIMEOUT 开场等待文案/面板重叠/回复无响应超时 | complete | [2026-09-12-reply-wait-ux-and-model-timeout](./2026-09-12-reply-wait-ux-and-model-timeout.md) |
 | NPC-DEBATE-AND-CLAIM-ID NPC 互相辩论解锁 + claim 编号清洗 + 每局随机失真者 | complete | [2026-09-12-npc-debate-and-inline-claim-id](./2026-09-12-npc-debate-and-inline-claim-id.md) |
+| REL1 部分签署（P0 / P1-1 / P1-2） | complete（已被完整签署接续） | [2026-09-12-rel1-partial-signoff](./2026-09-12-rel1-partial-signoff.md) |
+| REL1 签署（第 0–4 节通过；遗留清理未做） | complete | [2026-09-12-rel1-signoff](./2026-09-12-rel1-signoff.md) |
+| P1-3 第二案晋升系统目录 + flash 长文抽取批处理 | complete | [2026-09-12-p13-catalog-and-claim-batches](./2026-09-12-p13-catalog-and-claim-batches.md) |

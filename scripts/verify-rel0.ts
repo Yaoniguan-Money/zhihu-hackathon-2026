@@ -61,6 +61,10 @@ async function main(): Promise<void> {
     "cases:listPublic 含 case-demo-001",
     catalog.ok && JSON.stringify(catalog.value).includes("case-demo-001"),
   );
+  check(
+    "cases:listPublic 含 case-demo-002",
+    catalog.ok && JSON.stringify(catalog.value).includes("case-demo-002"),
+  );
 
   // 2) 案件公开投影：五角色（getPublic 需要用户身份，用匿名 token 调用）
   const tokenForProbe = await call<{ tokens: { token: string } }>(

@@ -413,6 +413,7 @@ export const seedSystemCase = internalMutation({
     catalog_json: v.string(),
     rules_json: v.string(),
     rubric_json: v.string(),
+    compiler_version: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const existing = await ctx.db
@@ -499,7 +500,7 @@ export const seedSystemCase = internalMutation({
       catalog_json: JSON.stringify(casePrivate.evidence_catalog),
       rules_json: JSON.stringify(casePrivate.evidence_unlock_rules),
       rubric_json: args.rubric_json,
-      compiler_version: "golden-frozen@gc0",
+      compiler_version: args.compiler_version ?? "golden-frozen@gc0",
       created_at_ms: nowMs,
     });
     return { case_key: args.case_key, created: true };
