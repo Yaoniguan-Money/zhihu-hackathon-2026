@@ -1,5 +1,9 @@
 import { NextResponse } from "next/server";
-import { importZhihuUrl, ZhihuImportError } from "@server/source/zhihu-import.js";
+import {
+  importZhihuUrl,
+  toPublicZhihuImportError,
+  ZhihuImportError,
+} from "@server/source/zhihu-import.js";
 
 export const runtime = "nodejs";
 export const maxDuration = 30;
@@ -31,15 +35,8 @@ export async function POST(request: Request) {
     });
   } catch (error) {
     if (error instanceof ZhihuImportError) {
-      const status = error.code === "INVALID_ZHIHU_URL"
-        ? 400
-        : error.code === "ZHIHU_FETCH_FAILED"
-          ? 502
-          : 422;
-      return NextResponse.json(
-        { error: { code: error.code, message: error.message } },
-        { status },
-      );
+      const mapped = toPublicZhihuImportError(error);
+      return NextResponse.json({ error: mapped.error }, { status: mapped.status });
     }
     return NextResponse.json(
       { error: { code: "INTERNAL_INCIDENT", message: "读取知乎文章失败" } },

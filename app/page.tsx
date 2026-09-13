@@ -60,6 +60,8 @@ function CustomCaseForm() {
   const [text, setText] = useState("");
   const [invite, setInvite] = useState("");
   const [caseId, setCaseId] = useState<string | null>(null);
+  const [importing, setImporting] = useState(false);
+  const [importNote, setImportNote] = useState<string | null>(null);
   const [error, setError] = useState<CaseCompilationStatusPublic["error"] | { code: string; message: string } | null>(null);
 
   // 知乎支线（热榜/搜索）带链接跳回：预填来源 URL 并展开表单。
@@ -102,7 +104,54 @@ function CustomCaseForm() {
     }
   };
 
-  const canSubmit = /^https:\/\/.+/.test(url) && text.trim().length > 0 && invite.trim().length > 0 && !caseId;
+  const importText = async () => {
+    setError(null);
+    setImportNote(null);
+    setImporting(true);
+    try {
+      const resp = await fetch("/api/zhihu/import", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ url }),
+      });
+      const payload: unknown = await resp.json();
+      if (!resp.ok) {
+        const nested =
+          payload && typeof payload === "object" && "error" in payload
+            ? (payload as { error: unknown }).error
+            : payload;
+        setError(toPublicError(nested));
+        return;
+      }
+      if (
+        !payload ||
+        typeof payload !== "object" ||
+        !("text" in payload) ||
+        typeof (payload as { text: unknown }).text !== "string" ||
+        (payload as { text: string }).text.trim() === ""
+      ) {
+        setError({ code: "SOURCE_INVALID", message: "读取结果没有完整正文，请改为粘贴原文" });
+        return;
+      }
+      const imported = payload as { text: string; title?: unknown; finalUrl?: unknown };
+      if (typeof imported.finalUrl === "string" && imported.finalUrl.startsWith("https://")) {
+        setUrl(imported.finalUrl);
+      }
+      setText(imported.text);
+      setImportNote(
+        typeof imported.title === "string" && imported.title.trim()
+          ? `已填入《${imported.title.trim()}》，请核对后再编译`
+          : "已填入读取结果，请核对后再编译",
+      );
+    } catch (err) {
+      setError(toPublicError(err));
+    } finally {
+      setImporting(false);
+    }
+  };
+
+  const canImport = /^https:\/\/.+/.test(url) && !importing && !caseId;
+  const canSubmit = /^https:\/\/.+/.test(url) && text.trim().length > 0 && invite.trim().length > 0 && !caseId && !importing;
 
   return (
     <div data-tour="lobby-bring">
@@ -124,24 +173,37 @@ function CustomCaseForm() {
       {open && (
         <Modal
           title="带来一篇真实知乎文章"
-          subtitle="需要邀请码 · AI 会把它编译成一局五角色对局"
+          subtitle="需要邀请码 · 可读取知乎正文，仍须核对后提交完整原文"
           icon="link"
           onClose={() => setOpen(false)}
         >
           <div className="mt-4 space-y-3">
-            <input
-              value={url}
-              onChange={(e) => setUrl(e.target.value)}
-              placeholder="https://zhuanlan.zhihu.com/p/…"
-              className="w-full rounded-xl border-2 border-paper/20 bg-night-deep/60 px-4 py-2.5 text-sm text-paper placeholder:text-paper/30 focus:border-amber focus:outline-none"
-            />
+            <div className="flex gap-2">
+              <input
+                value={url}
+                onChange={(e) => { setUrl(e.target.value); setImportNote(null); }}
+                placeholder="https://zhuanlan.zhihu.com/p/…"
+                className="min-w-0 flex-1 rounded-xl border-2 border-paper/20 bg-night-deep/60 px-4 py-2.5 text-sm text-paper placeholder:text-paper/30 focus:border-amber focus:outline-none"
+              />
+              <button
+                type="button"
+                onClick={importText}
+                disabled={!canImport}
+                className="shrink-0 rounded-xl border-2 border-amber/50 bg-amber/10 px-3 py-2.5 text-xs font-black text-amber disabled:opacity-40"
+              >
+                {importing ? "读取中…" : "读取正文"}
+              </button>
+            </div>
             <textarea
               value={text}
-              onChange={(e) => setText(e.target.value)}
-              placeholder="粘贴文章的完整正文（必须完整，URL 只作来源记录）"
+              onChange={(e) => { setText(e.target.value); setImportNote(null); }}
+              placeholder="粘贴文章的完整正文，或点「读取正文」填入后核对（必须完整，URL 只作来源记录）"
               rows={8}
               className="w-full resize-none rounded-xl border-2 border-paper/20 bg-night-deep/60 px-4 py-2.5 text-sm leading-relaxed text-paper placeholder:text-paper/30 focus:border-amber focus:outline-none"
             />
+            {importNote && (
+              <p className="text-xs font-bold text-amber/90">{importNote}</p>
+            )}
             <input
               value={invite}
               onChange={(e) => setInvite(e.target.value)}
@@ -328,7 +390,7 @@ export default function Home() {
         {/* ③ 从知乎找选题：热榜 / 搜索 */}
         <SectionLabel index="③" icon="magnifier" title="从知乎找选题" />
         <p className="-mt-2 text-[11px] leading-relaxed text-paper/45">
-          先用热榜、搜索物色题材；正式开局仍回到 ②，粘贴文章完整正文与邀请码。
+           先用热榜、搜索物色题材；正式开局仍回到 ②，读取或粘贴完整正文后再编译。
         </p>
         <div className="grid grid-cols-2 gap-3" data-tour="lobby-zhihu">
           <a href="/zhihu/hot" className="card-dark flex flex-col items-center gap-1 p-4 text-center transition-colors hover:border-amber/40">

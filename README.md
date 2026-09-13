@@ -20,7 +20,7 @@ Source Snapshot（URL + 完整正文）
 
 核心设计约束（详见 [`AGENTS.md`](./AGENTS.md)、[`docs/adr/`](./docs/adr)、`contracts/` 运行时 schema）：
 
-- 完整正文是建案必需输入；URL 只记录来源，运行时不抓取正文。
+- 完整正文是建案必需输入；URL 只记录来源。编译路径不抓取正文。大厅「读取正文」只把公开知乎页填进表单，失败须手贴，不能 URL-only 建案。
 - 模型输出只是候选：schema、引用、权限、投影校验全部在服务端；原始 token 永不出后端。
 - 失败是显式结果：typed failure、无默认值、无隐藏重试、无部分成功。
 - 幂等（client_action_id）、排他锁 + lease、Owner 隔离、公开/私有事件双序列。

@@ -128,3 +128,4 @@ docs/handoffs/<ticket-or-stage-id>.md
 | REL1 部分签署（P0 / P1-1 / P1-2） | complete（已被完整签署接续） | [2026-09-12-rel1-partial-signoff](./2026-09-12-rel1-partial-signoff.md) |
 | REL1 签署（第 0–4 节通过；遗留清理未做） | complete | [2026-09-12-rel1-signoff](./2026-09-12-rel1-signoff.md) |
 | P1-3 第二案晋升系统目录 + flash 长文抽取批处理 | complete | [2026-09-12-p13-catalog-and-claim-batches](./2026-09-12-p13-catalog-and-claim-batches.md) |
+| ZHIHU-URL-IMPORT-LOBBY 大厅读取正文接线 | complete | [2026-09-13-zhihu-url-import-lobby](./2026-09-13-zhihu-url-import-lobby.md) |

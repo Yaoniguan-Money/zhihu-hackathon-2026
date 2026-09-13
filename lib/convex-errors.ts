@@ -75,7 +75,13 @@ export function errorCodeHint(code: PublicError["code"]): string {
     case "SERVICE_NOT_CONFIGURED":
       return "你还没有配置模型服务：点右上角齿轮，填写你的模型 API（Base URL / API Key / 模型名）后再试。";
     case "SERVICE_UNAVAILABLE":
-      return "模型服务暂时连不上；若是你自己的配置，请到设置里检查 Base URL、API Key 与模型名。";
+      return "服务暂时连不上。若是读取知乎正文失败，请改用手贴原文；若是模型调用，请到设置里检查 Base URL、API Key 与模型名。";
+    case "SOURCE_INVALID":
+      return "来源正文不完整或不合法，请核对后重新粘贴，也可以改用手贴原文。";
+    case "SOURCE_TOO_LONG":
+      return "正文超过上限，请换成更短的完整文章。";
+    case "INVALID_ARGUMENT":
+      return "请检查输入后再试。";
     case "RATE_LIMITED":
       return "次数已达上限，请稍后再试。";
     case "AUTH_REQUIRED":

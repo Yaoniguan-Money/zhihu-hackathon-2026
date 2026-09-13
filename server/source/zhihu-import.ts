@@ -1,3 +1,5 @@
+import type { PublicError } from "@contracts/public/index.js";
+
 const ALLOWED_HOSTS = new Set(["zhihu.com", "www.zhihu.com", "zhuanlan.zhihu.com"]);
 const MAX_REDIRECTS = 3;
 const MAX_HTML_BYTES = 3 * 1024 * 1024;
@@ -31,6 +33,23 @@ export class ZhihuImportError extends Error {
     super(message);
     this.code = code;
     this.name = "ZhihuImportError";
+  }
+}
+
+export function toPublicZhihuImportError(error: ZhihuImportError): {
+  status: number;
+  error: PublicError;
+} {
+  switch (error.code) {
+    case "INVALID_ZHIHU_URL":
+      return { status: 400, error: { code: "INVALID_ARGUMENT", message: error.message } };
+    case "ZHIHU_RESPONSE_TOO_LARGE":
+      return { status: 422, error: { code: "SOURCE_TOO_LONG", message: error.message } };
+    case "ZHIHU_CONTENT_UNAVAILABLE":
+    case "ZHIHU_CONTENT_INCOMPLETE":
+      return { status: 422, error: { code: "SOURCE_INVALID", message: error.message } };
+    case "ZHIHU_FETCH_FAILED":
+      return { status: 502, error: { code: "SERVICE_UNAVAILABLE", message: error.message } };
   }
 }
 
