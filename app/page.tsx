@@ -19,6 +19,7 @@ import SoundToggle from "@/components/ui/SoundToggle";
 import { ModelSettingsButton } from "@/components/settings/ModelSettingsDialog";
 import HowtoModal from "@/components/lobby/HowtoModal";
 import Modal from "@/components/ui/Modal";
+import ZhihuAuthBadge from "@/components/lobby/ZhihuAuthBadge";
 
 const InterrogationStage = dynamic(() => import("@/components/three/InterrogationStage"), {
   ssr: false,
@@ -415,6 +416,14 @@ export default function Home() {
           </div>
           <Icon name="next" size={14} className="text-paper/40" />
         </a>
+
+        {/* ⑤ 知乎账号登录（AUTH1）：徽章自包含，useSearchParams 需 Suspense */}
+        <SectionLabel index="⑤" icon="mask" title="知乎账号" />
+        <div className="-mt-2">
+          <Suspense fallback={null}>
+            <ZhihuAuthBadge />
+          </Suspense>
+        </div>
 
         {/* 玩法说明：点击弹出弹窗（右栏就地展开在小屏会被裁切且无法滚动） */}
         <button

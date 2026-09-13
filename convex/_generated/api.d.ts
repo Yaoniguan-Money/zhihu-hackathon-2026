@@ -24,6 +24,7 @@ import type * as roleTurns from "../roleTurns.js";
 import type * as sessions from "../sessions.js";
 import type * as userModelConfig from "../userModelConfig.js";
 import type * as voice from "../voice.js";
+import type * as zhihuAuth from "../zhihuAuth.js";
 
 import type {
   ApiFromModules,
@@ -48,6 +49,7 @@ declare const fullApi: ApiFromModules<{
   sessions: typeof sessions;
   userModelConfig: typeof userModelConfig;
   voice: typeof voice;
+  zhihuAuth: typeof zhihuAuth;
 }>;
 
 /**

@@ -237,4 +237,28 @@ export default defineSchema({
     registry_json: v.string(),
     updated_at_ms: v.number(),
   }).index("by_owner", ["owner_identity"]),
+
+  // AUTH1：知乎 OAuth state（一次性、5 分钟 TTL、绑定发起身份；CSRF）。
+  // 回调消费即删除；state 本身是回调端点的唯一能力凭证。
+  zhihu_oauth_states: defineTable({
+    state: v.string(),
+    identity_token: v.string(), // 发起授权的 tokenIdentifier
+    created_at_ms: v.number(),
+    expires_at_ms: v.number(),
+  }).index("by_state", ["state"]),
+
+  // AUTH1：知乎账号绑定（每身份至多一行）。资料为 /user 投影；access_token
+  // 只存服务端（受控存储），公开查询仅回 ZhihuProfilePublic，token 永不下发。
+  zhihu_bindings: defineTable({
+    identity_token: v.string(),
+    stable_id: v.string(), // hash_id，缺省时为无损 uid 字符串
+    fullname: v.string(),
+    headline: v.string(),
+    avatar_url: v.string(),
+    profile_url: v.string(),
+    access_token: v.string(), // 仅服务端；过期后 UI 引导重新授权
+    token_expires_at_ms: v.number(), // expires_in 缺失时为 0（未知，按未过期处理）
+    bound_at_ms: v.number(),
+    updated_at_ms: v.number(),
+  }).index("by_identity", ["identity_token"]),
 });

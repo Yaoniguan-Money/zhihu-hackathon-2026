@@ -65,4 +65,5 @@ cd voice-worker
 - **P0 公网闭环**：COMPLETE（建案/对局/审讯/证据板/指控/揭晓 + 匿名隔离 + 公网部署）。
 - **P1**：录音对质 ✅；本地语音 ✅（五音色已锁定）；第二案件真实编译 ✅（全链闭环 smoke 待供应商额度恢复后补跑）。
 - **前端（FE-B1）**：产品界面全面重制 ✅——程序化卡通 3D 角色/审讯室（React Three Fiber + Toon）、XState 镜像 SessionView、全页面接真实 Convex 公开接口（mock 已出清）、gsap+motion 动效；真实模型全链试玩受 GLM 免费档间歇故障影响留 REL1 验收（见 [FE-B1 handoff](./docs/handoffs/2026-09-06-frontend-b-aesthetic-live-data.md)）。
-- 待办：知乎 OAuth 登录（等赛事项目分配 App ID/App Key）、REL1 批量验收。
+- **AUTH1 知乎 OAuth 登录**：代码完成 ✅（2026-09-14，分支 `feat/zhihu-oauth-login`：大厅「知乎账号」登录徽章、一次性 state + 服务端 token、`ZhihuProfilePublic` 投影；见 [AUTH1 handoff](./docs/handoffs/2026-09-14-zhihu-oauth-login.md)）。上线待外部步骤：赛事页登记回调 + Convex 三个环境变量（`ZHIHU_OAUTH_APP_ID/APP_KEY/REDIRECT_URI`）+ 部署 + 真机验收。
+- 待办：AUTH1 上线配置（如上）、REL1 批量验收。

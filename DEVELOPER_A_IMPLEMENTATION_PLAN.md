@@ -41,7 +41,7 @@
 | G1 第二案件输入 | COMPLETE | 用户委托 Agent 挑选并冻结第二真实来源（养老金/延迟退休，`golden-case/case-demo-002/`，3,514 单元、SHA-256 固定）；`me contents` 核实账号无公开创作后经官方 search 检索推荐，用户保留替换权。见 [P1-3 handoff](./docs/handoffs/2026-09-05-p13-g1-second-case.md)。 |
 | REL0 公网 P0 | COMPLETE | Convex Cloud（`agile-turtle-860`）与 Vercel Web（https://zhihu-hackathon-2026.vercel.app ）均部署并验证；生产 build 通过。见 [REL0 handoff](./docs/handoffs/2026-09-05-rel0-convex-cloud.md)。 |
 | REL1 P1 验收 | COMPLETE | 2026-09-12 用户签署：第 0–4 节通过（含 P1-3 人工验收）。遗留清理未做，不回写本 Gate。见 [REL1 签署](./docs/handoffs/2026-09-12-rel1-signoff.md)。 |
-| AUTH1 知乎 OAuth | BLOCKED | 是 P0 后的独立外部 Gate；不以 OAuth 阻塞游客 P0。 |
+| AUTH1 知乎 OAuth | COMPLETE（代码）→ BLOCKED（上线配置） | 2026-09-14：App Key 取得后按草案实现完毕（契约/纯函数层/Convex 编排/回调透传/大厅徽章，定向测试 17/17，见 [AUTH1 handoff](./docs/handoffs/2026-09-14-zhihu-oauth-login.md)）。剩余为外部步骤：赛事页登记回调、Convex 设置 `ZHIHU_OAUTH_APP_ID`/`ZHIHU_OAUTH_APP_KEY`/`ZHIHU_OAUTH_REDIRECT_URI` 并部署、真机授权验收；此前登录入口显式 SERVICE_NOT_CONFIGURED，不阻塞游客 P0。 |
 
 ## 3. D0：契约修复包与共同评审 Gate
 
@@ -126,7 +126,7 @@ AUTH0 + REL0 → AUTH1 知乎 OAuth（独立后续阶段）
 | P1-2b 流式语音管线 | COMPLETE | 已完成（2026-09-09，用户决定）：语音层重构为 Pipecat 式流式管线（ADR 0006）——AudioWorklet 持续采集 + FSMN-VAD 句段级 Streaming ASR（partial 前缀稳定）、启发式 turn detection（尾静音端点 + 恢复窗口）→ 自动 `roleTurns.ask`、Approved Speech Envelope 逐段流式 TTS、播报期 barge-in；失败逐段显式隔离不整体失败（用户决定）。业务链路零改动、供应链（模型清单）零变更；契约新增 contracts/public 14.5；worker 新增 /vad、/asr/pcm 并已重启验证。Scripted 管线测试 11 项 + 真实模型 worker e2e 4 项 + 全套件 179 pass / 0 fail + 生产 build 通过。见 [P1-2b handoff](./docs/handoffs/2026-09-09-p12b-voice-stream-pipeline.md)。 |
 | P1-3 第二案件 | COMPLETE | 实现与静态验证完成：第二真实来源经真实模型 durable 编译成功（claim-extraction@2 / case-compilation@2，新增解锁覆盖约束与抽取硬化），案件不变量 + Span 逐字回溯 + 不含第一案工件 + 用户案件不进目录全部断言通过。2026-09-12 REL1 第 4 节人工验收用户签署通过；同日冻结工件晋升系统目录为 `case-demo-002`（本地 + 生产 `agile-turtle-860`），claim-extraction 升至 v1@4（按段批抽 + 无法逐字定位的候选丢弃）。见 [P1-3 晋升 handoff](./docs/handoffs/2026-09-12-p13-catalog-and-claim-batches.md)。 |
 | REL1 P1 验收 | COMPLETE | 2026-09-12 用户签署第 0–4 节通过。遗留清理（旧中文目录 / 空部署）未做，不回写本 Gate。P1 失败绝不回写为 P0 已完成。见 [REL1 签署](./docs/handoffs/2026-09-12-rel1-signoff.md)。 |
-| AUTH1 知乎登录 | BLOCKED | P0 先使用游客身份。只有取得 App ID/App Key/Access Secret、公网 HTTPS callback、稳定用户标识，并确认 state/CSRF、过期、撤销等官方协议后，才把匿名用户安全绑定为知乎账号。OAuth Token 仅存服务端，最终授权由用户本人完成。不得修改官方 Skill，也不得让 OAuth 阻塞 P0。 |
+| AUTH1 知乎登录 | COMPLETE（代码）→ BLOCKED（上线配置） | 2026-09-14 实现：`zhihuAuthorize`（一次性 state 5 分钟 TTL）/`zhihuMe`/`zhihuUnbind` + Convex httpAction 回调（token 交换、/user 资料、uid int64 无损、无标识不建会话）+ Next 透传路由 + 大厅徽章。Token 仅存服务端（`zhihu_bindings` 表），公开查询仅 `ZhihuProfilePublic` 投影；最终授权由用户本人在知乎页完成。上线前置：登记回调 + Convex 三个环境变量 + 部署 + 真机验收（见 AUTH1 handoff）；未配置时显式 SERVICE_NOT_CONFIGURED，游客 P0 不受影响。 |
 
 ## 6. Public Interface → 阶段矩阵
 

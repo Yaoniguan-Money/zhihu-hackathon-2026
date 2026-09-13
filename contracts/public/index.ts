@@ -678,3 +678,29 @@ export const voiceStreamControlSchema = z.discriminatedUnion("action", [
 ]);
 
 export type VoiceStreamControl = z.infer<typeof voiceStreamControlSchema>;
+
+// ---------------------------------------------------------------------------
+// AUTH1：知乎 OAuth 登录（docs/auth1-design-draft.md）
+// 浏览器可见的绑定投影；access_token、App Key 等服务端数据不在此契约中。
+
+/** 知乎登录徽章需要的用户资料投影（OAuth access_token 只存服务端，永不下发）。 */
+export const zhihuProfilePublicSchema = z.strictObject({
+  /** 知乎稳定标识：hash_id，缺省时为 uid 的十进制字符串（无损解析）。 */
+  stable_id: z.string().min(1),
+  fullname: z.string(),
+  headline: z.string(),
+  avatar_url: z.string(),
+  profile_url: z.string(),
+  bound_at: isoDateTimeSchema,
+  /** OAuth token 过期时间；expires_in 缺失（未知）时为 null，UI 不显示过期态。 */
+  expires_at: isoDateTimeSchema.nullable(),
+});
+
+export type ZhihuProfilePublic = z.infer<typeof zhihuProfilePublicSchema>;
+
+/** auth.zhihuAuthorize 成功回执：跳转知乎授权页的唯一入口。 */
+export const zhihuAuthorizeReceiptSchema = z.strictObject({
+  authorize_url: z.string().url(),
+});
+
+export type ZhihuAuthorizeReceipt = z.infer<typeof zhihuAuthorizeReceiptSchema>;
