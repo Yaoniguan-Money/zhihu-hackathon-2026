@@ -60,6 +60,7 @@ export default function RevealPage() {
       tl.from(".rv-hero", { opacity: 0, y: -30, duration: 0.55 })
         .from(".rv-culprit", { scale: 0.6, opacity: 0, rotate: -6, duration: 0.6, ease: "back.out(1.8)" })
         .from(".rv-badges > *", { opacity: 0, y: 14, stagger: 0.07, duration: 0.35 })
+        .from(".rv-compare", { opacity: 0, y: 18, duration: 0.4 }, "-=0.1")
         .from(".rv-link", { opacity: 0, x: -36, stagger: 0.16, duration: 0.45 })
         .from(".rv-chain > *", { opacity: 0, y: 18, stagger: 0.1, duration: 0.35 })
         .from(".rv-note", { opacity: 0, y: 18, duration: 0.4 });
@@ -145,10 +146,19 @@ export default function RevealPage() {
   }
 
   const culprit = casePublic.roles.find((r) => r.role_id === reveal.correct_role_id);
-  const accused = sessionView?.submitted_accusation
-    ? casePublic.roles.find((r) => r.role_id === sessionView.submitted_accusation?.suspect_role_id)
+  const accusation = sessionView?.submitted_accusation ?? null;
+  const accused = accusation
+    ? casePublic.roles.find((r) => r.role_id === accusation.suspect_role_id)
     : null;
   const correct = reveal.player_correct;
+  // 指控对照：指对人但方式集合不完全也判未成立（reveal.ts 判定规则），
+  // 未成立时必须把差在哪说清楚，否则玩家会以为判定出错。
+  const roleMatch = accusation !== null && accusation.suspect_role_id === reveal.correct_role_id;
+  const playerTypes = accusation?.distortion_types ?? [];
+  const hitTypes = reveal.distortion_types.filter((t) => playerTypes.includes(t));
+  const missedTypes = reveal.distortion_types.filter((t) => !playerTypes.includes(t));
+  const extraTypes = playerTypes.filter((t) => !reveal.distortion_types.includes(t));
+  const typeHint = missedTypes.length > 0 ? "不全" : extraTypes.length > 0 ? "有偏差" : "有误";
 
   return (
     <div ref={rootRef} className="mx-auto max-w-4xl px-6 py-8">
@@ -166,6 +176,11 @@ export default function RevealPage() {
           {accused ? `你指控了 ${accused.display_name.split(" · ")[0]} · ` : ""}
           真正的篡改者是——
         </p>
+        {!correct && roleMatch && (
+          <p className="mt-1 text-xs font-black text-amber">
+            人指对了 · 但篡改方式{typeHint}，指控未能成立（见下方对照）
+          </p>
+        )}
       </div>
 
       {/* 真凶卡 */}
@@ -197,6 +212,54 @@ export default function RevealPage() {
             ))}
           </div>
         </div>
+      )}
+
+      {/* 你的指控 · 对照：未成立时明确差在哪（对象 / 方式命中 / 漏选 / 多选） */}
+      {accusation && (
+        <section className="rv-compare card-dark mx-auto mt-5 max-w-lg px-6 py-5">
+          <h3 className="mb-3 flex items-center gap-2 text-sm font-black text-paper">
+            <Icon name="scale" size={16} className={correct ? "text-amber" : "text-coral"} />
+            你的指控 · 对照
+          </h3>
+          <div className="space-y-2.5 text-sm">
+            <div className="flex items-center justify-between gap-3">
+              <span className="shrink-0 text-xs font-bold text-paper/55">指认对象</span>
+              <span className={`flex items-center gap-1.5 font-black ${roleMatch ? "text-teal" : "text-coral"}`}>
+                <Icon name={roleMatch ? "check" : "alert"} size={13} />
+                {accused ? accused.display_name.split(" · ")[0] : "—"}
+                {roleMatch ? "（正确）" : `（真凶：${culprit ? culprit.display_name.split(" · ")[0] : "—"}）`}
+              </span>
+            </div>
+            <div className="flex items-start justify-between gap-3">
+              <span className="mt-1 shrink-0 text-xs font-bold text-paper/55">篡改方式</span>
+              <div className="flex flex-wrap justify-end gap-1.5">
+                {hitTypes.map((dt) => (
+                  <span key={dt} className="chip !border-teal !bg-teal/15 !text-teal">
+                    <Icon name="check" size={11} />
+                    {DISTORTION_META[dt]?.name ?? dt}
+                  </span>
+                ))}
+                {missedTypes.map((dt) => (
+                  <span key={dt} className="chip !border-coral !bg-coral/20 !text-coral">
+                    <Icon name="alert" size={11} />
+                    漏选 · {DISTORTION_META[dt]?.name ?? dt}
+                  </span>
+                ))}
+                {extraTypes.map((dt) => (
+                  <span key={dt} className="chip !border-paper/30 !bg-paper/10 !text-paper/60">
+                    <Icon name="alert" size={11} />
+                    多选 · {DISTORTION_META[dt]?.name ?? dt}
+                  </span>
+                ))}
+              </div>
+            </div>
+            <p className="border-t-2 border-paper/10 pt-2 text-[11px] font-bold leading-relaxed text-paper/50">
+              {correct
+                ? "指控成立 = 指认对象与全部篡改方式均正确。"
+                : `指控成立需要：指认对象正确，且选对全部篡改方式（本局共 ${reveal.distortion_types.length} 种，不多选不漏选）。`}
+            </p>
+          </div>
+        </section>
       )}
 
       {/* 正误氛围 */}
