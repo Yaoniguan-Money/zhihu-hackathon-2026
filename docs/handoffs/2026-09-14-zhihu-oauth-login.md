@@ -55,6 +55,8 @@
 
 ## 已知风险、阻塞与下一步
 
-- 官方协议缺口（hackathon-oauth.md 实测记录）：回调可能不返回 `state`（当前实现：回传则须匹配，未回传不阻断——按官方边界仅联调级安全）；无 PKCE / refresh token / 撤销协议。token 过期只能重新授权。
+- **凭证来源澄清（2026-09-14 补充）**：用户在 `zhihu.com/ring/moltbook` 申请的 32 位密钥是 **Agent/圈子 API 的 app_secret**（配套 `app_key` = 个人主页 token，如 `txasqe0m`，请求签名鉴权），**不是** OAuth 登录的 App Key，不得写入 `ZHIHU_OAUTH_APP_KEY`。登录凭证唯一来源：官方 skill 0.7.2 `hackathon-oauth.md`——「App ID 和 App Key 通过赛事页面获取」；活动页面 `https://www.zhihu.com/hackathon?activity_code=zhihu_hackathon_2026_p2`（需登录），队长在「我的项目 → 队伍详情 → 创建项目」时填写**知乎登录回调地址**（即 `ZHIHU_OAUTH_REDIRECT_URI`），项目创建后页面分配 App ID/App Key。作品提交窗口 2026-09-13 10:00 至 09-15 10:00，创建项目入口已开放。
+- 官方 0.7.2 文档确认：黑客松 OAuth 服务已支持 `state` 原样透传，并要求严格校验（缺失/不匹配/过期/已用拒绝、原子消费）——本实现的行为与该要求一致；早期「实测可能不返回 state」的记录不再适用，`state_missing` 拒绝路径保留为正确行为。
+- 官方协议缺口（hackathon-oauth.md 0.7.2 已收敛）：无 PKCE / refresh token / 撤销协议；token 过期只能重新授权。
 - `zhihuAuthorize` 里同身份旧 state 清理用全表 collect 后按 identity 过滤（state 表量级为活跃登录数，短期无压力；如需优化加 by_identity 索引即可）。
-- 下一位 Agent 起点：按「明确未完成」四步走；验收脚本直接按上文明细执行，无隐藏步骤。
+- 下一位 Agent 起点：等队长在赛事页面创建项目拿到 App ID/App Key 后，按「明确未完成」四步走；验收脚本直接按上文明细执行，无隐藏步骤。
