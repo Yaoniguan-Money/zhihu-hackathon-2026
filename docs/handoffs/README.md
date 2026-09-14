@@ -130,4 +130,7 @@ docs/handoffs/<ticket-or-stage-id>.md
 | P1-3 第二案晋升系统目录 + flash 长文抽取批处理 | complete | [2026-09-12-p13-catalog-and-claim-batches](./2026-09-12-p13-catalog-and-claim-batches.md) |
 | ZHIHU-URL-IMPORT-LOBBY 大厅读取正文接线 | complete | [2026-09-13-zhihu-url-import-lobby](./2026-09-13-zhihu-url-import-lobby.md) |
 | AUTH1 知乎 OAuth 登录（代码完成，上线配置待外部步骤） | blocked（上线配置） | [2026-09-14-zhihu-oauth-login](./2026-09-14-zhihu-oauth-login.md) |
+| AUTH1 国内可访问 OAuth 回调 Worker | complete | [2026-09-14-zhihu-oauth-callback-worker](./2026-09-14-zhihu-oauth-callback-worker.md) |
+| AUTH1 生产凭证写入 + 回调回大厅 | blocked（真机授权） | [2026-09-14-zhihu-oauth-credentials](./2026-09-14-zhihu-oauth-credentials.md) |
 | 官方 zhihu Skill 升级至 0.7.2-beta | complete | [2026-09-14-zhihu-skill-0.7.2-upgrade](./2026-09-14-zhihu-skill-0.7.2-upgrade.md) |
+| REL2 整站部署到 Cloudflare Workers（国内可访问入口） | complete | [2026-09-14-whole-site-cloudflare-deploy](./2026-09-14-whole-site-cloudflare-deploy.md) |

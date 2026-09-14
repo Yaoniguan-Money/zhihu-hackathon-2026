@@ -138,7 +138,10 @@ export class OpenAICompatibleModelGateway implements ModelGateway {
             abortSignal: abortController.signal,
             // 通过 tool calling 传递完整 schema（含 enum 约束），
             // 确保 DeepSeek 等不支持 json_schema 的供应商也能返回合规结构。
-            tool: tool({ schema: call.schema, description: call.schemaName }),
+            tool: tool({
+              inputSchema: call.schema,
+              description: call.schemaName,
+            }),
             toolChoice: "required",
           });
           break;

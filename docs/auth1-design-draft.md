@@ -1,6 +1,6 @@
 # AUTH1 设计草案（IMPLEMENTED — 代码完成，上线配置待外部步骤）
 
-状态：`implemented`（2026-09-14 代码实现与定向验证完成；上线仍需：赛事页登记回调、Convex 环境变量、部署与真机验收。见 [AUTH1 handoff](./handoffs/2026-09-14-zhihu-oauth-login.md)）
+状态：`implemented`（2026-09-14 代码与生产凭证已写入；仍待用户本人真机授权。见 [AUTH1 凭证 handoff](./handoffs/2026-09-14-zhihu-oauth-credentials.md)）
 负责人：`开发人员 A / ZCode`
 更新时间：`2026-09-14`（初稿 2026-09-05）
 
@@ -16,9 +16,9 @@
 
 ## 外部前置（2026-09-14 状态）
 
-1. 黑客松项目已创建并分配 **App ID / App Key**（赛事页面；回调地址登记为下述 `redirect_uri`）。✅ App Key 已取得（2026-09-14，由用户经会话提供，已提示仅写入 Convex 部署环境）；⏳ App ID 与回调登记状态待用户确认。
+1. 黑客松项目已分配 **App ID / App Key**。✅ 两项均已写入生产 Convex `agile-turtle-860`（App ID 公开为 `596`；App Key 长度 32，不入仓库）。✅ 赛事页回调已确认为主站根地址。
 2. Access Secret 已在 keychain ✅（2026-09-05 在线复验 valid）。本阶段登录链路未使用；调用 contents/followees 等用户数据接口时仍需。
-3. 公网 HTTPS callback：`https://zhihu-hackathon-2026.vercel.app/api/auth/zhihu/callback`（⏳ 待登记到赛事页面；`ZHIHU_OAUTH_REDIRECT_URI` 必须与登记值逐字符一致）。
+3. 公网 HTTPS callback：`https://zhihu-hackathon.yaoniguan56.workers.dev/`（赛事页实际登记值；生产 `ZHIHU_OAUTH_REDIRECT_URI` 已改为该值，含尾斜杠）。根路径收到授权码后由 `proxy.ts` 改写到 `/api/auth/zhihu/callback`。
 4. 官方协议已确认：`references/hackathon-oauth.md`（授权端点、`authorization_code` 回调参数、`access_token` 表单交换、`expires_in` 有效期）+ `references/hackathon-user-profile-api.md`（/user 端点、uid 无损、无标识不建会话）。
 
 ## 接口设计（已按 contracts/public 运行时 schema 落地）

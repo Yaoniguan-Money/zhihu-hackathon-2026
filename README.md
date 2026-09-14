@@ -2,7 +2,7 @@
 
 输入一篇真实知乎文章，AI 抽取带精确原文回溯的证据图谱，并编排五个角色：**四个忠实角色**只发布被可见事实支持、不改变原意的陈述；**一个篡改角色**只能使用原文材料、却按获准方式（扩大范围、删除条件、因果偷换等 10 类）悄悄改变事实关系。玩家审讯角色、把已批准发言保存为录音证据投递对质、在证据板上拼出真相，最终提交「角色 + 篡改方式 + 证据」的最终指控，获得展示「来源事实 → 角色转述 → 被改变关系」的完整揭晓与双维评分。
 
-- **线上入口**：https://zhihu-hackathon-2026.vercel.app （产品界面由页面侧接入；后端数据面已可完整游玩）
+- **线上入口**：https://zhihu-hackathon.yaoniguan56.workers.dev （Cloudflare Workers，国内可访问；模型服务按 BYOK 契约由玩家在页内设置，见 [ADR 0005] 与 [REL2 handoff](./docs/handoffs/2026-09-14-whole-site-cloudflare-deploy.md)）
 - **权威数据**：https://agile-turtle-860.convex.cloud
 
 ## 架构一览
@@ -63,7 +63,8 @@ cd voice-worker
 ## 状态
 
 - **P0 公网闭环**：COMPLETE（建案/对局/审讯/证据板/指控/揭晓 + 匿名隔离 + 公网部署）。
+- **REL2 整站上 Cloudflare**：COMPLETE（2026-09-14，OpenNext Workers 部署 + 真机验收模型全链；语音仅本机、知乎 OAuth 待外部凭证；见 [REL2 handoff](./docs/handoffs/2026-09-14-whole-site-cloudflare-deploy.md)）。
 - **P1**：录音对质 ✅；本地语音 ✅（五音色已锁定）；第二案件真实编译 ✅（全链闭环 smoke 待供应商额度恢复后补跑）。
 - **前端（FE-B1）**：产品界面全面重制 ✅——程序化卡通 3D 角色/审讯室（React Three Fiber + Toon）、XState 镜像 SessionView、全页面接真实 Convex 公开接口（mock 已出清）、gsap+motion 动效；真实模型全链试玩受 GLM 免费档间歇故障影响留 REL1 验收（见 [FE-B1 handoff](./docs/handoffs/2026-09-06-frontend-b-aesthetic-live-data.md)）。
-- **AUTH1 知乎 OAuth 登录**：代码完成 ✅（2026-09-14，分支 `feat/zhihu-oauth-login`：大厅「知乎账号」登录徽章、一次性 state + 服务端 token、`ZhihuProfilePublic` 投影；见 [AUTH1 handoff](./docs/handoffs/2026-09-14-zhihu-oauth-login.md)）。上线待外部步骤：赛事页登记回调 + Convex 三个环境变量（`ZHIHU_OAUTH_APP_ID/APP_KEY/REDIRECT_URI`）+ 部署 + 真机验收。
-- 待办：AUTH1 上线配置（如上）、REL1 批量验收。
+- **AUTH1 知乎 OAuth 登录**：代码与生产凭证完成 ✅（2026-09-14：大厅徽章、一次性 state、服务端 token、`ZhihuProfilePublic` 投影；生产 Convex 已写入三项 OAuth 环境变量。见 [AUTH1 handoff](./docs/handoffs/2026-09-14-zhihu-oauth-login.md) 与 [凭证 handoff](./docs/handoffs/2026-09-14-zhihu-oauth-credentials.md)）。回调已对齐赛事页登记的主站根地址 `https://zhihu-hackathon.yaoniguan56.workers.dev/`。待：用户本人真机授权。
+- 待办：AUTH1 真机授权验收、REL1 批量验收。

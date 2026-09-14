@@ -41,7 +41,7 @@
 | G1 第二案件输入 | COMPLETE | 用户委托 Agent 挑选并冻结第二真实来源（养老金/延迟退休，`golden-case/case-demo-002/`，3,514 单元、SHA-256 固定）；`me contents` 核实账号无公开创作后经官方 search 检索推荐，用户保留替换权。见 [P1-3 handoff](./docs/handoffs/2026-09-05-p13-g1-second-case.md)。 |
 | REL0 公网 P0 | COMPLETE | Convex Cloud（`agile-turtle-860`）与 Vercel Web（https://zhihu-hackathon-2026.vercel.app ）均部署并验证；生产 build 通过。见 [REL0 handoff](./docs/handoffs/2026-09-05-rel0-convex-cloud.md)。 |
 | REL1 P1 验收 | COMPLETE | 2026-09-12 用户签署：第 0–4 节通过（含 P1-3 人工验收）。遗留清理未做，不回写本 Gate。见 [REL1 签署](./docs/handoffs/2026-09-12-rel1-signoff.md)。 |
-| AUTH1 知乎 OAuth | COMPLETE（代码）→ BLOCKED（上线配置） | 2026-09-14：App Key 取得后按草案实现完毕（契约/纯函数层/Convex 编排/回调透传/大厅徽章，定向测试 17/17，见 [AUTH1 handoff](./docs/handoffs/2026-09-14-zhihu-oauth-login.md)）。剩余为外部步骤：赛事页登记回调、Convex 设置 `ZHIHU_OAUTH_APP_ID`/`ZHIHU_OAUTH_APP_KEY`/`ZHIHU_OAUTH_REDIRECT_URI` 并部署、真机授权验收；此前登录入口显式 SERVICE_NOT_CONFIGURED，不阻塞游客 P0。 |
+| AUTH1 知乎 OAuth | COMPLETE（代码+生产凭证）→ BLOCKED（真机授权） | 2026-09-14：代码见 [AUTH1 handoff](./docs/handoffs/2026-09-14-zhihu-oauth-login.md)；凭证与回调对齐见 [凭证 handoff](./docs/handoffs/2026-09-14-zhihu-oauth-credentials.md)。`ZHIHU_OAUTH_REDIRECT_URI` 已改为赛事页登记的主站根地址 `https://zhihu-hackathon.yaoniguan56.workers.dev/`。剩余：用户本人真机授权。 |
 
 ## 3. D0：契约修复包与共同评审 Gate
 

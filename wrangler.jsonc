@@ -1,0 +1,22 @@
+// 主站 Worker（Next.js via OpenNext）。与 workers/wrangler.callback.jsonc
+// （独立知乎 OAuth 回调 Worker）互不影响；在仓库根目录执行 wrangler 命令即作用于本文件。
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "zhihu-hackathon",
+  "main": ".open-next/worker.js",
+  "compatibility_date": "2025-09-01",
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  },
+  // 非机密运行时变量。机密（ZHIHU_ACCESS_SECRET 等）用 `npx wrangler secret put` 设置。
+  "vars": {
+    "CONVEX_SITE_URL": "https://agile-turtle-860.convex.site",
+    "NEXT_PUBLIC_CONVEX_URL": "https://agile-turtle-860.convex.cloud",
+    "NEXT_PUBLIC_CONVEX_SITE_URL": "https://agile-turtle-860.convex.site"
+  },
+  "observability": {
+    "enabled": true
+  }
+}

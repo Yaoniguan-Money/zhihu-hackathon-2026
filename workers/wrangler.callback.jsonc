@@ -1,0 +1,5 @@
+{
+  "name": "zhihu-oauth-callback",
+  "main": "./zhihu-oauth-callback.js",
+  "compatibility_date": "2025-09-01",
+}

@@ -1,6 +1,6 @@
 # AUTH1：知乎 OAuth 登录（代码完成，待上线配置）
 
-状态：`blocked`（代码与定向验证完成；上线依赖外部配置步骤，见「明确未完成」）  
+状态：`blocked`（代码与生产凭证完成；待用户本人真机授权，见 [凭证 handoff](./2026-09-14-zhihu-oauth-credentials.md)）  
 完成时间：`2026-09-14`  
 负责人：`ZCode（用户会话）`，基于 `docs/auth1-design-draft.md` 初稿
 
@@ -20,13 +20,9 @@
 
 ## 明确未完成
 
-- 赛事页面登记回调地址 `https://zhihu-hackathon-2026.vercel.app/api/auth/zhihu/callback`（**登记值必须与 `ZHIHU_OAUTH_REDIRECT_URI` 逐字符一致**，含尾斜杠）。若已登记为其他地址，改 Convex 环境变量即可（代码不写死）。
-- Convex 部署环境设置（生产 `agile-turtle-860` 与 dev 各一套）：
-  `npx convex env set ZHIHU_OAUTH_APP_ID <AppID>`（**App ID 用户尚未提供**）
-  `npx convex env set ZHIHU_OAUTH_APP_KEY <AppKey>`（用户 2026-09-14 已提供，长度 32，勿写进仓库/日志/回复）
-  `npx convex env set ZHIHU_OAUTH_REDIRECT_URI https://zhihu-hackathon-2026.vercel.app/api/auth/zhihu/callback`
-- 部署：`npx convex deploy`（新函数/表/schema 生效）+ Vercel 常规发布（新增透传路由）。
-- 真机验收：部署后在大厅点「知乎登录」→ 用户本人完成知乎授权页确认 → 回调回大厅显示昵称/头像；再验退出、5 分钟 state 过期（等 5 分钟后用旧链接回调应 stage=state_invalid）。
+- 赛事页登记回调已确认为主站根地址 `https://zhihu-hackathon.yaoniguan56.workers.dev/`，生产 `ZHIHU_OAUTH_REDIRECT_URI` 已对齐；见 [凭证 handoff](./2026-09-14-zhihu-oauth-credentials.md)。
+- 生产 Convex `agile-turtle-860` 三项 OAuth 环境变量已写入（2026-09-14 凭证环节）；本地/dev 部署未配，本地大厅不能完成真实登录。
+- 真机验收：线上大厅点「知乎登录」→ 用户本人完成知乎授权页确认 → 回调回大厅显示昵称/头像；再验退出、5 分钟 state 过期（等 5 分钟后用旧链接回调应 stage=state_invalid）。
 - B 对大厅徽章 UI 的评审（视觉与文案融合）。
 
 ## 修改文件
@@ -59,4 +55,4 @@
 - 官方 0.7.2 文档确认：黑客松 OAuth 服务已支持 `state` 原样透传，并要求严格校验（缺失/不匹配/过期/已用拒绝、原子消费）——本实现的行为与该要求一致；早期「实测可能不返回 state」的记录不再适用，`state_missing` 拒绝路径保留为正确行为。
 - 官方协议缺口（hackathon-oauth.md 0.7.2 已收敛）：无 PKCE / refresh token / 撤销协议；token 过期只能重新授权。
 - `zhihuAuthorize` 里同身份旧 state 清理用全表 collect 后按 identity 过滤（state 表量级为活跃登录数，短期无压力；如需优化加 by_identity 索引即可）。
-- 下一位 Agent 起点：等队长在赛事页面创建项目拿到 App ID/App Key 后，按「明确未完成」四步走；验收脚本直接按上文明细执行，无隐藏步骤。
+- 下一位 Agent 起点：确认赛事页已登记回调后，按 [凭证 handoff](./2026-09-14-zhihu-oauth-credentials.md) 做真机授权验收。

@@ -3,7 +3,7 @@ import {
   importZhihuUrl,
   toPublicZhihuImportError,
   ZhihuImportError,
-} from "@server/source/zhihu-import.js";
+} from "@server/source/zhihu-import";
 
 export const runtime = "nodejs";
 export const maxDuration = 30;

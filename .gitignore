@@ -8,6 +8,7 @@
 # PF0 工具链
 node_modules/
 .next/
+.open-next/
 out/
 next-env.d.ts
 *.tsbuildinfo
@@ -23,6 +24,8 @@ convex/_generated/
 
 .vercel
 .env*
+.wrangler
+workers/.wrangler
 
 # P1-2 本地语音：模型权重/日志/虚拟环境不入仓库（哈希清单与下载脚本入库）
 voice-worker/.venv/

@@ -57,3 +57,13 @@
 - 涉及素材或 skill 时校验路径安全、固定哈希和媒体可解码；不得修改官方 skill 文件。
 - 完成前分别进行 Standards Review 与 Spec Review。前者检查仓库规范和代码异味，后者逐项核对原始需求、契约、缺失行为与 scope creep。
 - Golden Case 未获得用户提供的 URL 与完整正文时，所有依赖它的 ticket 必须标记 `BLOCKED`，不得替换输入后继续。
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+# This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->
