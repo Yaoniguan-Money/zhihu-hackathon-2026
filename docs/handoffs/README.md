@@ -129,3 +129,5 @@ docs/handoffs/<ticket-or-stage-id>.md
 | REL1 签署（第 0–4 节通过；遗留清理未做） | complete | [2026-09-12-rel1-signoff](./2026-09-12-rel1-signoff.md) |
 | P1-3 第二案晋升系统目录 + flash 长文抽取批处理 | complete | [2026-09-12-p13-catalog-and-claim-batches](./2026-09-12-p13-catalog-and-claim-batches.md) |
 | ZHIHU-URL-IMPORT-LOBBY 大厅读取正文接线 | complete | [2026-09-13-zhihu-url-import-lobby](./2026-09-13-zhihu-url-import-lobby.md) |
+| AUTH1 知乎 OAuth 登录（代码完成，上线配置待外部步骤） | blocked（上线配置） | [2026-09-14-zhihu-oauth-login](./2026-09-14-zhihu-oauth-login.md) |
+| 官方 zhihu Skill 升级至 0.7.2-beta | complete | [2026-09-14-zhihu-skill-0.7.2-upgrade](./2026-09-14-zhihu-skill-0.7.2-upgrade.md) |

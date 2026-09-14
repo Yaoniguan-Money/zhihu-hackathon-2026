@@ -1,85 +1,72 @@
-# Hackathon OAuth 接入
+# 黑客松 OAuth 接入
 
-资料更新时间：2026-09-04
-适用范围：知乎黑客松 2026 校园新锐季参赛作品
+适用范围：知乎黑客松参赛作品。
 
-## 使用边界
+黑客松项目优先按本文接入。授权 URL 和回调参数见 [授权页面](oauth.md#授权页面)，Token 交换协议见 [换取 Access Token](oauth.md#换取-access-token)。App ID 和 App Key 通过赛事页面获取，无需走通用邮件申请流程。
 
-黑客松作品需要让其他用户使用知乎账号登录，或代表已授权用户读取其创作、关注和收藏时，使用本流程。黑客松项目的 App ID 和 App Key 由赛事页面分配，并使用赛事页面登记的回调地址；普通开放平台项目继续通过常规渠道申请和配置。当前两类项目使用相同的授权端点、回调参数、Token 交换参数和用户数据鉴权组合；黑客松项目始终以本文为事实源，普通项目继续使用主 Skill 中的 OAuth 应用集成文档。
+获取授权用户基础信息使用独立接口 `https://openapi.zhihu.com/user`，详见 [获取授权用户基础信息](hackathon-user-profile-api.md)。创作列表与摘要、关注和收藏使用 [知乎开放平台用户数据 API](user-api.md)。
 
-## 凭证角色
+## 凭证与接口
 
-| 凭证 | 用途 | 存储位置 |
+| 能力 | 接口 | 鉴权 |
 |---|---|---|
-| App ID | 标识黑客松第三方应用 | 项目公开配置 |
-| App Key | 应用后端换取 OAuth Token | 本地安全凭证库或部署平台 Secret |
-| `authorization_code` | 用户单次授权结果 | 仅在应用后端回调中短暂处理 |
-| OAuth `access_token` | 代表已授权知乎用户 | 应用后端会话或受控服务端存储 |
-| 开放平台 Access Secret | 鉴权开放平台调用方 | 官方 `zhihu` Skill 凭证存储或部署平台 Secret |
+| 知乎登录后的基础信息 | `GET https://openapi.zhihu.com/user` | `Authorization: Bearer <OAuth access_token>` |
+| 授权用户的创作列表与摘要、关注、收藏 | `https://developer.zhihu.com/api/v1/user/...`，仅限用户数据 API 文档的列表接口 | `Authorization: Bearer <Access Secret>`、`X-OAuth-Token: <OAuth access_token>`、`X-Request-Timestamp: <Unix 秒级时间戳>` |
 
-App ID、App Key 和 Access Secret 是三种独立凭证。部署时分别使用 `ZHIHU_OAUTH_APP_KEY` 和 `ZHIHU_ACCESS_SECRET` 保存后两项，禁止写入源码、`.env`、URL、日志、截图、视频、前端响应或 Agent 输出。
+只做知乎登录和获取基础信息，不需要 Access Secret。读取授权用户的创作列表、关注或收藏时，需要同时配置 Access Secret。CLI 日常查询仅使用 Access Secret 所属账号，不发起 OAuth，也不接收用户 OAuth Token。
 
-## 黑客松授权流程
+本人全文、评论、账号统计和单篇统计四项接口只支持当前 Access Secret 所属账号，不能通过增加 `X-OAuth-Token` 切换身份，详见 [创作能力](creator.md)。活动故事和知识接口独立于登录，无需上述凭证，详见 [活动内容 API](hackathon-content-api.md)。
 
-### 1. 发起授权
+项目创建后，赛事页面分配 App ID 和 App Key。App ID 标识应用，App Key 用于后端换取 Token，均不同于开放平台 Access Secret。
 
-应用将用户跳转到：
+凭证领取时机仍需核实：活动补充资料将“创建项目”放在作品提交入口开放后，未说明开发期间提前领取 App ID 和 App Key 的方式。实际接入先查看赛事页面已有凭证入口；尚无凭证时，可以完成代码、配置模板和 Mock 测试，再通过活动说明或官方答疑确认领取方式。不要编造提前领取入口，也不直接套用通用应用的邮件申请流程。
 
-```text
-GET https://openapi.zhihu.com/authorize?redirect_uri={redirect_uri}&app_id={app_id}&response_type=code
-```
-
-可以发送随机 `state` 关联当前会话。用户必须亲自完成知乎授权页的最终确认。
-
-### 2. 接收回调
-
-黑客松实测主回调参数为：
+配置变量示例；已有项目沿用现有命名：
 
 ```text
-{redirect_uri}?authorization_code={authorization_code}
+ZHIHU_OAUTH_APP_ID
+ZHIHU_OAUTH_APP_KEY
+ZHIHU_OAUTH_REDIRECT_URI
+ZHIHU_ACCESS_SECRET
 ```
 
-接收端以 `authorization_code` 为主路径，可以兼容读取 `code`。回调没有授权码时停止流程，不继续换取 Token。
+App Key、Access Secret 和 OAuth Token 保存在后端安全凭证库、部署平台 Secret 或受控服务端存储中，不进入源码、URL、日志、前端响应或 Agent 输出。App ID 可作为公开配置。
 
-### 3. 换取 OAuth Token
+## 回调与授权
 
-应用后端调用：
+优先复用项目已有的登记配置。回调地址缺失、存在多个候选或配置与赛事页面不一致时，请用户确认；确认前可以完成代码和配置模板。
+
+实际授权联调前，核对 `redirect_uri` 的协议、域名、端口、路径、尾部斜杠和固定 Query 参数与赛事页面登记值完全一致。构造授权 URL 和交换 Token 使用同一地址，应用路由能够接收该地址的回调。
+
+用户亲自完成知乎登录和授权页的最终确认。
+
+黑客松 OAuth 服务已支持 `state` 原样透传。黑客松接入按以下流程处理；通用 OAuth 文档中未回传 `state` 的历史记录不适用于此流程。
+
+1. 发起授权前，使用密码学安全随机数生成器生成不可预测的 `state`，保存在服务端并绑定当前浏览器会话与本次登录请求，设置短时有效期。
+2. 构造授权 URL 时，将该值作为 `state` 查询参数传给知乎；使用 URL 构造工具编码参数。
+3. 回调到达后，在交换 Token 和建立登录会话前，校验返回的 `state` 与当前会话保存的值完全一致，且仍在有效期内。缺失、不匹配、过期或已使用时拒绝本次登录。
+4. 校验通过后原子消费该值，防止重复回调复用，再继续交换 Token。重新发起登录时生成新的 `state`。
+
+授权与回调形态示例：
 
 ```text
-POST https://openapi.zhihu.com/access_token
-Content-Type: application/x-www-form-urlencoded
+GET https://openapi.zhihu.com/authorize?redirect_uri={encoded_redirect_uri}&app_id={app_id}&response_type=code&state={state}
+{redirect_uri}?authorization_code={authorization_code}&state={state}
 ```
 
-表单字段为：
+`state` 仅用于关联登录请求，不承载 App Key、OAuth Token 或用户隐私。回调地址核对与 `state` 校验都需要执行。
 
-```text
-app_id=<App ID>
-app_key=<App Key>
-grant_type=authorization_code
-redirect_uri=<活动页面登记的 callback>
-code=<回调中的 authorization_code>
-```
+## 应用会话
 
-这里的 `grant_type` 是固定值，`code` 是 Token 接口要求的表单字段名。不要把表单字段改成 `authorization_code`，也不要从回调读取 `grant_type`。
+复用作品已有后端、Serverless Function、云函数或框架服务端路由。纯浏览器项目增加最小后端，负责 Token 交换、用户信息请求和会话管理。
 
-优先根据响应中是否存在 `access_token` 判断交换成功，并读取 `expires_in` 管理有效期。业务响应可能使用 `code: 20000` 表示成功，不能仅凭该字段判定失败。
+浏览器仅持有应用自己的随机会话标识，使用 `HttpOnly`、`Secure` Cookie 承载；OAuth Token 留在服务端。已有 Session、数据库或缓存时直接复用。常驻单进程 Demo 可用进程内 Map 保存会话标识、OAuth Token、过期时间和用户身份；多实例或 Serverless 使用共享会话存储。
 
-### 4. 调用用户数据 API
+用户退出或会话失效时清理映射；Token 过期或鉴权失败时停止读取，不切换到 Access Secret 所属账号。用户再次主动登录或使用需要授权的功能时，再发起授权，不在退出后自动重新登录。
 
-代表授权用户调用用户数据接口时同时发送：
+## 交付验证
 
-```http
-Authorization: Bearer <开放平台 Access Secret>
-X-OAuth-Token: <OAuth access_token>
-X-Request-Timestamp: <Unix 秒级时间戳>
-```
-
-Access Secret 鉴权开放平台调用方，`X-OAuth-Token` 指明当前授权用户。App Key 不能作为其中任何一个请求 Header。接口、Query 和响应字段读取 [用户数据 API](user-api.md)。
-
-## 安全与诊断
-
-- 回调地址必须与登记值完全一致，包括协议、域名、路径和尾部斜杠。
-- App Key、Access Secret、authorization code 和 OAuth Token 只在应用后端处理。
-- 诊断信息只展示凭证来源、是否配置、长度和 SHA-256 短前缀，不展示完整值。
-- OAuth Token 过期或鉴权失败时停止读取用户数据，不回退到 Access Secret 所属账号。
-- 用户退出、应用重启或测试结束时清理服务端 OAuth 会话；需要持久化时先完成安全评审。
+- 通过公网 HTTPS 回调地址完成实际授权，并读取当前授权用户的信息。
+- 验证正确 `state` 可以完成登录，缺失、不匹配、过期及重复使用的 `state` 均被拒绝；不同浏览器会话不能复用登录请求。
+- 验证退出、会话失效和 Token 失效后的处理，确认浏览器及演示材料不包含完整密钥或 OAuth Token。
+- 自动化测试使用 Mock；实际授权由开发者本人完成，Mock 通过不代表线上联调通过。

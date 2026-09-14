@@ -11,6 +11,8 @@
 - 知乎搜索 API
 - 知乎热榜 API
 - 知乎直答 API
+- 问题发现与回答摘要 API
+- 额度查询 API
 - 用户数据 API（独立文档）
 - OAuth 应用集成（独立文档）
 
@@ -635,6 +637,58 @@ data: [DONE]
 5. 支持 role、content 上下文传参的模型：`zhida-fast-1p5`、`zhida-thinking-1p5`。
 6. 实际可用模型还会受租户授权配置影响。
 
+# 问题发现与回答摘要 API
+
+问题推荐和回答摘要两个接口均使用 Bearer 鉴权和秒级 `X-Request-Timestamp`，HTTP Method 均为 `GET`。
+
+## 根据用户画像推荐问题
+
+```http
+GET /api/v1/user/question_recommendations?Count=5
+```
+
+`Count` 可选，默认 `5`，范围 `1-20`。不传 `Query` 时，根据当前 Access Secret 所属用户的画像推荐问题。
+
+## 根据主题推荐问题
+
+```http
+GET /api/v1/user/question_recommendations?Query=AI%20Agent&Count=5
+```
+
+| Query | 类型 | 必填 | 默认值 | 说明 |
+|---|---|---:|---:|---|
+| `Query` | String | 主题模式必填 | 不传 | 主题或关键词；显式传空值或纯空白返回 `10001`，不传时走画像模式 |
+| `Count` | Int32 | 否 | `5` | `1-20` |
+
+同一推荐接口的两种模式返回相同结构，`Data.Items` 包含：
+
+| 字段 | 类型 | 说明 |
+|---|---|---|
+| `Title` | String | 问题标题 |
+| `Url` | String | 问题链接 |
+
+两种问题推荐与本人全文、评论、账号统计、单篇统计共用 `creator` 创作能力额度，默认每个租户每个自然日 100 次，未实名等低额度用户为 10 次；实际额度以额度查询结果为准。
+
+## 获取问题下的回答摘要
+
+```http
+GET /api/v1/content/question_answers?QuestionUrl=https%3A%2F%2Fwww.zhihu.com%2Fquestion%2F123&Offset=0&Limit=20
+```
+
+| Query | 类型 | 必填 | 默认值 | 说明 |
+|---|---|---:|---:|---|
+| `QuestionUrl` | String | 是 | - | 完整的知乎问题 URL |
+| `Offset` | Int64 | 否 | `0` | 非负分页偏移 |
+| `Limit` | Int64 | 否 | `20` | `1-50` |
+
+响应 `Data.Items` 包含 `ContentType`、`ContentToken`、`Url` 和 `Summary`，`Data.Paging` 包含布尔值 `IsEnd`、可选 Int64 `NextOffset` 与可选 Int64 `Totals`。`Summary` 是服务返回的摘要或截取文本，不额外生成 AI 摘要，也不代表回答全文。
+
+无效或无摘要的回答会被过滤，单页可能不足 `Limit`，甚至为空。以 `Paging.IsEnd` 判断结束；为 `false` 且需要更多结果时，将 `Paging.NextOffset` 作为下一次请求的 `Offset`，不要按返回条数计算偏移。若缺少 `NextOffset`，停止自动翻页并报告分页信息不完整。`Totals` 可能包含被过滤的项。
+
+该接口使用独立的 `question_answers` 知乎问题回答额度，默认每个租户每个自然日 100 次，未实名等低额度用户为 10 次；实际额度以额度查询结果为准。
+
+频率、并发限制和日额度耗尽均返回 `30001`；遇到限制时按需查询对应能力组的剩余额度，避免持续重试。
+
 # 额度查询 API
 
 ## 接口说明
@@ -657,9 +711,9 @@ Query：
 
 | 名称 | 类型 | 必填 | 说明 |
 |---|---|---:|---|
-| `APIIDs` | String | 否 | 逗号分隔的公开 APIID；省略时返回全部 7 项 |
+| `APIIDs` | String | 否 | 逗号分隔的公开 APIID；省略时返回全部 9 项 |
 
-`APIIDs` 支持 `global_search`、`zhihu_search`、`hot_list`、`user_data`、`zhida_openai`、`knowledge`、`tools`。知识库和小工具分别使用 `knowledge`、`tools` 统一额度。
+`APIIDs` 支持 `global_search`、`zhihu_search`、`hot_list`、`question_answers`、`user_data`、`creator`、`zhida_openai`、`knowledge`、`tools`。问题回答摘要使用 `question_answers`；两种问题推荐共用 `creator`。知识库和小工具分别使用 `knowledge`、`tools` 统一额度。
 
 请求示例：
 
@@ -768,3 +822,7 @@ Content-Type: application/json
 | `40006` | `file parsing failed` | 文件解析失败 |
 | `50002` | `search failed, please try again later` | RAG 检索失败 |
 | `90001` | `request failed` | 其他安全收敛后的内部失败 |
+
+## 本人创作全文、评论与统计
+
+四项新增 GET API 只接受当前 Access Secret 身份，路径、参数、响应和错误处理见 [创作能力](creator.md)。原用户列表类接口的 OAuth 说明不适用于这四项能力。
